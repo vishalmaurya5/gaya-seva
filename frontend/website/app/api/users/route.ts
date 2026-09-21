@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 export interface UserAccount {
   id: string;
@@ -21,10 +19,6 @@ export interface UserAccount {
   lng?: number;
   rating?: number;
 }
-
-import os from 'os';
-
-const DATA_FILE_PATH = path.join(os.tmpdir(), 'gayaseva_users_store.json');
 
 const DEFAULT_USERS: UserAccount[] = [
   {
@@ -87,6 +81,8 @@ const DEFAULT_USERS: UserAccount[] = [
   }
 ];
 
+let inMemoryUsersStore: UserAccount[] = [...DEFAULT_USERS];
+
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
@@ -99,50 +95,62 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders() });
 }
 
-function readUsersFromFile(): UserAccount[] {
+function readUsers(): UserAccount[] {
+  return inMemoryUsersStore;
+}
+
+function writeUsers(users: UserAccount[]) {
+  inMemoryUsersStore = users;
+}
+
+export async function GET(req: Request) {
   try {
-    if (!fs.existsSync(DATA_FILE_PATH)) {
-      const dir = path.dirname(DATA_FILE_PATH);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(DEFAULT_USERS, null, 2), 'utf-8');
-      return DEFAULT_USERS;
+    const { searchParams } = new URL(req.url);
+    const role = searchParams.get('role');
+    const status = searchParams.get('status');
+
+    let users = readUsers();
+
+    if (role && role !== 'ALL') {
+      users = users.filter((u) => u.role === role.toUpperCase());
     }
-    const content = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-    return JSON.parse(content);
-  } catch (err) {
-    console.error('Failed to read users_store.json:', err);
-    return DEFAULT_USERS;
-  }
-}
 
-function writeUsersToFile(users: UserAccount[]) {
-  try {
-    const dir = path.dirname(DATA_FILE_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(users, null, 2), 'utf-8');
-  } catch (err) {
-    console.error('Failed to write users_store.json:', err);
-  }
-}
+    if (status && status !== 'ALL') {
+      users = users.filter((u) => u.status === status.toUpperCase());
+    }
 
-export async function GET() {
-  const users = readUsersFromFile();
-  return NextResponse.json(users, { headers: corsHeaders() });
+    return NextResponse.json(users, { headers: corsHeaders() });
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Failed to fetch users' }, { status: 500, headers: corsHeaders() });
+  }
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const users = readUsersFromFile();
+    const { name, email, phone, role, customRole, city, languages } = body;
 
+    if (!name || !role) {
+      return NextResponse.json({ error: 'Name and Role are required fields' }, { status: 400, headers: corsHeaders() });
+    }
+
+    const users = readUsers();
     const newUser: UserAccount = {
-      ...body,
-      id: body.id || `usr_${Date.now()}`,
-      createdAt: body.createdAt || new Date().toISOString(),
+      id: `usr_${Date.now()}`,
+      name,
+      email: email || '',
+      phone: phone || '',
+      role: role.toUpperCase(),
+      customRole: customRole || '',
+      status: 'VERIFIED',
+      city: city || 'Gaya Ji',
+      languages: Array.isArray(languages) ? languages : ['Hindi'],
+      createdAt: new Date().toISOString(),
+      rating: 5.0,
     };
 
-    const updatedUsers = [newUser, ...users];
-    writeUsersToFile(updatedUsers);
+    users.push(newUser);
+    writeUsers(users);
 
     return NextResponse.json(newUser, { status: 201, headers: corsHeaders() });
   } catch (err: any) {
@@ -156,10 +164,10 @@ export async function PUT(req: Request) {
     const { id, ...updates } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400, headers: corsHeaders() });
+      return NextResponse.json({ error: 'User ID is required for update' }, { status: 400, headers: corsHeaders() });
     }
 
-    const users = readUsersFromFile();
+    const users = readUsers();
     let updatedUser: UserAccount | null = null;
 
     const updatedUsers: UserAccount[] = users.map((u) => {
@@ -175,7 +183,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404, headers: corsHeaders() });
     }
 
-    writeUsersToFile(updatedUsers);
+    writeUsers(updatedUsers);
     return NextResponse.json(updatedUser, { headers: corsHeaders() });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to update user' }, { status: 400, headers: corsHeaders() });
@@ -196,14 +204,14 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400, headers: corsHeaders() });
     }
 
-    const users = readUsersFromFile();
+    const users = readUsers();
     const filteredUsers = users.filter((u) => u.id !== id);
 
     if (filteredUsers.length === users.length) {
       return NextResponse.json({ error: 'User not found' }, { status: 404, headers: corsHeaders() });
     }
 
-    writeUsersToFile(filteredUsers);
+    writeUsers(filteredUsers);
     return NextResponse.json({ success: true, deletedId: id }, { headers: corsHeaders() });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to delete user' }, { status: 400, headers: corsHeaders() });
