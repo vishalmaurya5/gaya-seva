@@ -22,7 +22,9 @@ export interface UserAccount {
   rating?: number;
 }
 
-const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'users_store.json');
+import os from 'os';
+
+const DATA_FILE_PATH = path.join(os.tmpdir(), 'gayaseva_users_store.json');
 
 const DEFAULT_USERS: UserAccount[] = [
   {
