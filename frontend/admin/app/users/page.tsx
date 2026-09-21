@@ -45,10 +45,14 @@ export default function UsersAndAdminsPage() {
     setUsers(latest);
   };
 
+  const syncUsers = () => {
+    setUsers(UserStore.getUsers());
+  };
+
   useEffect(() => {
     loadUsers();
-    window.addEventListener('storage', loadUsers);
-    return () => window.removeEventListener('storage', loadUsers);
+    window.addEventListener('storage', syncUsers);
+    return () => window.removeEventListener('storage', syncUsers);
   }, []);
 
   // Filter for Users & Admins (Pilgrim, Admin, Super Admin or All Users)

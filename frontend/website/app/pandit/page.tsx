@@ -30,6 +30,7 @@ export default function PanditDirectoryPage() {
       experience: '22+ Years Experience',
       status: 'VERIFIED',
       phone: '+919296804705',
+      availabilityStatus: 'AVAILABLE' as const,
     },
     {
       id: 'pnd_2',
@@ -41,6 +42,7 @@ export default function PanditDirectoryPage() {
       experience: '18+ Years Experience',
       status: 'VERIFIED',
       phone: '+918544491413',
+      availabilityStatus: 'AVAILABLE' as const,
     },
   ];
 
@@ -55,6 +57,7 @@ export default function PanditDirectoryPage() {
       experience: 'Verified Gaya Purohit',
       status: u.status,
       phone: u.phone,
+      availabilityStatus: u.availabilityStatus || 'AVAILABLE',
     })),
     ...defaultPandits.filter((dp) => !registeredPandits.some((rp) => rp.phone === dp.phone)),
   ];
@@ -76,6 +79,7 @@ export default function PanditDirectoryPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {allPandits.map((pnd) => {
           const isVerified = pnd.status === 'VERIFIED';
+          const isAvailable = pnd.availabilityStatus !== 'BOOKED';
           return (
             <div key={pnd.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
@@ -83,15 +87,27 @@ export default function PanditDirectoryPage() {
                   <div>
                     <h3 className="font-black text-lg text-slate-900 flex items-center gap-1.5">{pnd.name}</h3>
                     
-                    {isVerified ? (
-                      <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-900 rounded-full inline-flex items-center gap-1 mt-1 border border-emerald-300">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> GayaSeva Verified
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 mt-1 border border-amber-300">
-                        <Clock className="w-3.5 h-3.5 text-amber-700" /> Pending Admin Approval
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      {isVerified ? (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-900 rounded-full inline-flex items-center gap-1 border border-emerald-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> GayaSeva Verified
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 border border-amber-300">
+                          <Clock className="w-3.5 h-3.5 text-amber-700" /> Pending Admin Approval
+                        </span>
+                      )}
+
+                      {isAvailable ? (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                          🟢 AVAILABLE FOR PUJA
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                          🔴 BUSY WITH RITUAL
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⭐ {pnd.rating}</span>
                 </div>

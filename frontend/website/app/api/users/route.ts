@@ -5,7 +5,7 @@ export interface UserAccount {
   name: string;
   email: string;
   phone: string;
-  role: 'PILGRIM' | 'PANDIT' | 'DRIVER' | 'HOTEL' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
   customRole?: string;
   status: 'VERIFIED' | 'PENDING' | 'SUSPENDED';
   city?: string;
@@ -18,13 +18,27 @@ export interface UserAccount {
   lat?: number;
   lng?: number;
   rating?: number;
+  password?: string;
 }
 
 const DEFAULT_USERS: UserAccount[] = [
   {
+    id: 'usr_super_vishal',
+    name: 'Vishal Verma',
+    email: 'vishalverma5359@gayaseva.com',
+    password: 'Babu@730123',
+    phone: '+917301230000',
+    role: 'SUPER_ADMIN',
+    status: 'VERIFIED',
+    city: 'Gaya Ji',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    rating: 5.0,
+  },
+  {
     id: 'usr_super',
     name: 'Vikramaditya Sharma',
     email: 'superadmin@gayaseva.org',
+    password: 'Babu@730123',
     phone: '+919876543200',
     role: 'SUPER_ADMIN',
     status: 'VERIFIED',
@@ -36,6 +50,7 @@ const DEFAULT_USERS: UserAccount[] = [
     id: 'usr_pnd1',
     name: 'Pandit Rajesh Shastri',
     email: 'rajesh.shastri@gayaseva.org',
+    password: 'password123',
     phone: '+919876543210',
     role: 'PANDIT',
     customRole: 'Pinda Daan & Tripindi Shraddha Specialist',
@@ -49,6 +64,7 @@ const DEFAULT_USERS: UserAccount[] = [
     id: 'usr_drv1',
     name: 'Ramesh Kumar (Taxi Service)',
     email: 'ramesh.cab@gayaseva.org',
+    password: 'password123',
     phone: '+919876543220',
     role: 'DRIVER',
     customRole: 'Ac Dzire / Etios Taxi',
@@ -61,6 +77,7 @@ const DEFAULT_USERS: UserAccount[] = [
     id: 'usr_htl1',
     name: 'Sri Vishnupad Yatri Dharamshala',
     email: 'dharamshala@gayaseva.org',
+    password: 'password123',
     phone: '+919876543230',
     role: 'HOTEL',
     customRole: 'AC Yatri Dharamshala & Guest House',
@@ -73,6 +90,7 @@ const DEFAULT_USERS: UserAccount[] = [
     id: 'usr_pilgrim1',
     name: 'Sunita Banerjee',
     email: 'sunita.banerjee@gmail.com',
+    password: 'password123',
     phone: '+919876543240',
     role: 'PILGRIM',
     status: 'VERIFIED',
@@ -81,7 +99,46 @@ const DEFAULT_USERS: UserAccount[] = [
   }
 ];
 
-let inMemoryUsersStore: UserAccount[] = [...DEFAULT_USERS];
+import fs from 'fs';
+import path from 'path';
+
+function getFilePath(): string {
+  // Save to workspace root data/users.json
+  const possiblePaths = [
+    path.join(process.cwd(), 'data', 'users.json'),
+    path.join(process.cwd(), '..', '..', 'data', 'users.json'),
+  ];
+  return possiblePaths[0];
+}
+
+function readUsers(): UserAccount[] {
+  try {
+    const filePath = getFilePath();
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to read users from file store:', e);
+  }
+  return DEFAULT_USERS;
+}
+
+function writeUsers(users: UserAccount[]) {
+  try {
+    const filePath = getFilePath();
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Failed to write users to file store:', e);
+  }
+}
 
 function corsHeaders() {
   return {
@@ -93,14 +150,6 @@ function corsHeaders() {
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders() });
-}
-
-function readUsers(): UserAccount[] {
-  return inMemoryUsersStore;
-}
-
-function writeUsers(users: UserAccount[]) {
-  inMemoryUsersStore = users;
 }
 
 export async function GET(req: Request) {
@@ -128,7 +177,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, role, customRole, city, languages } = body;
+    const { name, email, phone, role, customRole, city, languages, password, avatarUrl, profilePicUrl, documentUrl, googleMapsUrl, lat, lng } = body;
 
     if (!name || !role) {
       return NextResponse.json({ error: 'Name and Role are required fields' }, { status: 400, headers: corsHeaders() });
@@ -136,16 +185,23 @@ export async function POST(req: Request) {
 
     const users = readUsers();
     const newUser: UserAccount = {
-      id: `usr_${Date.now()}`,
+      id: body.id || `usr_${Date.now()}`,
       name,
       email: email || '',
       phone: phone || '',
+      password: password || undefined,
       role: role.toUpperCase(),
       customRole: customRole || '',
-      status: 'VERIFIED',
+      status: body.status || 'PENDING',
       city: city || 'Gaya Ji',
       languages: Array.isArray(languages) ? languages : ['Hindi'],
       createdAt: new Date().toISOString(),
+      avatarUrl: avatarUrl || profilePicUrl || undefined,
+      profilePicUrl: profilePicUrl || avatarUrl || undefined,
+      documentUrl: documentUrl || undefined,
+      googleMapsUrl: googleMapsUrl || undefined,
+      lat: lat || undefined,
+      lng: lng || undefined,
       rating: 5.0,
     };
 

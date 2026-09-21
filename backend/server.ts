@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'https://gayaseva.com',
   'https://www.gayaseva.com',
+  'https://gaya-seva-three.vercel.app',
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
   'http://localhost:3000',

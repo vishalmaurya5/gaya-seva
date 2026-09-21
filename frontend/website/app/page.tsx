@@ -76,25 +76,35 @@ export default function HomePage() {
   const [activeItineraryDay, setActiveItineraryDay] = useState<1 | 2 | 3>(1);
 
   // Multi-Search Bar State
-  const [searchCategory, setSearchCategory] = useState<'PANDIT' | 'TAXI' | 'STAY' | 'FOOD' | 'PUJA' | 'GUIDE'>('PANDIT');
-  const [searchLocation, setSearchLocation] = useState('Vishnupad Temple & Devghat');
-  const [searchDate, setSearchDate] = useState('Today / Instant');
+  const [searchCategory, setSearchCategory] = useState<string>('PANDIT');
+
+  const navigateToCategoryPage = (category: string) => {
+    if (category === 'PANDIT') {
+      window.location.href = `/pandit`;
+    } else if (category === 'TAXI') {
+      window.location.href = `/pick-drop`;
+    } else if (category === 'STAY') {
+      window.location.href = `/stay`;
+    } else if (category === 'FOOD') {
+      window.location.href = `/food`;
+    } else if (category === 'PUJA') {
+      window.location.href = `/puja-material`;
+    } else if (category === 'BARBER') {
+      window.location.href = `/services?category=BARBER`;
+    } else if (category === 'GUIDE') {
+      window.location.href = `/gaya`;
+    } else if (category === 'LOST_FOUND') {
+      window.location.href = `/help/lost-and-found`;
+    } else if (category === 'ALL') {
+      window.location.href = `/services`;
+    } else {
+      window.location.href = `/services`;
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchCategory === 'PANDIT') {
-      window.location.href = `/pandit?location=${encodeURIComponent(searchLocation)}`;
-    } else if (searchCategory === 'TAXI') {
-      window.location.href = `/pick-drop?pickup=${encodeURIComponent(searchLocation)}`;
-    } else if (searchCategory === 'STAY') {
-      window.location.href = `/stay?location=${encodeURIComponent(searchLocation)}`;
-    } else if (searchCategory === 'FOOD') {
-      window.location.href = `/food`;
-    } else if (searchCategory === 'PUJA') {
-      window.location.href = `/puja-material`;
-    } else {
-      window.location.href = `/gaya-guide`;
-    }
+    navigateToCategoryPage(searchCategory);
   };
 
   useEffect(() => {
@@ -178,31 +188,31 @@ export default function HomePage() {
       <PopupAd />
 
       {/* SECTION 1: 📢 TOP PITRU PAKSHA & TEERTH TICKER BAR */}
-      <div className="bg-gradient-to-r from-[#180F08] via-[#2A180B] to-[#180F08] text-white py-1.5 px-4 sm:px-8 xl:px-12 text-center border-b border-[#F58220]/25 text-xs font-medium relative z-20">
-        <div className="w-full flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 mx-auto md:mx-0">
-            <span className="px-2.5 py-0.5 bg-[#F58220] text-white font-extrabold rounded-full text-[10px] tracking-wider uppercase animate-pulse flex items-center gap-1 shadow-sm">
-              <Megaphone className="w-3 h-3" /> PITRU PAKSHA 2026 SPECIAL
+      <div className="bg-gradient-to-r from-[#180F08] via-[#2A180B] to-[#180F08] text-white py-1.5 px-3 sm:px-8 xl:px-12 text-center border-b border-[#F58220]/25 text-[11px] sm:text-xs font-medium relative z-20 max-w-full overflow-hidden">
+        <div className="w-full flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-xs max-w-full">
+          <div className="flex items-center gap-1.5 mx-auto md:mx-0 truncate max-w-full">
+            <span className="px-2 py-0.5 bg-[#F58220] text-white font-extrabold rounded-full text-[9px] sm:text-[10px] tracking-wider uppercase animate-pulse flex items-center gap-1 shadow-sm shrink-0">
+              <Megaphone className="w-3 h-3" /> PITRU PAKSHA
             </span>
-            <span className="text-[#F6C343] font-semibold hidden sm:inline">
+            <span className="text-[#F6C343] font-semibold truncate">
               {t('sec1Notice')}
             </span>
           </div>
-          <div className="flex items-center gap-3 mx-auto md:mx-0">
+          <div className="flex items-center gap-2 mx-auto md:mx-0 shrink-0">
             <a 
               href="tel:+918544491413" 
-              className="text-[#F6C343] hover:text-white font-bold underline flex items-center gap-1.5 transition-colors text-xs"
+              className="text-[#F6C343] hover:text-white font-bold underline flex items-center gap-1 transition-colors text-[10px] sm:text-xs"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-[#F58220]" />
+              <PhoneCall className="w-3 h-3 text-[#F58220]" />
               <span>{isHindi ? '24/7 हेल्पलाइन: +91 85444 91413' : 'Helpline: +91 85444 91413'}</span>
             </a>
           </div>
         </div>
       </div>
 
-      {/* SECTION 2: 🏛️ MASTER HERO SECTION WITH BACKGROUND IMAGE (Fluid Max-Width & Tight Gap) */}
-      <div className="w-full px-3 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
-        <section className="relative min-h-[540px] bg-[url('/hero-background.png')] bg-cover bg-center bg-no-repeat text-white py-10 sm:py-14 px-4 sm:px-8 rounded-3xl border-2 border-[#F58220]/35 shadow-2xl overflow-hidden">
+      {/* SECTION 2: 🏛️ MASTER HERO SECTION WITH BACKGROUND IMAGE */}
+      <div className="w-full px-2 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 max-w-full overflow-hidden">
+        <section className="relative min-h-[460px] sm:min-h-[540px] bg-[url('/hero-background.png')] bg-cover bg-center bg-no-repeat text-white py-8 sm:py-14 px-3 sm:px-8 rounded-3xl border-2 border-[#F58220]/35 shadow-2xl overflow-hidden max-w-full">
           {/* Dark Gradient Overlay for Maximum Text Visibility & Background Richness */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C0D02]/85 via-[#2A180B]/75 to-[#1C0D02]/90 pointer-events-none" />
 
@@ -211,25 +221,25 @@ export default function HomePage() {
           <div className="absolute bottom-0 right-0 w-[500px] h-[350px] bg-[#F58220]/15 blur-3xl pointer-events-none rounded-full" />
           <div className="absolute top-1/3 left-0 w-[400px] h-[300px] bg-[#F6C343]/10 blur-3xl pointer-events-none rounded-full" />
 
-          <div className="relative z-10 max-w-6xl mx-auto text-center space-y-5 sm:space-y-7">
+          <div className="relative z-10 max-w-6xl mx-auto text-center space-y-4 sm:space-y-7 max-w-full">
           {/* Logo & Badge */}
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col items-center gap-3"
+            className="flex flex-col items-center gap-2.5 max-w-full"
           >
             <div className="relative group">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#F58220] via-[#F6C343] to-[#D97706] opacity-75 blur group-hover:opacity-100 transition duration-500 animate-pulse" />
               <GayaSevaLogo 
-                size={105} 
+                size={80} 
                 className="relative drop-shadow-[0_12px_35px_rgba(245,130,32,0.5)] transform group-hover:scale-105 transition-transform duration-300"
               />
             </div>
             
-            <span className="px-4 py-1.5 rounded-full bg-[#F58220]/15 text-[#F6C343] font-bold text-xs uppercase tracking-widest border border-[#F58220]/30 inline-flex items-center gap-2 backdrop-blur-md shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-[#F58220]" />
-              <span>{t('heroBadge')}</span>
+            <span className="px-3 sm:px-4 py-1 rounded-full bg-[#F58220]/15 text-[#F6C343] font-bold text-[10px] sm:text-xs uppercase tracking-wider border border-[#F58220]/30 inline-flex items-center gap-1.5 backdrop-blur-md shadow-inner max-w-full truncate">
+              <Sparkles className="w-3.5 h-3.5 text-[#F58220] shrink-0" />
+              <span className="truncate">{t('heroBadge')}</span>
             </span>
           </motion.div>
 
@@ -238,7 +248,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-sans font-black tracking-tight leading-tight text-white drop-shadow-lg max-w-4xl mx-auto"
+            className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-black tracking-tight leading-snug text-white drop-shadow-lg max-w-4xl mx-auto break-words"
           >
             {t('heroTitle1')} — <span className="bg-gradient-to-r from-[#F6C343] via-[#F58220] to-[#FDE047] bg-clip-text text-transparent">{t('heroTitleHighlight')}</span>
           </motion.h1>
@@ -248,7 +258,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-sm sm:text-base lg:text-lg text-slate-100 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-sm"
+            className="text-xs sm:text-base lg:text-lg text-slate-100 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-sm px-2"
           >
             {t('heroSubtitle')}
           </motion.p>
@@ -260,77 +270,44 @@ export default function HomePage() {
             transition={{ duration: 0.7, delay: 0.4 }}
             className="pt-2"
           >
-            <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-2xl rounded-3xl p-3 sm:p-4 text-gray-900 shadow-2xl border border-amber-500/30 max-w-5xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-3 items-center">
+            <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-2xl rounded-3xl p-3 sm:p-4 text-gray-900 shadow-2xl border border-amber-500/30 max-w-3xl mx-auto font-sans">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 
-                {/* Field 1: Service Category (4 cols) */}
-                <div className="md:col-span-4 bg-gray-50/90 hover:bg-white p-3 rounded-2xl border border-gray-200/80 transition-all text-left">
-                  <label className="text-[10px] font-extrabold text-[#C45E00] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                    <Flame className="w-3 h-3 text-[#F58220]" />
-                    <span>{isHindi ? '1. क्या सेवा चाहिए?' : '1. Service Category'}</span>
+                {/* Single Field: Service Category */}
+                <div className="flex-1 bg-gray-50/90 hover:bg-white p-3.5 rounded-2xl border border-gray-200/80 transition-all text-left shadow-xs">
+                  <label className="text-[11px] font-extrabold text-[#C45E00] uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-[#F58220]" />
+                    <span>{isHindi ? 'गया सेवा चुनें (Select Service):' : 'Select Service Category:'}</span>
                   </label>
                   <select 
                     value={searchCategory}
-                    onChange={(e) => setSearchCategory(e.target.value as any)}
-                    className="w-full bg-transparent text-xs sm:text-sm font-bold text-gray-900 focus:outline-none cursor-pointer"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSearchCategory(val);
+                      navigateToCategoryPage(val);
+                    }}
+                    className="w-full bg-transparent text-sm sm:text-base font-extrabold text-gray-900 focus:outline-none cursor-pointer"
                   >
-                    <option value="PANDIT">🪔 {isHindi ? 'पिंडदान एवं तीर्थ पुरोहित' : 'Pind Daan & Pandits'}</option>
-                    <option value="TAXI">🚕 {isHindi ? 'पिक एंड ड्रॉप (टैक्सी/ऑटो)' : 'Pick & Drop Taxi / Auto'}</option>
-                    <option value="STAY">🏨 {isHindi ? 'होटल एवं धर्मशालाएं' : 'Hotels & Dharamshalas'}</option>
-                    <option value="FOOD">🍱 {isHindi ? 'शुद्ध सात्विक भोजन' : 'Pure Satvik Food'}</option>
-                    <option value="PUJA">🛒 {isHindi ? 'पूजा किट एवं गया तिलकुट' : 'Puja Kits & Gaya Tilkut'}</option>
-                    <option value="GUIDE">🗺️ {isHindi ? 'गया गाइड एवं दर्शनीय स्थल' : 'Gaya Guide & Shrines'}</option>
+                    <option value="PANDIT">🪔 {isHindi ? 'पिंडदान एवं तीर्थ पुरोहित (Pandits & Pind Daan)' : 'Pind Daan & Pandits'}</option>
+                    <option value="TAXI">🚕 {isHindi ? 'पिक एंड ड्रॉप (टैक्सी/ऑटो) (Pick & Drop Taxi)' : 'Pick & Drop Taxi / Auto'}</option>
+                    <option value="STAY">🏨 {isHindi ? 'होटल एवं धर्मशालाएं (Hotels & Dharamshalas)' : 'Hotels & Dharamshalas'}</option>
+                    <option value="FOOD">🍱 {isHindi ? 'शुद्ध सात्विक भोजन (Satvik Food)' : 'Pure Satvik Food & Catering'}</option>
+                    <option value="BARBER">💈 {isHindi ? 'क्षौर कर्म एवं नाई (Kshaur Karma / Barber)' : 'Barber & Kshaur Karma (नाई/ठाकुर)'}</option>
+                    <option value="PUJA">🛒 {isHindi ? 'पूजा किट एवं गया तिलकुट (Puja Kits)' : 'Puja Kits & Gaya Tilkut'}</option>
+                    <option value="GUIDE">🗺️ {isHindi ? 'गया गाइड एवं दर्शनीय स्थल (Gaya Guide)' : 'Gaya Guide & Shrines'}</option>
+                    <option value="LOST_FOUND">🔍 {isHindi ? 'खोया और पाया सेवा (Lost & Found Portal)' : 'Lost & Found Portal (खोया और पाया)'}</option>
+                    <option value="ALL">🧰 {isHindi ? 'सभी गया सेवाएं (All Services Directory)' : 'All Services Directory'}</option>
                   </select>
                 </div>
 
-                {/* Field 2: Location / Temple Gate (4 cols) */}
-                <div className="md:col-span-4 bg-gray-50/90 hover:bg-white p-3 rounded-2xl border border-gray-200/80 transition-all text-left">
-                  <label className="text-[10px] font-extrabold text-[#C45E00] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-[#F58220]" />
-                    <span>{isHindi ? '2. स्थान / घाट / मंदिर' : '2. Location / Temple Gate'}</span>
-                  </label>
-                  <select
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm font-bold text-gray-900 focus:outline-none cursor-pointer"
-                  >
-                    <option value="Vishnupad Temple & Devghat">📍 Vishnupad Temple & Ghats</option>
-                    <option value="Falgu River Bank">📍 Falgu River Bank</option>
-                    <option value="Gaya Junction Railway Station">📍 Gaya Junction Railway Station</option>
-                    <option value="Gaya Airport (GAY)">📍 Gaya Airport (GAY)</option>
-                    <option value="Bodh Gaya Mahabodhi Temple">📍 Bodh Gaya Mahabodhi Temple</option>
-                    <option value="Pretshila Hill Shrine">📍 Pretshila Hill Shrine</option>
-                    <option value="Akshayavat Tree Site">📍 Akshayavat Tree Site</option>
-                  </select>
-                </div>
-
-                {/* Field 3: Date / Season (2 cols) */}
-                <div className="md:col-span-2 bg-gray-50/90 hover:bg-white p-3 rounded-2xl border border-gray-200/80 transition-all text-left">
-                  <label className="text-[10px] font-extrabold text-[#C45E00] uppercase tracking-wider block mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-[#F58220]" />
-                    <span>{isHindi ? '3. तिथि' : '3. Date / Batch'}</span>
-                  </label>
-                  <select
-                    value={searchDate}
-                    onChange={(e) => setSearchDate(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-sm font-bold text-gray-900 focus:outline-none cursor-pointer"
-                  >
-                    <option value="Today / Instant">Today / Instant</option>
-                    <option value="Tomorrow">Tomorrow</option>
-                    <option value="Pitru Paksha 2026">Pitru Paksha 2026</option>
-                  </select>
-                </div>
-
-                {/* Field 4: Search Action CTA (2 cols) */}
-                <div className="md:col-span-2">
-                  <button 
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D96B00] hover:from-[#E07210] hover:to-[#C45E00] text-white font-extrabold text-sm py-3.5 px-4 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 border border-orange-400/40"
-                  >
-                    <Search className="w-4 h-4 shrink-0" />
-                    <span>{isHindi ? 'खोजें' : 'Search'}</span>
-                  </button>
-                </div>
+                {/* Search Button */}
+                <button 
+                  type="submit"
+                  className="sm:w-auto px-8 bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D96B00] hover:from-[#E07210] hover:to-[#C45E00] text-white font-extrabold text-sm sm:text-base py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 border border-orange-400/40 cursor-pointer shrink-0"
+                >
+                  <Search className="w-5 h-5 shrink-0" />
+                  <span>{isHindi ? 'खोजें' : 'Search'}</span>
+                </button>
 
               </div>
 

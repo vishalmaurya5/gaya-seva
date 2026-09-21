@@ -45,6 +45,7 @@ export default function RegisterPage() {
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
+      password,
       role: 'PILGRIM',
       status: 'VERIFIED',
       city: city || 'Gaya Ji',
@@ -53,7 +54,7 @@ export default function RegisterPage() {
     localStorage.setItem('GAYASEVA_CURRENT_USER', JSON.stringify(newUser));
     setSuccess(true);
     setTimeout(() => {
-      router.push('/');
+      router.push('/dashboard');
     }, 1500);
   };
 

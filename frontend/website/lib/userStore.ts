@@ -3,7 +3,7 @@ export interface UserAccount {
   name: string;
   email: string;
   phone: string;
-  role: 'PILGRIM' | 'PANDIT' | 'DRIVER' | 'HOTEL' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
   customRole?: string;
   status: 'VERIFIED' | 'PENDING' | 'SUSPENDED';
   city?: string;
@@ -16,16 +16,33 @@ export interface UserAccount {
   lat?: number;
   lng?: number;
   rating?: number;
+  password?: string;
+  availabilityStatus?: 'AVAILABLE' | 'BOOKED';
 }
 
 const STORAGE_KEY = 'GAYASEVA_USERS_STORE';
-const API_URL = 'http://localhost:3000/api/users';
+const API_URL = typeof window !== 'undefined'
+  ? '/api/users'
+  : (process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users` : '/api/users');
 
 const DEFAULT_USERS: UserAccount[] = [
+  {
+    id: 'usr_super_vishal',
+    name: 'Vishal Verma',
+    email: 'vishalverma5359@gayaseva.com',
+    password: 'Babu@730123',
+    phone: '+917301230000',
+    role: 'SUPER_ADMIN',
+    status: 'VERIFIED',
+    city: 'Gaya Ji',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    rating: 5.0,
+  },
   {
     id: 'usr_super',
     name: 'Vikramaditya Sharma',
     email: 'superadmin@gayaseva.org',
+    password: 'Babu@730123',
     phone: '+919876543200',
     role: 'SUPER_ADMIN',
     status: 'VERIFIED',
@@ -37,6 +54,7 @@ const DEFAULT_USERS: UserAccount[] = [
     id: 'usr_pnd1',
     name: 'Pandit Rajesh Shastri',
     email: 'rajesh.shastri@gayaseva.org',
+    password: 'password123',
     phone: '+919876543210',
     role: 'PANDIT',
     customRole: 'Pinda Daan & Tripindi Shraddha Specialist',
@@ -45,11 +63,28 @@ const DEFAULT_USERS: UserAccount[] = [
     languages: ['Hindi', 'Sanskrit', 'Bengali'],
     createdAt: '2026-02-10T00:00:00.000Z',
     rating: 4.9,
+    availabilityStatus: 'AVAILABLE',
+  },
+  {
+    id: 'usr_brb1',
+    name: 'Ramu Thakur (Kshaur Karma)',
+    email: 'ramu.barber@gayaseva.org',
+    password: 'password123',
+    phone: '+919876543250',
+    role: 'BARBER',
+    customRole: 'Kshaur Karma & Mundan Specialist (नाई / ठाकुर)',
+    status: 'VERIFIED',
+    city: 'Vishnupad Ghat Area',
+    languages: ['Hindi', 'Magahi'],
+    createdAt: '2026-03-10T00:00:00.000Z',
+    rating: 4.9,
+    availabilityStatus: 'AVAILABLE',
   },
   {
     id: 'usr_drv1',
     name: 'Ramesh Kumar (Taxi Service)',
     email: 'ramesh.cab@gayaseva.org',
+    password: 'password123',
     phone: '+919876543220',
     role: 'DRIVER',
     customRole: 'Ac Dzire / Etios Taxi',
@@ -57,11 +92,13 @@ const DEFAULT_USERS: UserAccount[] = [
     city: 'Gaya Junction',
     createdAt: '2026-02-15T00:00:00.000Z',
     rating: 4.8,
+    availabilityStatus: 'AVAILABLE',
   },
   {
     id: 'usr_htl1',
     name: 'Sri Vishnupad Yatri Dharamshala',
     email: 'dharamshala@gayaseva.org',
+    password: 'password123',
     phone: '+919876543230',
     role: 'HOTEL',
     customRole: 'AC Yatri Dharamshala & Guest House',
@@ -69,16 +106,19 @@ const DEFAULT_USERS: UserAccount[] = [
     city: 'Vishnupad Temple Area',
     createdAt: '2026-03-01T00:00:00.000Z',
     rating: 4.9,
+    availabilityStatus: 'AVAILABLE',
   },
   {
     id: 'usr_pilgrim1',
     name: 'Sunita Banerjee',
     email: 'sunita.banerjee@gmail.com',
+    password: 'password123',
     phone: '+919876543240',
     role: 'PILGRIM',
     status: 'VERIFIED',
     city: 'Kolkata',
     createdAt: '2026-03-05T00:00:00.000Z',
+    availabilityStatus: 'AVAILABLE',
   }
 ];
 
@@ -89,11 +129,8 @@ export const UserStore = {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
-        this.fetchUsersFromApi();
         return DEFAULT_USERS;
       }
-      // Trigger background sync with API
-      this.fetchUsersFromApi();
       return JSON.parse(stored);
     } catch (e) {
       return DEFAULT_USERS;
@@ -107,8 +144,11 @@ export const UserStore = {
       if (res.ok) {
         const users = await res.json();
         if (Array.isArray(users)) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-          window.dispatchEvent(new Event('storage'));
+          const currentStoredUsers = this.getUsers();
+          if (JSON.stringify(currentStoredUsers) !== JSON.stringify(users)) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+            window.dispatchEvent(new Event('storage'));
+          }
           return users;
         }
       }
@@ -131,6 +171,7 @@ export const UserStore = {
   addUser(user: Omit<UserAccount, 'id' | 'createdAt'>): UserAccount {
     const users = this.getUsers();
     const newUser: UserAccount = {
+      availabilityStatus: 'AVAILABLE',
       ...user,
       id: `usr_${Date.now()}`,
       createdAt: new Date().toISOString(),

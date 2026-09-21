@@ -36,7 +36,8 @@ export default function DriversManagementPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [vehicleType, setVehicleType] = useState('Ac Dzire / Etios Taxi');
+  const [vehicleType, setVehicleType] = useState('AC Dzire / Etios Sedan');
+  const [customVehicleInput, setCustomVehicleInput] = useState('');
   const [status, setStatus] = useState<UserAccount['status']>('VERIFIED');
   const [city, setCity] = useState('Gaya Junction & Bodhgaya');
   const [profilePicUrl, setProfilePicUrl] = useState('');
@@ -47,10 +48,14 @@ export default function DriversManagementPage() {
     setUsers(latest);
   };
 
+  const syncDrivers = () => {
+    setUsers(UserStore.getUsers());
+  };
+
   useEffect(() => {
     loadDrivers();
-    window.addEventListener('storage', loadDrivers);
-    return () => window.removeEventListener('storage', loadDrivers);
+    window.addEventListener('storage', syncDrivers);
+    return () => window.removeEventListener('storage', syncDrivers);
   }, []);
 
   // Filter only DRIVER accounts
@@ -69,6 +74,13 @@ export default function DriversManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const getResolvedVehicleType = () => {
+    if (vehicleType === 'Other Custom Vehicle (Manual Input)') {
+      return customVehicleInput.trim() || 'Custom Vehicle Taxi';
+    }
+    return vehicleType;
+  };
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
@@ -78,7 +90,7 @@ export default function DriversManagementPage() {
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
       role: 'DRIVER',
-      customRole: vehicleType,
+      customRole: getResolvedVehicleType(),
       status,
       city: city || 'Gaya Junction & Bodhgaya',
       profilePicUrl: profilePicUrl || undefined,
@@ -99,7 +111,7 @@ export default function DriversManagementPage() {
       name,
       email,
       phone,
-      customRole: vehicleType,
+      customRole: getResolvedVehicleType(),
       status,
       city,
       profilePicUrl,
@@ -129,7 +141,20 @@ export default function DriversManagementPage() {
     setName(driver.name);
     setEmail(driver.email);
     setPhone(driver.phone);
-    setVehicleType(driver.customRole || 'Ac Dzire / Etios Taxi');
+    const predefined = [
+      'Bike / Two-Wheeler Taxi (Motorcycle / Scooter)',
+      'AC Dzire / Etios Sedan',
+      'Innova Crysta 7-Seater',
+      'E-Rickshaw / Auto Pickup',
+      'Tempo Traveller 13-Seater'
+    ];
+    if (driver.customRole && predefined.includes(driver.customRole)) {
+      setVehicleType(driver.customRole);
+      setCustomVehicleInput('');
+    } else {
+      setVehicleType('Other Custom Vehicle (Manual Input)');
+      setCustomVehicleInput(driver.customRole || '');
+    }
     setStatus(driver.status);
     setCity(driver.city || 'Gaya Junction');
     setProfilePicUrl(driver.profilePicUrl || '');
@@ -140,7 +165,8 @@ export default function DriversManagementPage() {
     setName('');
     setEmail('');
     setPhone('');
-    setVehicleType('Ac Dzire / Etios Taxi');
+    setVehicleType('AC Dzire / Etios Sedan');
+    setCustomVehicleInput('');
     setStatus('VERIFIED');
     setCity('Gaya Junction & Bodhgaya');
     setProfilePicUrl('');
@@ -405,11 +431,24 @@ export default function DriversManagementPage() {
                   onChange={(e) => setVehicleType(e.target.value)} 
                   className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:border-[#F58220]"
                 >
-                  <option value="AC Dzire / Etios Sedan">AC Dzire / Etios Sedan</option>
-                  <option value="Innova Crysta 7-Seater">Innova Crysta 7-Seater</option>
-                  <option value="E-Rickshaw / Auto Pickup">E-Rickshaw / Auto Pickup</option>
-                  <option value="Tempo Traveller 13-Seater">Tempo Traveller 13-Seater</option>
+                  <option value="Bike / Two-Wheeler Taxi (Motorcycle / Scooter)">🏍️ Bike / Two-Wheeler Taxi (Motorcycle / Scooter)</option>
+                  <option value="AC Dzire / Etios Sedan">🚗 AC Dzire / Etios Sedan</option>
+                  <option value="Innova Crysta 7-Seater">🚙 Innova Crysta 7-Seater</option>
+                  <option value="E-Rickshaw / Auto Pickup">🛺 E-Rickshaw / Auto Pickup</option>
+                  <option value="Tempo Traveller 13-Seater">🚐 Tempo Traveller 13-Seater</option>
+                  <option value="Other Custom Vehicle (Manual Input)">✏️ Other Custom Vehicle (Manual Input)</option>
                 </select>
+
+                {vehicleType === 'Other Custom Vehicle (Manual Input)' && (
+                  <input
+                    type="text"
+                    required
+                    value={customVehicleInput}
+                    onChange={(e) => setCustomVehicleInput(e.target.value)}
+                    placeholder="Enter Custom Vehicle Name (e.g. Electric Scooter / Vintage Car)"
+                    className="w-full mt-2 px-3 py-2 border border-amber-300 bg-amber-50/60 rounded-xl focus:outline-none focus:border-[#F58220] text-xs font-semibold"
+                  />
+                )}
               </div>
 
               <div>

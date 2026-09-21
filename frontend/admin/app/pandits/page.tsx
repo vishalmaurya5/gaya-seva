@@ -49,10 +49,14 @@ export default function PanditsManagementPage() {
     setUsers(latest);
   };
 
+  const syncPandits = () => {
+    setUsers(UserStore.getUsers());
+  };
+
   useEffect(() => {
     loadPandits();
-    window.addEventListener('storage', loadPandits);
-    return () => window.removeEventListener('storage', loadPandits);
+    window.addEventListener('storage', syncPandits);
+    return () => window.removeEventListener('storage', syncPandits);
   }, []);
 
   // Filter only PANDIT accounts

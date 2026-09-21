@@ -1,22 +1,47 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Car, MapPin, Calendar, Clock, Users, Luggage, ShieldCheck, Phone, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Car, MapPin, Calendar, Clock, Users, Luggage, ShieldCheck, Phone, MessageSquare, Power, CheckCircle2 } from 'lucide-react';
+import { UserStore, UserAccount } from '@/lib/userStore';
 
 export default function PickDropPage() {
   const [pickup, setPickup] = useState('Gaya Railway Station');
   const [drop, setDrop] = useState('Vishnupad Temple');
   const [passengers, setPassengers] = useState(4);
   const [vehicleType, setVehicleType] = useState('Sedan');
+  const [users, setUsers] = useState<UserAccount[]>([]);
 
-  const drivers = [
-    { id: '1', name: 'Ramesh Kumar', vehicle: 'Sedan (AC)', passengers: 4, rating: 4.8, area: 'Gaya Railway Station', phone: '+919876543210' },
-    { id: '2', name: 'Sunil Singh', vehicle: 'Maruti Ertiga 7-Seater', passengers: 7, rating: 4.9, area: 'Vishnupad Teerth', phone: '+919876543211' },
-    { id: '3', name: 'Vijay Auto Service', vehicle: 'E-Rickshaw Auto', passengers: 3, rating: 4.7, area: 'Bodh Gaya Road', phone: '+919876543212' },
+  useEffect(() => {
+    setUsers(UserStore.getUsers());
+    const handleStorage = () => setUsers(UserStore.getUsers());
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const registeredDrivers = users.filter((u) => u.role === 'DRIVER');
+
+  const defaultDrivers = [
+    { id: '1', name: 'Ramesh Kumar', vehicle: 'AC Dzire / Etios Sedan', passengers: 4, rating: 4.8, area: 'Gaya Railway Station', phone: '+919876543220', availabilityStatus: 'AVAILABLE' as const },
+    { id: '2', name: 'Sunil Singh', vehicle: 'Maruti Ertiga 7-Seater', passengers: 7, rating: 4.9, area: 'Vishnupad Teerth', phone: '+919876543211', availabilityStatus: 'AVAILABLE' as const },
+    { id: '3', name: 'Vijay Auto Service', vehicle: 'E-Rickshaw Auto', passengers: 3, rating: 4.7, area: 'Bodh Gaya Road', phone: '+919876543212', availabilityStatus: 'AVAILABLE' as const },
+  ];
+
+  const allDrivers = [
+    ...registeredDrivers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      vehicle: u.customRole || 'AC Taxi / Auto',
+      passengers: 4,
+      rating: u.rating || 4.8,
+      area: u.city || 'Gaya Junction & Vishnupad Zone',
+      phone: u.phone,
+      availabilityStatus: u.availabilityStatus || 'AVAILABLE',
+    })),
+    ...defaultDrivers.filter((dp) => !registeredDrivers.some((rp) => rp.phone === dp.phone)),
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 font-sans text-slate-900">
       {/* Search Header */}
       <div className="bg-[#2A180B] text-white p-6 sm:p-8 rounded-3xl border border-[#F58220]/20 shadow-xl space-y-6">
         <div>
@@ -65,9 +90,12 @@ export default function PickDropPage() {
               onChange={(e) => setVehicleType(e.target.value)}
               className="w-full bg-[#2A180B] border border-gray-600 rounded-xl px-3 py-2 text-xs text-white"
             >
-              <option value="Sedan">Sedan AC</option>
-              <option value="Auto">E-Rickshaw Auto</option>
-              <option value="SUV">SUV Ertiga</option>
+              <option value="Bike">🏍️ Bike / Two-Wheeler Taxi</option>
+              <option value="Sedan">🚗 AC Dzire / Etios Sedan</option>
+              <option value="Auto">🛺 E-Rickshaw Auto Pickup</option>
+              <option value="SUV">🚙 SUV Innova / Ertiga</option>
+              <option value="Tempo">🚐 Tempo Traveller (Group)</option>
+              <option value="Other">✏️ Other Custom Vehicle</option>
             </select>
           </div>
         </div>
@@ -81,42 +109,79 @@ export default function PickDropPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-serif font-bold text-[#4A2E1A]">Verified Pick & Drop Providers</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {drivers.map((drv) => (
-            <div key={drv.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-base text-[#4A2E1A]">{drv.name}</h3>
-                  <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1 mt-1">
-                    <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
-                  </span>
+          {allDrivers.map((drv) => {
+            const isAvailable = drv.availabilityStatus !== 'BOOKED';
+            return (
+              <div key={drv.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-base text-[#4A2E1A]">{drv.name}</h3>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                        <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
+                        </span>
+
+                        {isAvailable ? (
+                          <span className="px-2 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded inline-flex items-center gap-1 animate-pulse">
+                            🟢 AVAILABLE
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-[10px] font-black bg-red-600 text-white rounded inline-flex items-center gap-1">
+                            🔴 BOOKED / BUSY
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⭐ {drv.rating}</span>
+                  </div>
+
+                  <div className="text-xs text-gray-600 space-y-1 bg-[#F8F6EF] p-3 rounded-xl">
+                    <p>🚕 {drv.vehicle}</p>
+                    <p>👥 Up to {drv.passengers} Passengers</p>
+                    <p>📍 {drv.area}</p>
+                  </div>
                 </div>
-                <span className="text-xs font-bold text-amber-600">⭐ {drv.rating}</span>
-              </div>
 
-              <div className="text-xs text-gray-600 space-y-1 bg-[#F8F6EF] p-3 rounded-xl">
-                <p>🚕 {drv.vehicle}</p>
-                <p>👥 Up to {drv.passengers} Passengers</p>
-                <p>📍 {drv.area}</p>
+                <div className="flex gap-2 pt-2">
+                  <a
+                    href={isAvailable ? `tel:${drv.phone}` : '#'}
+                    onClick={(e) => {
+                      if (!isAvailable) {
+                        e.preventDefault();
+                        alert('यह ड्राइवर अभी बुक है / Driver is currently BOOKED. Please contact next available driver.');
+                      }
+                    }}
+                    className={`flex-1 py-2.5 text-xs font-black rounded-xl text-center flex items-center justify-center gap-1 shadow-sm transition-all ${
+                      isAvailable
+                        ? 'bg-[#4A2E1A] hover:bg-[#3D2310] text-white cursor-pointer'
+                        : 'bg-slate-300 text-slate-600 cursor-not-allowed'
+                    }`}
+                  >
+                    <Phone className="w-3.5 h-3.5" /> {isAvailable ? 'Call Now' : 'Booked'}
+                  </a>
+                  <a
+                    href={isAvailable ? `https://wa.me/${drv.phone.replace('+', '')}?text=Need%20Pick%20%26%20Drop` : '#'}
+                    onClick={(e) => {
+                      if (!isAvailable) {
+                        e.preventDefault();
+                        alert('यह ड्राइवर अभी बुक है / Driver is currently BOOKED.');
+                      }
+                    }}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`flex-1 py-2.5 text-xs font-black rounded-xl text-center flex items-center justify-center gap-1 shadow-sm transition-all ${
+                      isAvailable
+                        ? 'bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer'
+                        : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                    }`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
+                  </a>
+                </div>
               </div>
-
-              <div className="flex gap-2 pt-2">
-                <a
-                  href={`tel:${drv.phone}`}
-                  className="flex-1 py-2 bg-[#4A2E1A] text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1"
-                >
-                  <Phone className="w-3.5 h-3.5" /> Call
-                </a>
-                <a
-                  href={`https://wa.me/${drv.phone.replace('+', '')}?text=Need%20Pick%20%26%20Drop`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 py-2 bg-[#25D366] text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
-                </a>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -5,7 +5,8 @@ import {
   UserCheck, ShieldCheck, Car, Flame, Hotel, ShoppingBag, MapPin, 
   Wrench, CheckCircle, Upload, FileText, Sparkles, Phone, Mail, 
   Award, ArrowRight, Lock, Check, UtensilsCrossed, Compass, Building2,
-  X, AlertCircle, Image as ImageIcon, Link as LinkIcon, ShieldAlert, CheckCircle2
+  X, AlertCircle, Image as ImageIcon, Link as LinkIcon, ShieldAlert, CheckCircle2,
+  Scissors
 } from 'lucide-react';
 import Link from 'next/link';
 import { GayaSevaLogo } from '@/components/ui/GayaSevaLogo';
@@ -16,7 +17,7 @@ import {
   uploadToSupabaseBucket 
 } from '@/lib/supabaseClient';
 
-type ProviderRoleCategory = 'PANDIT' | 'DRIVER' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'OTHER';
+type ProviderRoleCategory = 'PANDIT' | 'BARBER' | 'DRIVER' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'OTHER';
 
 interface CategoryOption {
   role: ProviderRoleCategory;
@@ -28,12 +29,13 @@ interface CategoryOption {
 
 const CATEGORIES: CategoryOption[] = [
   { role: 'PANDIT', title: 'Purohit & Pandit Ji', subtitle: 'Pind Daan, Shradh & Vedic Karmakand', icon: Flame, badge: 'Popular' },
+  { role: 'BARBER', title: 'Barber & Kshaur Karma (नाई / ठाकुर)', subtitle: 'Pind Daan Mundan & Kshaur Sanskar', icon: Scissors, badge: 'Pind Daan' },
   { role: 'DRIVER', title: 'Taxi & Transport Driver', subtitle: 'Outstation cabs & Airport transfers', icon: Car, badge: 'Instant' },
   { role: 'HOTEL', title: 'Hotel & Dharamshala', subtitle: 'AC/Non-AC rooms near Vishnupad', icon: Hotel, badge: 'Direct' },
   { role: 'SHOP', title: 'Puja Samagri & Tilkut', subtitle: 'Gaya Tilkut, Anarsa & Puja items', icon: ShoppingBag, badge: 'Top Goods' },
   { role: 'GUIDE', title: 'Tirth Panda & Guide', subtitle: '45-Vedi Pind Daan & Bodhgaya', icon: Compass, badge: 'Verified' },
   { role: 'FOOD', title: 'Satvik Food & Catering', subtitle: 'Pure Jain & Brahmin Satvik meals', icon: UtensilsCrossed, badge: 'Pure Veg' },
-  { role: 'OTHER', title: 'Other Custom Service', subtitle: 'E-Rickshaw, Photo, Handloom etc.', icon: Sparkles, badge: 'Custom' },
+  { role: 'OTHER', title: 'Other Custom Service', subtitle: 'Manual Input (E-Rickshaw, Photo, etc.)', icon: Sparkles, badge: 'Custom' },
 ];
 
 const AVAILABLE_LANGUAGES = ['Hindi', 'English', 'Bengali', 'Telugu', 'Tamil', 'Sanskrit'];
@@ -49,6 +51,8 @@ export default function ProviderRegisterPage() {
   const [email, setEmail] = useState('');
   const [operatingCity, setOperatingCity] = useState('');
   const [experienceYears, setExperienceYears] = useState('5');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedLangs, setSelectedLangs] = useState<string[]>(['Hindi', 'English']);
   const [agreedTerms, setAgreedTerms] = useState(false);
   
@@ -217,10 +221,17 @@ export default function ProviderRegisterPage() {
       return;
     }
     
-    let storeRole: 'PANDIT' | 'DRIVER' | 'HOTEL' = 'PANDIT';
-    if (selectedRole === 'DRIVER') storeRole = 'DRIVER';
-    else if (selectedRole === 'HOTEL') storeRole = 'HOTEL';
-    else storeRole = 'PANDIT';
+    let storeRole: any = selectedRole;
+    let customRoleVal = customRoleText.trim();
+
+    if (selectedRole === 'BARBER') {
+      customRoleVal = customRoleVal || 'Kshaur Karma & Mundan Specialist (नाई / ठाकुर)';
+    } else if (selectedRole === 'OTHER') {
+      customRoleVal = customRoleVal || 'Custom Service Partner';
+    } else if (!customRoleVal) {
+      const catObj = CATEGORIES.find(c => c.role === selectedRole);
+      customRoleVal = catObj ? catObj.subtitle : selectedRole;
+    }
 
     const refId = `GS-PTR-${Math.floor(100000 + Math.random() * 900000)}`;
     setSubmittedRefId(refId);
@@ -229,8 +240,9 @@ export default function ProviderRegisterPage() {
       name: businessName ? `${fullName} (${businessName})` : (fullName || 'New Partner'),
       email: email || `${phone.replace(/[^0-9]/g, '') || Date.now()}@provider.gayaseva.org`,
       phone: phone || '+91 9876543210',
+      password: password || undefined,
       role: storeRole,
-      customRole: selectedRole === 'OTHER' ? (customRoleText || 'Custom Partner') : selectedRole,
+      customRole: customRoleVal,
       status: 'PENDING',
       city: operatingCity || 'Gaya Ji',
       languages: selectedLangs,
@@ -328,20 +340,24 @@ export default function ProviderRegisterPage() {
                 })}
               </div>
 
-              {/* Custom Category Input if OTHER selected */}
-              {selectedRole === 'OTHER' && (
-                <div className="pt-2 animate-fadeIn space-y-1">
-                  <label className="font-bold text-[#F58220] block text-[11px]">Specify Custom Service Title *</label>
-                  <input
-                    type="text"
-                    required={selectedRole === 'OTHER'}
-                    value={customRoleText}
-                    onChange={(e) => setCustomRoleText(e.target.value)}
-                    placeholder="e.g. Tourist Photographer, Handloom Dealer, E-Rickshaw Owner"
-                    className="w-full p-2.5 bg-amber-50/70 border border-amber-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#F58220]"
-                  />
-                </div>
-              )}
+              {/* Custom Category Input (Mandatory for OTHER, optional for all others) */}
+              <div className="pt-2 animate-fadeIn space-y-1">
+                <label className="font-bold text-[#F58220] block text-[11px]">
+                  {selectedRole === 'OTHER' ? 'Specify Custom Service Title *' : 'Custom Specialization / Service Subtitle (Optional)'}
+                </label>
+                <input
+                  type="text"
+                  required={selectedRole === 'OTHER'}
+                  value={customRoleText}
+                  onChange={(e) => setCustomRoleText(e.target.value)}
+                  placeholder={
+                    selectedRole === 'OTHER' 
+                      ? 'e.g. Tourist Photographer, Handloom Dealer, E-Rickshaw Owner'
+                      : 'e.g. Kshaur Karma & Mundan Specialist, 45-Vedi Shradh Expert, AC Traveller Taxi'
+                  }
+                  className="w-full p-2.5 bg-amber-50/70 border border-amber-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#F58220]"
+                />
+              </div>
             </div>
 
             {/* Profile Picture Section (Max 50KB or Image URL) */}
@@ -458,6 +474,28 @@ export default function ProviderRegisterPage() {
                       className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-[#F58220] focus:ring-2 focus:ring-[#F58220]/20"
                     />
                   </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Account Login Password *</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                  <input
+                    required
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create password for partner portal login"
+                    className="w-full pl-9 pr-16 py-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-[#F58220] focus:ring-2 focus:ring-[#F58220]/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3.5 text-xs text-[#F58220] font-bold hover:underline"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
                 </div>
               </div>
 

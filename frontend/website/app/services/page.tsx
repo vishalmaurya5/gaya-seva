@@ -22,7 +22,13 @@ import {
   CheckCircle2,
   Phone,
   Search,
-  Check
+  Check,
+  Scissors,
+  X,
+  Send,
+  Calendar,
+  Users as UsersIcon,
+  Clock
 } from 'lucide-react';
 import { UserStore, UserAccount } from '@/lib/userStore';
 import { ContentStore, ServiceConfigItem } from '@/lib/contentStore';
@@ -42,6 +48,16 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
     border: 'border-amber-300',
     descEn: 'Authentic Gayawal Teerth Purohits for Falgu River, Vishnupad & Akshayavat rituals.',
     descHi: 'विष्णुपद, फल्गु नदी तट और अक्षयवट हेतु अधिकृत गयावाल तीर्थ पुरोहित।',
+  },
+  BARBER: {
+    labelEn: 'Barber & Kshaur Karma (नाई/ठाकुर)',
+    labelHi: 'क्षौर कर्म एवं नाई (मुंडन सेवा)',
+    icon: Scissors,
+    color: 'text-amber-700',
+    bg: 'bg-amber-50/90',
+    border: 'border-amber-300',
+    descEn: 'Verified traditional Barbers (Nai/Thakur) for Pinda Daan Mundan & Kshaur Karma.',
+    descHi: 'पिंडदान मुंडन एवं क्षौर कर्म हेतु अधिकृत पारंपरिक नाई (ठाकुर) सेवा।',
   },
   DRIVER: {
     labelEn: 'Pick & Drop Taxi',
@@ -105,6 +121,13 @@ function ServicesContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [servicesConfig, setServicesConfig] = useState<ServiceConfigItem[]>([]);
+  const [selectedDetailItem, setSelectedDetailItem] = useState<any | null>(null);
+
+  // Booking Form State
+  const [inquiryName, setInquiryName] = useState('');
+  const [inquiryDate, setInquiryDate] = useState('');
+  const [inquiryCount, setInquiryCount] = useState('1');
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   useEffect(() => {
     // Read category from URL query param if present e.g. /services?category=PANDIT
@@ -126,7 +149,7 @@ function ServicesContent() {
 
   // GRAPH ENGINE: Dynamically extract & loop through all registered categories (including custom vendor roles!)
   const dynamicCategories = useMemo(() => {
-    const categorySet = new Set<string>(['ALL', 'PANDIT', 'DRIVER', 'HOTEL', 'FOOD', 'PUJA', 'GUIDE']);
+    const categorySet = new Set<string>(['ALL', 'PANDIT', 'BARBER', 'DRIVER', 'HOTEL', 'FOOD', 'PUJA', 'GUIDE']);
     
     users.forEach((u) => {
       if (u.role && u.role !== 'PILGRIM' && u.role !== 'ADMIN' && u.role !== 'SUPER_ADMIN') {
@@ -160,13 +183,15 @@ function ServicesContent() {
       googleMapsUrl?: string;
       lat?: number;
       lng?: number;
+      priceText?: string;
+      availabilityStatus?: 'AVAILABLE' | 'BOOKED';
     }> = [];
 
     // Map Users from UserStore
     users.forEach((u) => {
       if (u.role === 'PILGRIM' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') return;
 
-      const catKey = (u.customRole ? u.customRole.trim().toUpperCase().replace(/\s+/g, '_') : u.role) || 'OTHER';
+      const catKey = u.role || (u.customRole ? u.customRole.trim().toUpperCase().replace(/\s+/g, '_') : 'OTHER');
       const meta = STANDARD_CATEGORY_META[catKey];
       const catDisplay = meta ? (isHindi ? meta.labelHi : meta.labelEn) : (u.customRole || u.role);
 
@@ -183,10 +208,12 @@ function ServicesContent() {
         avatarUrl: u.avatarUrl || u.profilePicUrl,
         isVerified: u.status === 'VERIFIED',
         languages: u.languages || ['Hindi', 'English'],
-        details: 'GayaSeva Verified & Trusted Service Provider in Gaya Ji.',
-        googleMapsUrl: u.googleMapsUrl,
+        details: 'GayaSeva Verified & Direct Teerth Service Provider in Gaya Dham.',
+        googleMapsUrl: u.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(u.name + ' ' + (u.city || 'Gaya Ji'))}`,
         lat: u.lat,
         lng: u.lng,
+        priceText: 'GayaSeva 0% Commission Direct Rate',
+        availabilityStatus: u.availabilityStatus || 'AVAILABLE',
       });
     });
 
@@ -208,6 +235,9 @@ function ServicesContent() {
         rating: 4.8,
         isVerified: true,
         details: s.details,
+        googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(s.title + ' Gaya Ji')}`,
+        priceText: s.priceText,
+        availabilityStatus: s.availabilityStatus || 'AVAILABLE',
       });
     });
 
@@ -235,6 +265,19 @@ function ServicesContent() {
 
   const activeCategoryMeta = STANDARD_CATEGORY_META[selectedCategory];
 
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBookingSuccess(true);
+    setTimeout(() => {
+      if (selectedDetailItem) {
+        const waMsg = encodeURIComponent(
+          `जय श्री हरि विष्णु! मैं ${inquiryName || 'तीर्थयात्री'} गया सेवा के माध्यम से ${selectedDetailItem.title} बुकिंग हेतु संपर्क कर रहा हूँ।\nतारीख: ${inquiryDate || 'शीघ्र'}\nयात्री संख्या: ${inquiryCount}`
+        );
+        window.open(`https://wa.me/${selectedDetailItem.whatsapp}?text=${waMsg}`, '_blank');
+      }
+    }, 1200);
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F6EF] font-sans text-slate-900 antialiased py-8 px-4 sm:px-6 lg:px-8 space-y-8 max-w-7xl mx-auto">
       
@@ -255,8 +298,8 @@ function ServicesContent() {
             
             <p className="text-slate-100 text-sm sm:text-base font-medium leading-relaxed max-w-2xl">
               {isHindi
-                ? 'अपनी आवश्यकतानुसार श्रेणी चुनें — तीर्थ पुरोहित, टैक्सी/ऑटो, होटल, सात्विक भोजन, पूजा सामग्री एवं गाइड की 100% सीधी बुकिंग।'
-                : 'Select any category below to discover nearby verified Purohits, Pick & Drop Cabs, Hotels, Satvik Food & Puja items with direct contact.'}
+                ? 'अपनी आवश्यकतानुसार श्रेणी चुनें — तीर्थ पुरोहित, मुंडन नाई, टैक्सी/ऑटो, होटल, सात्विक भोजन, पूजा सामग्री एवं गाइड की 100% सीधी बुकिंग।'
+                : 'Select any category below to discover nearby verified Purohits, Barbers, Cabs, Hotels, Satvik Food & Puja items with direct contact.'}
             </p>
           </div>
 
@@ -392,15 +435,28 @@ function ServicesContent() {
             {filteredListings.map((item) => (
               <div 
                 key={item.id} 
-                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all space-y-5 flex flex-col justify-between"
+                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all space-y-5 flex flex-col justify-between group cursor-pointer"
+                onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
               >
                 <div className="space-y-4">
-                  {/* Category Pill & Verified Status */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="px-3 py-1 text-xs font-extrabold bg-amber-100 text-amber-950 rounded-full border border-amber-300 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#F58220]" />
-                      <span>{item.categoryDisplay}</span>
-                    </span>
+                  {/* Category Pill, Availability & Verified Status */}
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-3 py-1 text-xs font-extrabold bg-amber-100 text-amber-950 rounded-full border border-amber-300 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#F58220]" />
+                        <span>{item.categoryDisplay}</span>
+                      </span>
+
+                      {item.availabilityStatus !== 'BOOKED' ? (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                          🟢 AVAILABLE
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                          🔴 BOOKED / BUSY
+                        </span>
+                      )}
+                    </div>
 
                     <span className="text-sm font-extrabold text-slate-900 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
                       <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
@@ -410,7 +466,7 @@ function ServicesContent() {
 
                   {/* Provider Header */}
                   <div className="flex items-start gap-3.5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-[#1C0D02] font-black text-lg flex items-center justify-center shrink-0 border-2 border-amber-300 overflow-hidden shadow-sm">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-[#1C0D02] font-black text-lg flex items-center justify-center shrink-0 border-2 border-amber-300 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
                       {item.avatarUrl ? (
                         <img src={item.avatarUrl} alt={item.title} className="w-full h-full object-cover" />
                       ) : (
@@ -419,7 +475,7 @@ function ServicesContent() {
                     </div>
 
                     <div className="space-y-1">
-                      <h4 className="font-extrabold text-lg text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap">
+                      <h4 className="font-extrabold text-lg text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap group-hover:text-[#F58220] transition-colors">
                         <span>{item.title}</span>
                         {item.isVerified && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold border border-emerald-300">
@@ -454,38 +510,47 @@ function ServicesContent() {
                     )}
 
                     {item.details && (
-                      <p className="text-xs text-slate-700 font-normal leading-relaxed pt-1 border-t border-slate-200">
+                      <p className="text-xs text-slate-700 font-normal leading-relaxed pt-1 border-t border-slate-200 line-clamp-2">
                         {item.details}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Direct Action Contact Buttons - Highly Visible & Large */}
-                <div className="pt-2 flex items-center gap-2.5">
-                  <a
-                    href={`tel:${item.phone}`}
-                    className="flex-1 py-3 px-4 bg-[#1C0D02] hover:bg-black text-[#F6C343] font-black text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-2 transition-all border border-amber-500/30 active:scale-95"
+                {/* Direct Action Contact Buttons */}
+                <div className="pt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
+                    className="w-full py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-extrabold text-xs rounded-2xl text-center border border-amber-300 transition-all flex items-center justify-center gap-1.5"
                   >
-                    <Phone className="w-4 h-4 text-[#F58220]" />
-                    <span>Call Now</span>
-                  </a>
+                    <span>📋 पूरी जानकारी एवं बुकिंग (View Details)</span>
+                  </button>
 
-                  <a
-                    href={getProfessionalWhatsAppUrl({
-                      phone: item.whatsapp,
-                      title: item.title,
-                      subtitle: item.subtitle,
-                      lang: language,
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
-                    title="WhatsApp Direct Inquiry"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${item.phone}`}
+                      className="flex-1 py-2.5 px-3 bg-[#1C0D02] hover:bg-black text-[#F6C343] font-black text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-1.5 transition-all border border-amber-500/30 active:scale-95"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-[#F58220]" />
+                      <span>Call Now</span>
+                    </a>
+
+                    <a
+                      href={getProfessionalWhatsAppUrl({
+                        phone: item.whatsapp,
+                        title: item.title,
+                        subtitle: item.subtitle,
+                        lang: language,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
+                      title="WhatsApp Direct Inquiry"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -493,7 +558,202 @@ function ServicesContent() {
         )}
       </div>
 
-      {/* 5. ARRANGEMAN MANAGEMENT BANNER */}
+      {/* 5. INTERACTIVE SERVICE DETAIL & DIRECT BOOKING MODAL */}
+      {selectedDetailItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-2xl w-full border border-amber-300 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-scaleUp">
+            
+            {/* Modal Header */}
+            <div className="bg-gradient-to-br from-[#1C0D02] via-[#2A180B] to-[#3D2310] text-white p-5 sm:p-6 border-b border-[#F58220]/40 relative">
+              <button
+                onClick={() => setSelectedDetailItem(null)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-start gap-4 pr-8">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-200 to-orange-200 text-[#1C0D02] font-black text-2xl flex items-center justify-center shrink-0 border-2 border-[#F6C343] overflow-hidden shadow-lg">
+                  {selectedDetailItem.avatarUrl ? (
+                    <img src={selectedDetailItem.avatarUrl} alt={selectedDetailItem.title} className="w-full h-full object-cover" />
+                  ) : (
+                    selectedDetailItem.title.substring(0, 2).toUpperCase()
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 bg-[#F6C343] text-[#1C0D02] text-[10px] font-black uppercase rounded-full">
+                      {selectedDetailItem.categoryDisplay}
+                    </span>
+                    {selectedDetailItem.isVerified && (
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> 100% Verified
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
+                    {selectedDetailItem.title}
+                  </h2>
+                  <p className="text-xs font-bold text-amber-200">{selectedDetailItem.subtitle}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6">
+              
+              {/* Quick Info Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-center">
+                  <span className="text-[10px] font-extrabold text-slate-500 uppercase block">Rating Score</span>
+                  <span className="text-sm font-black text-slate-900 flex items-center justify-center gap-1 mt-0.5">
+                    <Star className="w-4 h-4 fill-amber-500 text-amber-500" /> {selectedDetailItem.rating} / 5.0
+                  </span>
+                </div>
+
+                <div className="bg-orange-50 p-3 rounded-2xl border border-orange-200 text-center">
+                  <span className="text-[10px] font-extrabold text-slate-500 uppercase block">Location Zone</span>
+                  <span className="text-xs font-extrabold text-slate-900 block truncate mt-0.5">
+                    📍 {selectedDetailItem.city}
+                  </span>
+                </div>
+
+                <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-center col-span-2 sm:col-span-1">
+                  <span className="text-[10px] font-extrabold text-slate-500 uppercase block">Rate / Price</span>
+                  <span className="text-xs font-extrabold text-emerald-900 block truncate mt-0.5">
+                    {selectedDetailItem.priceText || 'Direct Transparent Rate'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Service Description */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#F58220]" />
+                  <span>सेवा विवरण एवं विशेषताएं (Service Details & Description):</span>
+                </h4>
+                <p className="text-xs text-slate-700 font-medium leading-relaxed">
+                  {selectedDetailItem.details}
+                </p>
+                {selectedDetailItem.languages && (
+                  <p className="text-xs text-slate-700 font-bold pt-2 border-t border-slate-200">
+                    भाषाएं (Languages Spoken): <span className="text-slate-900 font-black">{selectedDetailItem.languages.join(', ')}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Direct Action Contacts */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href={`tel:${selectedDetailItem.phone}`}
+                  className="w-full sm:flex-1 py-3 px-4 bg-[#1C0D02] hover:bg-black text-[#F6C343] font-black text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-2 transition-all border border-amber-500/30"
+                >
+                  <Phone className="w-4 h-4 text-[#F58220]" />
+                  <span>Call Provider ({selectedDetailItem.phone})</span>
+                </a>
+
+                {selectedDetailItem.googleMapsUrl && (
+                  <a
+                    href={selectedDetailItem.googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto py-3 px-4 bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs rounded-2xl border border-amber-300 text-center flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <MapPin className="w-4 h-4 text-[#F58220]" />
+                    <span>Google Maps Location</span>
+                  </a>
+                )}
+              </div>
+
+              {/* Direct Booking Form */}
+              <div className="bg-amber-50/70 p-5 rounded-3xl border border-amber-200 space-y-4">
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#F58220]" />
+                    <span>1-टैप त्वरित बुकिंग / पूछताछ फॉर्म (Direct Service Inquiry):</span>
+                  </h4>
+                  <p className="text-xs text-slate-600 font-medium">
+                    नीचे अपना विवरण भरें — जानकारी प्रदाता को सीधे व्हाट्सएप्प से भेजी जाएगी।
+                  </p>
+                </div>
+
+                {bookingSuccess ? (
+                  <div className="bg-emerald-100 border border-emerald-300 text-emerald-900 p-4 rounded-2xl text-center space-y-2 animate-fadeIn">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                    <h5 className="font-black text-sm">पूछताछ सफलतापूर्वक भेज दी गई है!</h5>
+                    <p className="text-xs font-bold">आपको सीधे प्रदाता के WhatsApp चैट पर रिडायरेक्ट किया जा रहा है...</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleBookingSubmit} className="space-y-3 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">आपका नाम (Your Name):</label>
+                        <input
+                          type="text"
+                          required
+                          value={inquiryName}
+                          onChange={(e) => setInquiryName(e.target.value)}
+                          placeholder="नाम दर्ज करें"
+                          className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium focus:ring-2 focus:ring-[#F58220] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">तारीख (Travel Date):</label>
+                        <input
+                          type="date"
+                          value={inquiryDate}
+                          onChange={(e) => setInquiryDate(e.target.value)}
+                          className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium focus:ring-2 focus:ring-[#F58220] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">यात्री संख्या (Pilgrims):</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          value={inquiryCount}
+                          onChange={(e) => setInquiryCount(e.target.value)}
+                          className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium focus:ring-2 focus:ring-[#F58220] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-[#F58220] hover:bg-[#d96d13] text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>व्हाट्सएप्प पर डायरेक्ट बुकिंग पूछताछ भेजें</span>
+                    </button>
+                  </form>
+                )}
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs font-bold text-slate-600">
+              <span className="flex items-center gap-1 text-emerald-700">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" /> 0% Commission Direct Booking
+              </span>
+              <button
+                onClick={() => setSelectedDetailItem(null)}
+                className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-black transition-colors"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 6. ARRANGEMAN MANAGEMENT BANNER */}
       <div className="bg-gradient-to-r from-[#1C0D02] via-[#2A180B] to-[#1C0D02] text-white p-6 sm:p-8 rounded-3xl border-2 border-amber-500/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center md:text-left">
           <span className="px-3 py-1 rounded-full bg-amber-500/20 text-[#F6C343] font-black text-xs tracking-wider uppercase border border-amber-400/40 inline-block">

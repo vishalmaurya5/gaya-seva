@@ -8,6 +8,7 @@ interface GayaSevaLogoProps {
   textColor?: string;
   subtextColor?: string;
   isDarkBg?: boolean;
+  tagline?: string;
 }
 
 export const GayaSevaLogo: React.FC<GayaSevaLogoProps> = ({
@@ -18,6 +19,7 @@ export const GayaSevaLogo: React.FC<GayaSevaLogoProps> = ({
   textColor,
   subtextColor,
   isDarkBg = false,
+  tagline,
 }) => {
   const numericSize = typeof size === 'number' ? size : parseInt(size.toString(), 10) || 48;
 
@@ -44,19 +46,19 @@ export const GayaSevaLogo: React.FC<GayaSevaLogoProps> = ({
   const tagColor = subtextColor || (isDarkBg ? 'text-[#F6C343]' : 'text-[#C45E00]');
 
   return (
-    <div className="flex items-center gap-3 group select-none">
+    <div className="flex items-center gap-2.5 group select-none">
       {logoImage}
       <div className="flex flex-col justify-center">
         <div className="flex items-baseline">
-          <span className={`font-serif text-2xl sm:text-3xl font-extrabold tracking-tight ${primaryTextColor} drop-shadow-sm`}>
+          <span className={`font-serif text-2xl sm:text-3xl font-black tracking-tight ${primaryTextColor} drop-shadow-xs`}>
             Gaya
           </span>
-          <span className="font-serif text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-[#D96B00] via-[#E07210] to-[#F58220] bg-clip-text text-transparent drop-shadow-sm ml-0.5">
+          <span className="font-serif text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-[#D96B00] via-[#E07210] to-[#F58220] bg-clip-text text-transparent drop-shadow-xs ml-0.5">
             Seva
           </span>
         </div>
-        <span className={`text-[9.5px] sm:text-[10.5px] tracking-[0.14em] uppercase font-black ${tagColor} leading-tight pt-0.5`}>
-          BODHGAYA • PIND DAAN • PICK & DROP
+        <span className={`text-[10px] sm:text-[11.5px] font-bold ${tagColor} leading-tight pt-0.5 font-sans tracking-normal`}>
+          {tagline || 'श्रद्धा • सेवा • समर्पण'}
         </span>
       </div>
     </div>

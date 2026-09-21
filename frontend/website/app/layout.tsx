@@ -9,7 +9,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
 
 export const viewport: Viewport = {
-  themeColor: '#4A2E1A',
+  themeColor: '#1C0D02',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export const metadata: Metadata = {
@@ -27,11 +30,13 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { LocationBanner } from '@/components/layout/LocationBanner';
 import { StickyActionButtons } from '@/components/layout/StickyActionButtons';
+import { QRConciergeModal } from '@/components/ui/QRConciergeModal';
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen flex flex-col bg-[#F8F6EF] text-[#4A2E1A] antialiased pb-16 md:pb-0">
+      <body className="min-h-screen flex flex-col bg-[#F8F6EF] text-[#4A2E1A] antialiased pb-16 md:pb-0 max-w-full overflow-x-hidden">
         <LanguageProvider>
           <LocationProvider>
             <LocationBanner />
@@ -40,6 +45,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Footer />
             <MobileBottomNav />
             <StickyActionButtons />
+            <QRConciergeModal />
+            <PWAInstallPrompt />
           </LocationProvider>
         </LanguageProvider>
       </body>

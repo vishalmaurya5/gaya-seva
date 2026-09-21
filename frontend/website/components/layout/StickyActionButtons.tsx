@@ -17,9 +17,9 @@ export function StickyActionButtons() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp Enquiry"
-        className="fixed bottom-5 left-4 sm:left-6 z-50 bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-2xl rounded-full px-4 py-3 flex items-center gap-2.5 font-bold text-xs transition-all active:scale-95 border border-white/20 group hover:shadow-green-500/30"
+        className="fixed bottom-20 sm:bottom-6 left-3 sm:left-6 z-40 bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-2xl rounded-full px-3.5 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 font-bold text-xs transition-all active:scale-95 border border-white/20 group hover:shadow-green-500/30"
       >
-        <MessageCircle className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
+        <MessageCircle className="w-4 sm:w-5 h-4 sm:h-5 shrink-0 group-hover:scale-110 transition-transform" />
         <span className="hidden sm:inline">
           {isHindi ? 'WhatsApp सहायता' : 'WhatsApp Enquiry'}
         </span>
@@ -29,9 +29,9 @@ export function StickyActionButtons() {
       <Link
         href="/ai"
         aria-label="AI Yatri Assistant"
-        className="fixed bottom-5 right-4 sm:right-6 z-50 bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D97706] hover:from-[#E07210] hover:to-[#B45309] text-white shadow-2xl rounded-full px-4 sm:px-5 py-3 flex items-center gap-2.5 font-bold text-xs transition-all active:scale-95 border border-white/30 group hover:shadow-orange-500/30"
+        className="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 z-40 bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D97706] hover:from-[#E07210] hover:to-[#B45309] text-white shadow-2xl rounded-full px-3.5 sm:px-5 py-2.5 sm:py-3 flex items-center gap-2 font-bold text-xs transition-all active:scale-95 border border-white/30 group hover:shadow-orange-500/30"
       >
-        <Sparkles className="w-5 h-5 text-[#F6C343] shrink-0 animate-pulse group-hover:rotate-12 transition-transform" />
+        <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-[#F6C343] shrink-0 animate-pulse group-hover:rotate-12 transition-transform" />
         <span className="inline">
           {isHindi ? 'AI तीर्थ गाइड' : 'AI Yatri Guide'}
         </span>

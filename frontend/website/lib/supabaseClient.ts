@@ -112,6 +112,7 @@ export async function uploadToSupabaseBucket(
   folderPath: string,
   sanitizedFileName: string
 ): Promise<{ publicUrl: string; error?: string }> {
+  // 1. Try Cloud Bucket (Supabase Storage)
   try {
     if (IS_REAL_KEY) {
       const filePath = `${folderPath}/${sanitizedFileName}`;
@@ -135,7 +136,29 @@ export async function uploadToSupabaseBucket(
     console.warn('Supabase storage execution warning:', err?.message || err);
   }
 
-  // Client-side secure Data-URL fallback for instant visual preview & offline persistence
+  // 2. Server Storage Bucket (/api/upload -> public/uploads)
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('bucket', bucketName);
+    formData.append('filename', sanitizedFileName);
+
+    const apiRes = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData?.url) {
+        return { publicUrl: apiData.url };
+      }
+    }
+  } catch (err: any) {
+    console.warn('Server storage bucket upload notice:', err?.message || err);
+  }
+
+  // 3. Client-side secure Data-URL fallback for instant visual preview & offline persistence
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => {

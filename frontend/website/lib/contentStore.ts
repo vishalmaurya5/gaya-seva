@@ -39,13 +39,31 @@ export interface SacredPlace {
 
 export interface ServiceConfigItem {
   id: string;
-  category: 'PICK_DROP' | 'PANDIT' | 'STAY' | 'FOOD' | 'PUJA_KIT';
+  category: 'PICK_DROP' | 'PANDIT' | 'BARBER' | 'STAY' | 'FOOD' | 'PUJA_KIT' | 'GUIDE';
   title: string;
   subtitle: string;
   priceText: string;
   details: string;
+  imageUrl?: string;
   phone?: string;
   whatsapp?: string;
+  availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+}
+
+export interface LostFoundItem {
+  id: string;
+  type: 'LOST' | 'FOUND';
+  category: 'PERSON' | 'DOCUMENT' | 'VALUABLES' | 'ELECTRONICS' | 'LUGGAGE' | 'OTHER';
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  reporterName: string;
+  reporterPhone: string;
+  reporterEmail?: string;
+  imageUrl?: string;
+  status: 'REPORTED' | 'VERIFIED' | 'REUNITED' | 'CLOSED';
+  createdAt: string;
 }
 
 // Initial Default Data (Popup Ads default empty until added by Admin)
@@ -192,7 +210,7 @@ const INITIAL_SERVICES: ServiceConfigItem[] = [
     id: 'srv-1',
     category: 'PICK_DROP',
     title: 'Gaya Station → Vishnupad Temple',
-    subtitle: 'E-Rickshaw / Auto / Sedan',
+    subtitle: 'E-Rickshaw / Auto / Sedan Cab',
     priceText: '₹250 - ₹350',
     details: 'Direct transfer from Gaya Junction to Vishnupad Devghat.',
     phone: '+91 8544491413',
@@ -220,11 +238,67 @@ const INITIAL_SERVICES: ServiceConfigItem[] = [
   },
 ];
 
+const INITIAL_LOST_FOUND: LostFoundItem[] = [
+  {
+    id: 'lf-1',
+    type: 'LOST',
+    category: 'PERSON',
+    title: 'Ramavtar Sharma (Age 68) — Missing near Falgu Devghat',
+    description: 'Wearing white kurta-dhoti and saffron pitambari shawl. Speaks Hindi & Bhojpuri. Separated during morning Pinda Daan Tarpan at Falgu River Ghat 4.',
+    location: 'Falgu River Devghat No. 4, Gaya Ji',
+    date: '2026-09-21',
+    reporterName: 'Pankaj Sharma',
+    reporterPhone: '+91 9431200030',
+    status: 'VERIFIED',
+    createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+  },
+  {
+    id: 'lf-2',
+    type: 'FOUND',
+    category: 'DOCUMENT',
+    title: 'Brown Leather Wallet with Aadhaar Card & Train Ticket',
+    description: 'Found brown wallet containing Aadhaar Card (Name: S. K. Roy), SBI ATM card, and train ticket to Howrah Jn.',
+    location: 'Vishnupad Temple Gate 2 Police Helpdesk',
+    date: '2026-09-21',
+    reporterName: 'GayaSeva Volunteer Team',
+    reporterPhone: '+91 8544491413',
+    status: 'VERIFIED',
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+  },
+  {
+    id: 'lf-3',
+    type: 'LOST',
+    category: 'ELECTRONICS',
+    title: 'Blue Realme Smartphone in Black Leather Case',
+    description: 'Lost near Bodh Gaya Mahabodhi temple main entrance bus parking area.',
+    location: 'Bodh Gaya Mahabodhi Parking',
+    date: '2026-09-20',
+    reporterName: 'Anjali Devi',
+    reporterPhone: '+91 9123456789',
+    status: 'REPORTED',
+    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+  },
+  {
+    id: 'lf-4',
+    type: 'FOUND',
+    category: 'LUGGAGE',
+    title: 'Red VIP Travel Trolley Bag (Safely Reunited)',
+    description: 'Left behind near Gaya Junction Taxi Stand. Successfully verified and handed over to rightful owner.',
+    location: 'Gaya Junction Platform 1 Helpdesk',
+    date: '2026-09-19',
+    reporterName: 'Gaya Railway Police Helpdesk',
+    reporterPhone: '+91 8544491413',
+    status: 'REUNITED',
+    createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+  },
+];
+
 const KEYS = {
   POPUP_ADS: 'gayaseva_popup_ads_v2',
   SLIDER_BANNERS: 'gayaseva_slider_banners_v2',
   PLACES: 'gayaseva_places_db_v1',
   SERVICES: 'gayaseva_services_db_v1',
+  LOST_FOUND: 'gayaseva_lost_found_db_v1',
 };
 
 export class ContentStore {
@@ -238,7 +312,6 @@ export class ContentStore {
         return INITIAL_POPUP_ADS;
       }
       const parsed: PopupAd[] = JSON.parse(stored);
-      // Filter out legacy dummy popups
       const cleaned = parsed.filter(ad => ad.id !== 'pop-1');
       if (cleaned.length !== parsed.length) {
         this.savePopupAds(cleaned);
@@ -385,8 +458,8 @@ export class ContentStore {
   static addService(service: Omit<ServiceConfigItem, 'id'>): ServiceConfigItem {
     const services = this.getServices();
     const newService: ServiceConfigItem = { ...service, id: 'srv-' + Date.now() };
-    services.unshift(newService);
-    this.saveServices(services);
+    const updated = [newService, ...services];
+    this.saveServices(updated);
     return newService;
   }
 
@@ -398,5 +471,66 @@ export class ContentStore {
   static deleteService(id: string): void {
     const services = this.getServices().filter((s) => s.id !== id);
     this.saveServices(services);
+  }
+
+  // LOST & FOUND CRUD
+  static getLostFoundItems(): LostFoundItem[] {
+    if (typeof window === 'undefined') return INITIAL_LOST_FOUND;
+    try {
+      const stored = localStorage.getItem(KEYS.LOST_FOUND);
+      if (!stored) {
+        localStorage.setItem(KEYS.LOST_FOUND, JSON.stringify(INITIAL_LOST_FOUND));
+        return INITIAL_LOST_FOUND;
+      }
+      return JSON.parse(stored);
+    } catch {
+      return INITIAL_LOST_FOUND;
+    }
+  }
+
+  static saveLostFoundItems(items: LostFoundItem[]): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(KEYS.LOST_FOUND, JSON.stringify(items));
+    window.dispatchEvent(new Event('storage'));
+  }
+
+  static addLostFoundItem(item: Omit<LostFoundItem, 'id' | 'createdAt'>): LostFoundItem {
+    const items = this.getLostFoundItems();
+    const newItem: LostFoundItem = {
+      ...item,
+      id: 'lf-' + Date.now(),
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [newItem, ...items];
+    this.saveLostFoundItems(updated);
+    return newItem;
+  }
+
+  static updateLostFoundItem(id: string, updated: Partial<LostFoundItem>): void {
+    const items = this.getLostFoundItems().map((item) => (item.id === id ? { ...item, ...updated } : item));
+    this.saveLostFoundItems(items);
+  }
+
+  static deleteLostFoundItem(id: string): void {
+    const items = this.getLostFoundItems().filter((item) => item.id !== id);
+    this.saveLostFoundItems(items);
+  }
+}
+
+export class LostFoundStore {
+  static getItems(): LostFoundItem[] {
+    return ContentStore.getLostFoundItems();
+  }
+
+  static addItem(item: Omit<LostFoundItem, 'id' | 'createdAt'>): LostFoundItem {
+    return ContentStore.addLostFoundItem(item);
+  }
+
+  static updateItem(id: string, updated: Partial<LostFoundItem>): void {
+    ContentStore.updateLostFoundItem(id, updated);
+  }
+
+  static deleteItem(id: string): void {
+    ContentStore.deleteLostFoundItem(id);
   }
 }

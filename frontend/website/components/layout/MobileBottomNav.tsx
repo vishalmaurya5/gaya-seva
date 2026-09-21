@@ -12,7 +12,7 @@ export function MobileBottomNav() {
 
   const navItems = [
     { name: t('mobHome'), href: '/', icon: Home },
-    { name: t('mobServices'), href: '/pick-drop', icon: Grid },
+    { name: t('mobServices'), href: '/services', icon: Grid },
     { name: t('mobAi'), href: '/ai', icon: Bot },
     { name: t('mobHelp'), href: '/help', icon: HelpCircle },
     { name: t('mobAccount'), href: '/dashboard', icon: User },

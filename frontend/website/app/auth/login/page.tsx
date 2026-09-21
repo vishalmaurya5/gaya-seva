@@ -47,6 +47,10 @@ export default function LoginPage() {
         setError('आपका खाता निलंबित है। कृपया सहायता टीम से संपर्क करें / Account Suspended. Contact Helpline.');
         return;
       }
+      if (existingUser.password && existingUser.password !== password) {
+        setError('गलत पासवर्ड। कृपया पुनः प्रयास करें / Incorrect password. Please try again.');
+        return;
+      }
       targetUser = existingUser;
     } else {
       // Create & register node in graph if new user
@@ -69,23 +73,29 @@ export default function LoginPage() {
     localStorage.setItem('GAYASEVA_CURRENT_USER', JSON.stringify(targetUser));
 
     // Graph Dispatcher Routing Logic
-    let destination = '/';
-    let roleLabel = 'Yatri Pilgrim Portal';
+    let destination = '/dashboard';
+    let roleLabel = 'Yatri Pilgrim Portal Dashboard';
+
+    const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://gaya-seva-three.vercel.app/';
 
     if (targetUser.role === 'SUPER_ADMIN' || targetUser.role === 'ADMIN') {
-      destination = '/admin';
+      destination = adminUrl;
       roleLabel = 'GayaSeva Admin Operations Dashboard';
     } else if (targetUser.role === 'PANDIT') {
-      destination = '/services?category=PANDIT';
+      destination = '/pandit/dashboard';
       roleLabel = 'Purohit & Pandit Ji Partner Dashboard';
     } else if (targetUser.role === 'DRIVER') {
-      destination = '/services?category=DRIVER';
+      destination = '/driver/dashboard';
       roleLabel = 'Taxi & Transport Partner Dashboard';
     } else if (targetUser.role === 'HOTEL') {
-      destination = '/services?category=HOTEL';
+      destination = '/hotel/dashboard';
       roleLabel = 'Hotel & Dharamshala Partner Dashboard';
+    } else if (targetUser.role === 'PILGRIM') {
+      destination = '/dashboard';
+      roleLabel = 'Yatri Pilgrim Dashboard';
     } else if (targetUser.customRole) {
-      destination = `/services?category=${encodeURIComponent(targetUser.customRole)}`;
+      const userRoleStr = String((targetUser as any).role || 'user').toLowerCase();
+      destination = `/${userRoleStr}/dashboard`;
       roleLabel = `${targetUser.customRole} Service Dashboard`;
     }
 
@@ -94,7 +104,11 @@ export default function LoginPage() {
     setSuccess(true);
 
     setTimeout(() => {
-      router.push(destination);
+      if (destination.startsWith('http')) {
+        window.location.href = destination;
+      } else {
+        router.push(destination);
+      }
     }, 1200);
   };
 

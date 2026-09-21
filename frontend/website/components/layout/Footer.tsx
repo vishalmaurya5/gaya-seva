@@ -155,9 +155,9 @@ export function Footer() {
       </div>
 
       {/* Bottom Mega Glow & Large Outlined Title */}
-      <div className="relative z-0">
+      <div className="relative z-0 overflow-hidden max-w-full">
         <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-3xl h-full max-h-64 bg-[#F58220]/25 rounded-full blur-[160px] pointer-events-none" />
-        <h3 className="text-center font-extrabold leading-[0.7] text-transparent text-[clamp(3rem,15vw,15rem)] [-webkit-text-stroke:1px_#8A4300] mt-6 select-none opacity-90">
+        <h3 className="text-center font-extrabold leading-[0.7] text-transparent text-[clamp(2.5rem,12vw,12rem)] [-webkit-text-stroke:1px_#8A4300] mt-6 select-none opacity-90 truncate max-w-full">
           GayaSeva
         </h3>
       </div>

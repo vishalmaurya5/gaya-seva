@@ -48,10 +48,14 @@ export default function HotelsManagementPage() {
     setUsers(latest);
   };
 
+  const syncHotels = () => {
+    setUsers(UserStore.getUsers());
+  };
+
   useEffect(() => {
     loadHotels();
-    window.addEventListener('storage', loadHotels);
-    return () => window.removeEventListener('storage', loadHotels);
+    window.addEventListener('storage', syncHotels);
+    return () => window.removeEventListener('storage', syncHotels);
   }, []);
 
   // Filter only HOTEL accounts
