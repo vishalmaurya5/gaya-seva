@@ -12,7 +12,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "build": "npm run build --workspace=backend",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend/website",
     "start": "npm start --workspace=backend",
     "build:website": "npm run build --workspace=frontend/website",
     "start:website": "npm start --workspace=frontend/website",
