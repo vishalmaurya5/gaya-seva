@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import healthRouter from './routes/healthRouter';
-import { KeepAliveService } from './lib/keepAliveService';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,14 +26,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Mount Health Check & Keep-Alive Router
-app.use('/', healthRouter);
-
-// Root Fallback Route
+// Root API Info Route
 app.get('/api/info', (req, res) => {
   res.json({
     app: 'GayaSeva Backend Subsystem',
     version: '1.0.0',
+    status: 'ACTIVE',
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
+// Root Fallback Route
+app.get('/', (req, res) => {
+  res.json({
+    app: 'GayaSeva Backend Subsystem',
     status: 'ACTIVE',
   });
 });
@@ -44,26 +48,16 @@ app.get('/api/info', (req, res) => {
 const server = app.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`🚀 GayaSeva Backend Server running on port ${PORT}`);
-  console.log(`🏥 Health Check Endpoints: http://localhost:${PORT}/health`);
   console.log(`=======================================================`);
-
-  // Start Anti-Inactivity Keep-Alive Auto Ping (Every 5 minutes)
-  const intervalMinutes = Number(process.env.KEEP_ALIVE_INTERVAL_MINUTES) || 5;
-  KeepAliveService.startAutoPing({
-    intervalMinutes,
-    dbUrl: process.env.DATABASE_URL,
-  });
 });
 
 // Graceful Shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: Closing server and stopping KeepAlive.');
-  KeepAliveService.stopAutoPing();
+  console.log('SIGTERM signal received: Closing server.');
   server.close(() => process.exit(0));
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT signal received: Closing server and stopping KeepAlive.');
-  KeepAliveService.stopAutoPing();
+  console.log('SIGINT signal received: Closing server.');
   server.close(() => process.exit(0));
 });
