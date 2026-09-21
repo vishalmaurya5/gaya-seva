@@ -5,7 +5,7 @@
   "description": "GayaSeva Central Backend Subsystem",
   "main": "dist/server.js",
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "scripts": {
     "build": "tsc",
