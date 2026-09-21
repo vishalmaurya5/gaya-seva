@@ -1,8 +1,8 @@
 export const SITE_SEO_CONFIG = {
   siteName: 'GayaSeva',
   legalName: 'GayaSeva Teerth & Local Services Portal',
-  domain: 'gayaseva.org',
-  baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://gayaseva.org',
+  domain: 'gayaseva.com',
+  baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://www.gayaseva.com',
   defaultLocale: 'hi_IN',
   supportedLocales: ['hi_IN', 'en_IN'],
   
