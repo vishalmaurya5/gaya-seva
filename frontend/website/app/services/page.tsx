@@ -95,7 +95,7 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
   },
 };
 
-export default function DynamicServicesPage() {
+function ServicesContent() {
   const { t, language } = useLanguage();
   const { sortByDistance, locationName } = useLocation();
   const searchParams = useSearchParams();
@@ -517,5 +517,13 @@ export default function DynamicServicesPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function DynamicServicesPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-[#FFFDF9] p-8 text-center font-bold text-amber-900">Loading GayaSeva Services...</div>}>
+      <ServicesContent />
+    </React.Suspense>
   );
 }

@@ -160,10 +160,11 @@ export async function PUT(req: Request) {
     const users = readUsersFromFile();
     let updatedUser: UserAccount | null = null;
 
-    const updatedUsers = users.map((u) => {
+    const updatedUsers: UserAccount[] = users.map((u) => {
       if (u.id === id) {
-        updatedUser = { ...u, ...updates };
-        return updatedUser;
+        const merged: UserAccount = { ...u, ...updates };
+        updatedUser = merged;
+        return merged;
       }
       return u;
     });
