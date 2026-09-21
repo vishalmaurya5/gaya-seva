@@ -4,7 +4,7 @@
   "private": true,
   "description": "GayaSeva Public Marketplace, Pick & Drop, Religious, Stay & PWA Portal",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "dev": "next dev -p 3000",
