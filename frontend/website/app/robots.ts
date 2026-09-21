@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
           '/*/dashboard/',
           '/api/',
           '/auth/',
-          '/*?*', // Prevent parameter duplication in search engine indexes
         ],
       },
       {

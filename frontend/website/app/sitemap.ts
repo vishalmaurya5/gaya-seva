@@ -2,7 +2,6 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.gayaseva.com';
-  const currentDate = new Date().toISOString();
 
   const publicRoutes = [
     { url: '', priority: 1.0, changeFrequency: 'daily' as const },
@@ -30,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return publicRoutes.map((route) => ({
     url: `${baseUrl}${route.url}`,
-    lastModified: currentDate,
+    lastModified: new Date(),
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));

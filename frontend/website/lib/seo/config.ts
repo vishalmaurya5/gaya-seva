@@ -35,7 +35,7 @@ export const SITE_SEO_CONFIG = {
   contact: {
     phone: '+91 8544491413',
     whatsapp: '918544491413',
-    email: 'support@gayaseva.org',
+    email: 'support@gayaseva.com',
     address: {
       streetAddress: 'Devghat Road, Near Vishnupad Temple',
       addressLocality: 'Gaya Ji',
