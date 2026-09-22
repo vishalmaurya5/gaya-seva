@@ -107,7 +107,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="w-full sticky top-0 z-50 transition-all duration-300 max-w-full overflow-x-hidden">
+    <header className="w-full sticky top-0 z-50 transition-all duration-300 max-w-full relative">
       
       {/* 1. Top Announcement & Marquee Bar */}
       <div className="w-full bg-gradient-to-r from-[#1C0D02] via-[#2A180B] to-[#3D2310] text-[10px] sm:text-[11px] py-1 px-3 sm:px-8 xl:px-12 text-[#F6C343] font-medium flex items-center justify-between border-b border-amber-500/20 shadow-xs max-w-full overflow-hidden gap-2">
@@ -129,7 +129,7 @@ export function Navbar() {
             : 'bg-white py-2 border-b border-slate-100 shadow-xs'
         }`}
       >
-        <div className="w-full px-3 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 flex items-center justify-between gap-2 sm:gap-4 max-w-full overflow-hidden">
+        <div className="w-full px-3 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 flex items-center justify-between gap-2 sm:gap-4 max-w-full relative">
           
           {/* Logo Brand */}
           <Link href="/" className="flex items-center gap-2 group shrink-0 transition-transform duration-200 hover:scale-102">

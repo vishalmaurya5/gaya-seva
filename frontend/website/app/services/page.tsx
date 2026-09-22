@@ -135,9 +135,16 @@ function ServicesContent() {
     if (catParam) {
       setSelectedCategory(catParam.toUpperCase());
     }
-    // Load state from UserStore & ContentStore
+    // Load initial state from UserStore & ContentStore
     setUsers(UserStore.getUsers());
     setServicesConfig(ContentStore.getServices());
+
+    // Fetch fresh users from central API backend
+    UserStore.fetchUsersFromApi().then((apiUsers) => {
+      if (apiUsers && apiUsers.length > 0) {
+        setUsers(apiUsers);
+      }
+    });
 
     const handleStorage = () => {
       setUsers(UserStore.getUsers());

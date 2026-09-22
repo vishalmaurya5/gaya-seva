@@ -42,6 +42,23 @@
     "rating": 4.9
   },
   {
+    "id": "usr_brb1",
+    "name": "Ramu Thakur (Kshaur Karma)",
+    "email": "ramu.barber@gayaseva.org",
+    "password": "password123",
+    "phone": "+919876543250",
+    "role": "BARBER",
+    "customRole": "Kshaur Karma & Mundan Specialist (नाई / ठाकुर)",
+    "status": "VERIFIED",
+    "city": "Vishnupad Ghat Area",
+    "languages": [
+      "Hindi",
+      "Magahi"
+    ],
+    "createdAt": "2026-03-10T00:00:00.000Z",
+    "rating": 4.9
+  },
+  {
     "id": "usr_drv1",
     "name": "Ramesh Kumar (Taxi Service)",
     "email": "ramesh.cab@gayaseva.org",
@@ -77,5 +94,25 @@
     "status": "VERIFIED",
     "city": "Kolkata",
     "createdAt": "2026-03-05T00:00:00.000Z"
+  },
+  {
+    "id": "usr_1790016112398",
+    "name": "chnada",
+    "email": "9939778855@provider.gayaseva.org",
+    "phone": "9939778855",
+    "password": "123456",
+    "role": "BARBER",
+    "customRole": "Kshaur Karma & Mundan Specialist (नाई / ठाकुर)",
+    "status": "VERIFIED",
+    "city": "Gaya Ji / Patna",
+    "languages": [
+      "Hindi",
+      "English"
+    ],
+    "createdAt": "2026-09-21T18:41:52.747Z",
+    "avatarUrl": "/uploads/gayaseva-partner-profiles/IMG_20240829_204658_1790016073002_xpy2mvg_1790016075236.jpg",
+    "profilePicUrl": "/uploads/gayaseva-partner-profiles/IMG_20240829_204658_1790016073002_xpy2mvg_1790016075236.jpg",
+    "documentUrl": "/uploads/gayaseva-partner-documents/id1_1790016080376_1cq50v0_1790016081457.jpg",
+    "rating": 5
   }
 ]

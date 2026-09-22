@@ -90,7 +90,7 @@ export default function HomePage() {
     } else if (category === 'PUJA') {
       window.location.href = `/puja-material`;
     } else if (category === 'BARBER') {
-      window.location.href = `/services?category=BARBER`;
+      window.location.href = `/barbers`;
     } else if (category === 'GUIDE') {
       window.location.href = `/gaya`;
     } else if (category === 'LOST_FOUND') {
