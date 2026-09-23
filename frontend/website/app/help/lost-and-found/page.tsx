@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { LostFoundStore, LostFoundItem } from '@/lib/contentStore';
 import { useLanguage } from '@/context/LanguageContext';
+import { ImageUploadInput } from '@/components/ui/ImageUploadInput';
 
 export default function LostAndFoundPage() {
   const { language } = useLanguage();
@@ -577,17 +578,12 @@ export default function LostAndFoundPage() {
                 </div>
               </div>
 
-              {/* Image URL */}
-              <div>
-                <label className="block mb-1 text-slate-700 font-extrabold">{isHindi ? 'फोटो लिंक / इमेज URL (ऐच्छिक):' : 'Photo Image URL (Optional):'}</label>
-                <input 
-                  type="url"
-                  value={formImageUrl}
-                  onChange={(e) => setFormImageUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-[#F58220]"
-                />
-              </div>
+              {/* Photo Upload & URL Selection */}
+              <ImageUploadInput
+                value={formImageUrl}
+                onChange={setFormImageUrl}
+                isHindi={isHindi}
+              />
 
               {/* Submit */}
               <div className="pt-3">

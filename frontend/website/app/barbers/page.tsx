@@ -84,7 +84,7 @@ export default function BarberDirectoryPage() {
       availabilityStatus: u.availabilityStatus || 'AVAILABLE',
       avatarUrl: u.avatarUrl || u.profilePicUrl,
     })),
-    ...defaultBarbers.filter((db) => !registeredBarbers.some((rb) => rb.phone && rb.phone.replace(/\D/g, '') === db.phone.replace(/\D/g, ''))),
+    ...defaultBarbers.filter((db) => !registeredBarbers.some((rb) => rb.phone && rb.phone.replace(/\D/g, '').slice(-10) === db.phone.replace(/\D/g, '').slice(-10))),
   ];
 
   return (

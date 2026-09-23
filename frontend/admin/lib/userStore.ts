@@ -21,8 +21,8 @@ export interface UserAccount {
 
 const STORAGE_KEY = 'GAYASEVA_USERS_STORE';
 const API_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_WEBSITE_URL ? `${process.env.NEXT_PUBLIC_WEBSITE_URL}/api/users` : 'http://localhost:3000/api/users')
-  : (process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users` : 'http://localhost:3000/api/users');
+  ? '/api/users'
+  : (process.env.NEXT_PUBLIC_WEBSITE_URL ? `${process.env.NEXT_PUBLIC_WEBSITE_URL}/api/users` : 'http://localhost:3000/api/users');
 
 const DEFAULT_USERS: UserAccount[] = [
   {
@@ -76,6 +76,23 @@ const DEFAULT_USERS: UserAccount[] = [
     languages: ['Hindi', 'Magahi'],
     createdAt: '2026-03-10T00:00:00.000Z',
     rating: 4.9,
+  },
+  {
+    id: 'usr_1790016112398',
+    name: 'Chanda Thakur',
+    email: '9939778855@provider.gayaseva.org',
+    phone: '+919939778855',
+    password: '123456',
+    role: 'BARBER',
+    customRole: 'Kshaur Karma & Mundan Specialist (नाई / ठाकुर)',
+    status: 'VERIFIED',
+    city: 'Gaya Ji / Falgu Ghat',
+    languages: ['Hindi', 'English'],
+    createdAt: '2026-09-21T18:41:52.747Z',
+    avatarUrl: '/uploads/gayaseva-partner-profiles/IMG_20240829_204658_1790016073002_xpy2mvg_1790016075236.jpg',
+    profilePicUrl: '/uploads/gayaseva-partner-profiles/IMG_20240829_204658_1790016073002_xpy2mvg_1790016075236.jpg',
+    documentUrl: '/uploads/gayaseva-partner-documents/id1_1790016080376_1cq50v0_1790016081457.jpg',
+    rating: 5,
   },
   {
     id: 'usr_drv1',

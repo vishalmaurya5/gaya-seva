@@ -59,7 +59,11 @@ export default function BarbersManagementPage() {
   }, []);
 
   // Filter only BARBER accounts
-  const barberAccounts = users.filter((usr) => usr.role === 'BARBER');
+  const barberAccounts = users.filter(
+    (usr) =>
+      usr.role === 'BARBER' ||
+      (usr.customRole && (usr.customRole.toUpperCase().includes('BARBER') || usr.customRole.includes('नाई') || usr.customRole.includes('क्षौर')))
+  );
 
   const filteredBarbers = barberAccounts.filter((brb) => {
     const matchesSearch = 

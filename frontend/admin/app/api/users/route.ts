@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 export interface UserAccount {
   id: string;
@@ -130,15 +132,15 @@ const DEFAULT_USERS: UserAccount[] = [
   }
 ];
 
-import fs from 'fs';
-import path from 'path';
-
 function getFilePath(): string {
-  // Save to workspace root data/users.json
   const possiblePaths = [
     path.join(process.cwd(), 'data', 'users.json'),
     path.join(process.cwd(), '..', '..', 'data', 'users.json'),
+    path.join(process.cwd(), '..', 'data', 'users.json'),
   ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
   return possiblePaths[0];
 }
 
@@ -153,7 +155,7 @@ function readUsers(): UserAccount[] {
       }
     }
   } catch (e) {
-    console.error('Failed to read users from file store:', e);
+    console.error('Failed to read users from file store in admin:', e);
   }
   return DEFAULT_USERS;
 }
@@ -167,7 +169,7 @@ function writeUsers(users: UserAccount[]) {
     }
     fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf-8');
   } catch (e) {
-    console.error('Failed to write users to file store:', e);
+    console.error('Failed to write users to file store in admin:', e);
   }
 }
 

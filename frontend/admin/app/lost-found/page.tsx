@@ -25,6 +25,7 @@ import {
   HeartHandshake
 } from 'lucide-react';
 import { LostFoundStore, LostFoundItem } from '../../lib/contentStore';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
 
 export default function AdminLostFoundPage() {
   const [items, setItems] = useState<LostFoundItem[]>([]);
@@ -301,11 +302,18 @@ export default function AdminLostFoundPage() {
 
                     {/* Title & Category */}
                     <td className="p-3.5 max-w-xs">
-                      <div className="space-y-1">
-                        <p className="font-extrabold text-slate-900 line-clamp-2">{item.title}</p>
-                        <div className="flex items-center gap-1 text-[11px] text-slate-500 font-semibold">
-                          {getCategoryIcon(item.category)}
-                          <span>{item.category}</span>
+                      <div className="flex items-start gap-2.5">
+                        {item.imageUrl && (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0 mt-0.5">
+                            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="space-y-1 min-w-0">
+                          <p className="font-extrabold text-slate-900 line-clamp-2">{item.title}</p>
+                          <div className="flex items-center gap-1 text-[11px] text-slate-500 font-semibold">
+                            {getCategoryIcon(item.category)}
+                            <span>{item.category}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -521,16 +529,11 @@ export default function AdminLostFoundPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block mb-1">Image URL (Optional):</label>
-                <input 
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full p-2 bg-slate-50 border rounded-lg"
-                />
-              </div>
+              {/* Photo Upload & URL Selection */}
+              <ImageUploadInput
+                value={imageUrl}
+                onChange={setImageUrl}
+              />
 
               <div className="pt-2">
                 <button
