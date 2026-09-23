@@ -134,9 +134,9 @@ const DEFAULT_USERS: UserAccount[] = [
 
 function getFilePath(): string {
   const possiblePaths = [
+    path.join(process.cwd(), '..', 'data', 'users.json'),
     path.join(process.cwd(), 'data', 'users.json'),
     path.join(process.cwd(), '..', '..', 'data', 'users.json'),
-    path.join(process.cwd(), '..', 'data', 'users.json'),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) return p;
@@ -167,7 +167,14 @@ function writeUsers(users: UserAccount[]) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf-8');
+    const dataStr = JSON.stringify(users, null, 2);
+    fs.writeFileSync(filePath, dataStr, 'utf-8');
+
+    // Also sync to website data directory if present
+    const websiteDataPath = path.join(process.cwd(), '..', 'website', 'data', 'users.json');
+    if (fs.existsSync(path.dirname(websiteDataPath))) {
+      fs.writeFileSync(websiteDataPath, dataStr, 'utf-8');
+    }
   } catch (e) {
     console.error('Failed to write users to file store in admin:', e);
   }

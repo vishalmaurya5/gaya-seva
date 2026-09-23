@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Car, MapPin, Calendar, Clock, Users, Luggage, ShieldCheck, Phone, MessageSquare, Power, CheckCircle2 } from 'lucide-react';
 import { UserStore, UserAccount } from '@/lib/userStore';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
 export default function PickDropPage() {
   const [pickup, setPickup] = useState('Gaya Railway Station');
@@ -108,81 +110,55 @@ export default function PickDropPage() {
       {/* Available Drivers List */}
       <div className="space-y-4">
         <h2 className="text-xl font-serif font-bold text-[#4A2E1A]">Verified Pick & Drop Providers</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {allDrivers.map((drv) => {
-            const isAvailable = drv.availabilityStatus !== 'BOOKED';
-            return (
-              <div key={drv.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-bold text-base text-[#4A2E1A]">{drv.name}</h3>
-                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                        <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1">
-                          <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
-                        </span>
+        <DirectoryGatedView categoryName="Pick & Drop Taxi & Auto" totalCount={allDrivers.length} maxPreviewCount={2}>
+          {(visibleCount, hasAccess) => (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {allDrivers.slice(0, visibleCount).map((drv) => {
+                const isAvailable = drv.availabilityStatus !== 'BOOKED';
+                return (
+                  <div key={drv.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-base text-[#4A2E1A]">{drv.name}</h3>
+                          <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                            <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
+                            </span>
 
-                        {isAvailable ? (
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded inline-flex items-center gap-1 animate-pulse">
-                            🟢 AVAILABLE
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 text-[10px] font-black bg-red-600 text-white rounded inline-flex items-center gap-1">
-                            🔴 BOOKED / BUSY
-                          </span>
-                        )}
+                            {isAvailable ? (
+                              <span className="px-2 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded inline-flex items-center gap-1 animate-pulse">
+                                🟢 AVAILABLE
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 text-[10px] font-black bg-red-600 text-white rounded inline-flex items-center gap-1">
+                                🔴 BOOKED / BUSY
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⭐ {drv.rating}</span>
+                      </div>
+
+                      <div className="text-xs text-gray-600 space-y-1 bg-[#F8F6EF] p-3 rounded-xl">
+                        <p>🚕 {drv.vehicle}</p>
+                        <p>👥 Up to {drv.passengers} Passengers</p>
+                        <p>📍 {hasAccess ? drv.area : '📍 Address & Location Locked'}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⭐ {drv.rating}</span>
-                  </div>
 
-                  <div className="text-xs text-gray-600 space-y-1 bg-[#F8F6EF] p-3 rounded-xl">
-                    <p>🚕 {drv.vehicle}</p>
-                    <p>👥 Up to {drv.passengers} Passengers</p>
-                    <p>📍 {drv.area}</p>
+                    <LockedContactBox 
+                      providerId={drv.id} 
+                      providerName={drv.name} 
+                      defaultPhone={drv.phone}
+                      serviceCategory="Pick & Drop Taxi Driver"
+                    />
                   </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <a
-                    href={isAvailable ? `tel:${drv.phone}` : '#'}
-                    onClick={(e) => {
-                      if (!isAvailable) {
-                        e.preventDefault();
-                        alert('यह ड्राइवर अभी बुक है / Driver is currently BOOKED. Please contact next available driver.');
-                      }
-                    }}
-                    className={`flex-1 py-2.5 text-xs font-black rounded-xl text-center flex items-center justify-center gap-1 shadow-sm transition-all ${
-                      isAvailable
-                        ? 'bg-[#4A2E1A] hover:bg-[#3D2310] text-white cursor-pointer'
-                        : 'bg-slate-300 text-slate-600 cursor-not-allowed'
-                    }`}
-                  >
-                    <Phone className="w-3.5 h-3.5" /> {isAvailable ? 'Call Now' : 'Booked'}
-                  </a>
-                  <a
-                    href={isAvailable ? `https://wa.me/${drv.phone.replace('+', '')}?text=Need%20Pick%20%26%20Drop` : '#'}
-                    onClick={(e) => {
-                      if (!isAvailable) {
-                        e.preventDefault();
-                        alert('यह ड्राइवर अभी बुक है / Driver is currently BOOKED.');
-                      }
-                    }}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`flex-1 py-2.5 text-xs font-black rounded-xl text-center flex items-center justify-center gap-1 shadow-sm transition-all ${
-                      isAvailable
-                        ? 'bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer'
-                        : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                    }`}
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
-                  </a>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </DirectoryGatedView>
       </div>
     </div>
   );

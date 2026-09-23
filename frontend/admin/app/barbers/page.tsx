@@ -78,13 +78,13 @@ export default function BarbersManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -98,18 +98,18 @@ export default function BarbersManagementPage() {
       rating: 4.9,
     });
 
-    loadBarbers();
+    await loadBarbers();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingBarber) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.updateUser(editingBarber.id, {
+    await UserStore.updateUser(editingBarber.id, {
       name,
       email,
       phone,
@@ -121,22 +121,22 @@ export default function BarbersManagementPage() {
       documentUrl,
     });
 
-    loadBarbers();
+    await loadBarbers();
     setEditingBarber(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete Barber partner record "${name}"?`)) {
-      UserStore.deleteUser(id);
-      loadBarbers();
+      await UserStore.deleteUser(id);
+      await loadBarbers();
     }
   };
 
-  const handleApproveStatus = (barber: UserAccount) => {
+  const handleApproveStatus = async (barber: UserAccount) => {
     const newStatus: UserAccount['status'] = barber.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(barber.id, { status: newStatus });
-    loadBarbers();
+    await UserStore.updateUser(barber.id, { status: newStatus });
+    await loadBarbers();
   };
 
   const openEditModal = (barber: UserAccount) => {

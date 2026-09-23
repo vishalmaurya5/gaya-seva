@@ -75,13 +75,13 @@ export default function PanditsManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -95,18 +95,18 @@ export default function PanditsManagementPage() {
       rating: 4.9,
     });
 
-    loadPandits();
+    await loadPandits();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPandit) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.updateUser(editingPandit.id, {
+    await UserStore.updateUser(editingPandit.id, {
       name,
       email,
       phone,
@@ -118,22 +118,22 @@ export default function PanditsManagementPage() {
       documentUrl,
     });
 
-    loadPandits();
+    await loadPandits();
     setEditingPandit(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete Teerth Pandit record "${name}"?`)) {
-      UserStore.deleteUser(id);
-      loadPandits();
+      await UserStore.deleteUser(id);
+      await loadPandits();
     }
   };
 
-  const handleApproveStatus = (pandit: UserAccount) => {
+  const handleApproveStatus = async (pandit: UserAccount) => {
     const newStatus: UserAccount['status'] = pandit.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(pandit.id, { status: newStatus });
-    loadPandits();
+    await UserStore.updateUser(pandit.id, { status: newStatus });
+    await loadPandits();
   };
 
   const openEditModal = (pandit: UserAccount) => {

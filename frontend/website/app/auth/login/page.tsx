@@ -21,7 +21,7 @@ export default function LoginPage() {
    * Graph Engineering Role Resolver & Router Engine
    * Resolves the user account node from identifier graph and routes directly to user dashboard.
    */
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setResolvedUserRole(null);
@@ -59,7 +59,7 @@ export default function LoginPage() {
         ? 'SUPER_ADMIN' 
         : (identifier.toLowerCase().includes('pandit') ? 'PANDIT' : 'PILGRIM');
 
-      targetUser = UserStore.addUser({
+      targetUser = await UserStore.addUser({
         name: isEmail ? identifier.split('@')[0] : 'GayaSeva Member',
         email: isEmail ? identifier : `${identifier}@gayaseva.org`,
         phone: isEmail ? '+91 9876543210' : identifier,
@@ -71,6 +71,10 @@ export default function LoginPage() {
 
     // Save active session
     localStorage.setItem('GAYASEVA_CURRENT_USER', JSON.stringify(targetUser));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('gayaseva_auth_change'));
+    }
 
     // Graph Dispatcher Routing Logic
     let destination = '/dashboard';

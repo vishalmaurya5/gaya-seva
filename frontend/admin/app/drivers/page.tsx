@@ -81,11 +81,11 @@ export default function DriversManagementPage() {
     return vehicleType;
   };
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -98,16 +98,16 @@ export default function DriversManagementPage() {
       rating: 4.8,
     });
 
-    loadDrivers();
+    await loadDrivers();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDriver) return;
 
-    UserStore.updateUser(editingDriver.id, {
+    await UserStore.updateUser(editingDriver.id, {
       name,
       email,
       phone,
@@ -118,22 +118,22 @@ export default function DriversManagementPage() {
       documentUrl,
     });
 
-    loadDrivers();
+    await loadDrivers();
     setEditingDriver(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete driver record "${name}"?`)) {
-      UserStore.deleteUser(id);
-      loadDrivers();
+      await UserStore.deleteUser(id);
+      await loadDrivers();
     }
   };
 
-  const handleApproveStatus = (driver: UserAccount) => {
+  const handleApproveStatus = async (driver: UserAccount) => {
     const newStatus: UserAccount['status'] = driver.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(driver.id, { status: newStatus });
-    loadDrivers();
+    await UserStore.updateUser(driver.id, { status: newStatus });
+    await loadDrivers();
   };
 
   const openEditModal = (driver: UserAccount) => {

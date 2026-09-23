@@ -69,29 +69,29 @@ export default function AdminDashboardPage() {
     return () => window.removeEventListener('storage', syncLocalData);
   }, []);
 
-  const handleToggleStatus = (user: UserAccount) => {
+  const handleToggleStatus = async (user: UserAccount) => {
     const newStatus = user.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(user.id, { status: newStatus });
+    await UserStore.updateUser(user.id, { status: newStatus });
     AuditLogStore.log(
       newStatus === 'VERIFIED' ? 'USER_APPROVED' : 'USER_SUSPENDED',
       `Account: ${user.name} (${user.id})`,
       `Changed account status to ${newStatus}`,
       'USER_MANAGEMENT'
     );
-    loadData();
+    await loadData();
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     if (confirm('Are you sure you want to delete this user from the system?')) {
       const targetUser = users.find(u => u.id === id);
-      UserStore.deleteUser(id);
+      await UserStore.deleteUser(id);
       AuditLogStore.log(
         'USER_DELETED',
         `Account: ${targetUser?.name || id}`,
         'Deleted user account from system store',
         'USER_MANAGEMENT'
       );
-      loadData();
+      await loadData();
     }
   };
 

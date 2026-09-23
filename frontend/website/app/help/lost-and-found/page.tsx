@@ -22,11 +22,13 @@ import {
   UserCheck, 
   HeartHandshake,
   Sparkles,
-  Phone
+  Phone,
+  Lock
 } from 'lucide-react';
 import { LostFoundStore, LostFoundItem } from '@/lib/contentStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { ImageUploadInput } from '@/components/ui/ImageUploadInput';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
 
 export default function LostAndFoundPage() {
   const { language } = useLanguage();
@@ -59,14 +61,14 @@ export default function LostAndFoundPage() {
     return () => window.removeEventListener('storage', loadItems);
   }, []);
 
-  const handleCreateReport = (e: React.FormEvent) => {
+  const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formLocation.trim() || !formReporterName.trim() || !formReporterPhone.trim()) {
       alert(isHindi ? 'कृपया सभी आवश्यक फ़ील्ड भरें!' : 'Please fill out all required fields!');
       return;
     }
 
-    const newItem = LostFoundStore.addItem({
+    const newItem = await LostFoundStore.addItem({
       type: formType,
       category: formCategory,
       title: formTitle.trim(),
@@ -99,9 +101,9 @@ export default function LostAndFoundPage() {
     setTimeout(() => setSuccessMessage(null), 7000);
   };
 
-  const handleMarkReunited = (id: string, currentTitle: string) => {
+  const handleMarkReunited = async (id: string, currentTitle: string) => {
     if (confirm(isHindi ? `क्या यह मामला ("${currentTitle}") सुलझ गया है / व्यक्ति-सामान मिल गया है?` : `Mark this report ("${currentTitle}") as Reunited/Found?`)) {
-      LostFoundStore.updateItem(id, { status: 'REUNITED' });
+      await LostFoundStore.updateItem(id, { status: 'REUNITED' });
       loadItems();
     }
   };
@@ -323,126 +325,179 @@ export default function LostAndFoundPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredItems.map((item) => {
-                const isReunited = item.status === 'REUNITED';
-                const isLost = item.type === 'LOST';
+            <DirectoryGatedView categoryName="Lost & Found Help Desk" totalCount={filteredItems.length} maxPreviewCount={2}>
+              {(visibleCount, hasAccess) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredItems.slice(0, visibleCount).map((item) => {
+                    const isReunited = item.status === 'REUNITED';
+                    const isLost = item.type === 'LOST';
 
-                return (
-                  <div 
-                    key={item.id} 
-                    className={`bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between space-y-4 relative ${
-                      isReunited 
-                        ? 'border-amber-300 bg-amber-50/30 opacity-90' 
-                        : isLost 
-                        ? 'border-red-200 hover:border-red-400 shadow-xs hover:shadow-md' 
-                        : 'border-emerald-200 hover:border-emerald-400 shadow-xs hover:shadow-md'
-                    }`}
-                  >
-                    <div className="space-y-3">
-                      {/* Top Badge Row */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                            isLost 
-                              ? 'bg-red-100 text-red-700 border border-red-200' 
-                              : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                          }`}>
-                            {isLost ? (isHindi ? '🔴 खोया (LOST)' : 'LOST') : (isHindi ? '🟢 पाया (FOUND)' : 'FOUND')}
-                          </span>
-
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
-                            {getCategoryIcon(item.category)}
-                            <span>{item.category}</span>
-                          </span>
-                        </div>
-
-                        {/* Status Tag */}
-                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                    return (
+                      <div 
+                        key={item.id} 
+                        className={`bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between space-y-4 relative ${
                           isReunited 
-                            ? 'bg-amber-100 text-amber-900 border border-amber-300' 
-                            : 'bg-blue-50 text-blue-700 border border-blue-200'
-                        }`}>
-                          {isReunited ? (isHindi ? '🤝 सुलझ गया (Reunited)' : 'REUNITED') : (isHindi ? '✓ सत्यापित (Verified)' : 'VERIFIED')}
-                        </span>
+                            ? 'border-amber-300 bg-amber-50/30 opacity-90' 
+                            : isLost 
+                            ? 'border-red-200 hover:border-red-400 shadow-xs hover:shadow-md' 
+                            : 'border-emerald-200 hover:border-emerald-400 shadow-xs hover:shadow-md'
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          {/* Top Badge Row */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                                isLost 
+                                  ? 'bg-red-100 text-red-700 border border-red-200' 
+                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              }`}>
+                                {isLost ? (isHindi ? '🔴 खोया (LOST)' : 'LOST') : (isHindi ? '🟢 पाया (FOUND)' : 'FOUND')}
+                              </span>
+
+                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                                {getCategoryIcon(item.category)}
+                                <span>{item.category}</span>
+                              </span>
+                            </div>
+
+                            {/* Status Tag */}
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                              isReunited 
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300' 
+                                : 'bg-blue-50 text-blue-700 border border-blue-200'
+                            }`}>
+                              {isReunited ? (isHindi ? '🤝 सुलझ गया (Reunited)' : 'REUNITED') : (isHindi ? '✓ सत्यापित (Verified)' : 'VERIFIED')}
+                            </span>
+                          </div>
+
+                          {/* Image Preview if provided - Masked/Blurred if not paid */}
+                          {item.imageUrl && (
+                            <div className="w-full h-40 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group">
+                              <img 
+                                src={item.imageUrl} 
+                                alt={item.title} 
+                                className={`w-full h-full object-cover transition-all ${
+                                  !hasAccess ? 'blur-md select-none pointer-events-none opacity-60' : ''
+                                }`}
+                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                              />
+                              {!hasAccess && (
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center text-white space-y-1">
+                                  <Lock className="w-6 h-6 text-amber-400" />
+                                  <span className="text-[11px] font-black text-amber-200">
+                                    {isHindi ? '🔒 दस्तावेज/चित्र लॉक' : '🔒 Document/Image Locked'}
+                                  </span>
+                                  <span className="text-[9px] text-slate-200">
+                                    {isHindi ? 'एक्सेस पास से अनलॉक करें' : 'Unlock with Access Pass'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Title */}
+                          <h3 className="font-sans font-black text-base text-[#2A180B] leading-snug">
+                            {item.title}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-xs text-slate-600 font-medium leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            {item.description}
+                          </p>
+
+                          {/* Meta Info - Address & Contact Protected */}
+                          <div className="space-y-1 text-xs text-slate-500 font-semibold pt-1">
+                            <div className="flex items-center gap-1.5 text-slate-700">
+                              <MapPin className="w-3.5 h-3.5 text-[#F58220] shrink-0" />
+                              <span className="truncate font-extrabold">
+                                {hasAccess ? item.location : (isHindi ? '📍 ***** (स्थान व पता लॉक)' : '📍 Address & Location Locked')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span>{isHindi ? 'घटना तिथि:' : 'Date:'} {item.date}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span>
+                                {isHindi ? 'रिपोर्टर:' : 'Reporter:'} {hasAccess ? item.reporterName : '🔒 ***** (Locked)'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Bar - Phone & WhatsApp Protected */}
+                        <div className="pt-3 border-t border-slate-100 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {hasAccess ? (
+                              <a 
+                                href={`tel:${item.reporterPhone}`}
+                                className="py-2.5 px-3 bg-[#2A180B] hover:bg-[#1C0D02] text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                              >
+                                <PhoneCall className="w-3.5 h-3.5 text-[#F6C343]" />
+                                <span>{isHindi ? 'कॉल करें' : 'Call'}</span>
+                              </a>
+                            ) : (
+                              <button 
+                                onClick={() => {
+                                  const banner = document.getElementById('unlock-access-banner');
+                                  if (banner) banner.scrollIntoView({ behavior: 'smooth' });
+                                  const btn = document.getElementById('unlock-access-btn');
+                                  if (btn) btn.click();
+                                  else alert(isHindi ? 'फोन नंबर अनलॉक करने के लिए Access Pass चालू करें!' : 'Unlock GayaSeva Access Pass to call!');
+                                }}
+                                className="py-2.5 px-3 bg-amber-500 hover:bg-amber-600 text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                              >
+                                <Lock className="w-3.5 h-3.5 text-amber-100" />
+                                <span>{isHindi ? '🔒 कॉल लॉक' : '🔒 Call Locked'}</span>
+                              </button>
+                            )}
+
+                            {hasAccess ? (
+                              <a 
+                                href={`https://wa.me/${item.reporterPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`GayaSeva Lost & Found Inquiry regarding: ${item.title}`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                <span>WhatsApp</span>
+                              </a>
+                            ) : (
+                              <button 
+                                onClick={() => {
+                                  const banner = document.getElementById('unlock-access-banner');
+                                  if (banner) banner.scrollIntoView({ behavior: 'smooth' });
+                                  const btn = document.getElementById('unlock-access-btn');
+                                  if (btn) btn.click();
+                                  else alert(isHindi ? 'व्हाट्सएप संपर्क अनलॉक करने के लिए Access Pass चालू करें!' : 'Unlock GayaSeva Access Pass to WhatsApp!');
+                                }}
+                                className="py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                              >
+                                <Lock className="w-3.5 h-3.5 text-emerald-200" />
+                                <span>{isHindi ? '🔒 WhatsApp' : '🔒 WhatsApp'}</span>
+                              </button>
+                            )}
+                          </div>
+
+                          {!isReunited && (
+                            <button
+                              onClick={() => handleMarkReunited(item.id, item.title)}
+                              className="w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-[11px] font-extrabold transition-colors flex items-center justify-center gap-1 border border-amber-300 cursor-pointer"
+                            >
+                              <HeartHandshake className="w-3.5 h-3.5 text-amber-700" />
+                              <span>{isHindi ? 'सामान/व्यक्ति मिल गया? सुलझा घोषित करें' : 'Mark as Reunited / Found'}</span>
+                            </button>
+                          )}
+                        </div>
+
                       </div>
-
-                      {/* Image Preview if provided */}
-                      {item.imageUrl && (
-                        <div className="w-full h-40 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
-                          <img 
-                            src={item.imageUrl} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Title */}
-                      <h3 className="font-sans font-black text-base text-[#2A180B] leading-snug">
-                        {item.title}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                        {item.description}
-                      </p>
-
-                      {/* Meta Info */}
-                      <div className="space-y-1 text-xs text-slate-500 font-semibold pt-1">
-                        <div className="flex items-center gap-1.5 text-slate-700">
-                          <MapPin className="w-3.5 h-3.5 text-[#F58220] shrink-0" />
-                          <span className="truncate">{item.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{isHindi ? 'घटना तिथि:' : 'Date:'} {item.date}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{isHindi ? 'रिपोर्टर:' : 'Reporter:'} {item.reporterName}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Bar */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        <a 
-                          href={`tel:${item.reporterPhone}`}
-                          className="py-2.5 px-3 bg-[#2A180B] hover:bg-[#1C0D02] text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                        >
-                          <PhoneCall className="w-3.5 h-3.5 text-[#F6C343]" />
-                          <span>{isHindi ? 'कॉल करें' : 'Call'}</span>
-                        </a>
-
-                        <a 
-                          href={`https://wa.me/${item.reporterPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`GayaSeva Lost & Found Inquiry regarding: ${item.title}`)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-center rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          <span>WhatsApp</span>
-                        </a>
-                      </div>
-
-                      {!isReunited && (
-                        <button
-                          onClick={() => handleMarkReunited(item.id, item.title)}
-                          className="w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-950 rounded-xl text-[11px] font-extrabold transition-colors flex items-center justify-center gap-1 border border-amber-300 cursor-pointer"
-                        >
-                          <HeartHandshake className="w-3.5 h-3.5 text-amber-700" />
-                          <span>{isHindi ? 'सामान/व्यक्ति मिल गया? सुलझा घोषित करें' : 'Mark as Reunited / Found'}</span>
-                        </button>
-                      )}
-                    </div>
-
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              )}
+            </DirectoryGatedView>
           )}
         </div>
 

@@ -118,7 +118,7 @@ const INITIAL_PLACES: SacredPlace[] = [
     title: 'Vishnupad Temple',
     category: 'TEERTH',
     timing: '5:00 AM - 9:00 PM',
-    description: '40-cm basalt footprint of Lord Vishnu. Main hub for Pinda Daan and ancestor salvation.',
+    description: 'Chand Chaura, Gaya • Major Hindu pilgrimage site; 40-cm basalt footprint of Lord Vishnu for Pind Daan.',
     lat: '24.7865',
     lng: '85.0080',
     imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
@@ -126,81 +126,234 @@ const INITIAL_PLACES: SacredPlace[] = [
   },
   {
     id: 'plc-2',
-    slug: 'falgu-river',
-    title: 'Falgu River Devghat',
-    category: 'TEERTH',
-    timing: 'Open 24 Hours',
-    description: 'Holy river for ancestor sand Pinda offerings & evening Falgu Aarti. Antarsalila river bed.',
-    lat: '24.7880',
-    lng: '85.0120',
-    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80',
-    isFeatured: true,
-  },
-  {
-    id: 'plc-3',
     slug: 'akshayavat',
-    title: 'Akshayavat Banyan Tree',
+    title: 'Akshay Vat',
     category: 'TEERTH',
     timing: '6:00 AM - 7:00 PM',
-    description: 'Immortal banyan tree where final Pinda Daan oblations and oblations are completed.',
+    description: 'Vishnupad area, Gaya • Sacred banyan tree and important final Pind Daan oblation location.',
     lat: '24.7840',
     lng: '85.0090',
     isFeatured: true,
   },
   {
+    id: 'plc-3',
+    slug: 'sitakund',
+    title: 'Sita Kund',
+    category: 'TEERTH',
+    timing: '5:30 AM - 7:30 PM',
+    description: 'Falgu River, Gaya • Religious site associated with Goddess Sita and sand Pind Daan.',
+    lat: '24.7870',
+    lng: '85.0130',
+    isFeatured: true,
+  },
+  {
     id: 'plc-4',
+    slug: 'ramshila',
+    title: 'Ramshila Hill',
+    category: 'TEERTH',
+    timing: '6:00 AM - 7:00 PM',
+    description: 'Ramshila, Gaya • Religious hill associated with Lord Rama Pind Daan and Rameshwar Mahadev shrine.',
+    lat: '24.8150',
+    lng: '85.0110',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-5',
     slug: 'pretshila',
-    title: 'Pretshila Hill Shrine',
+    title: 'Pretshila Hill',
     category: 'TEERTH',
     timing: '6:00 AM - 6:00 PM',
-    description: 'Sacred hill shrine dedicated to salvation of souls who suffered untimely demise.',
+    description: 'Pretshila, Gaya • Important Pind Daan/Pitru ritual location for premature and unnatural deaths.',
     lat: '24.8450',
     lng: '84.9850',
     isFeatured: true,
   },
   {
-    id: 'plc-5',
-    slug: 'bodh-gaya',
-    title: 'Bodh Gaya Mahabodhi',
+    id: 'plc-6',
+    slug: 'brahmayoni',
+    title: 'Brahmayoni Hill',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:00 PM',
+    description: 'Godawari Area, Gaya • Hill and pilgrimage destination with 424 steps & Ashtabhuja Devi shrine.',
+    lat: '24.7790',
+    lng: '84.9960',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-7',
+    slug: 'mangla-gauri',
+    title: 'Mangla Gauri Temple',
+    category: 'TEERTH',
+    timing: '5:00 AM - 10:00 PM',
+    description: 'Godawari, Gaya • Famous 51 Shakti Peeth pilgrimage site where breast of Sati fell.',
+    lat: '24.7830',
+    lng: '85.0010',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-8',
+    slug: 'falgu-river',
+    title: 'Phalgu River',
+    category: 'TEERTH',
+    timing: 'Open 24 Hours',
+    description: 'Devghat, Gaya • Major religious and cultural landmark for holy bath, tarpan, and sand Pinda offerings.',
+    lat: '24.7880',
+    lng: '85.0120',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-9',
+    slug: 'mahabodhi-temple',
+    title: 'Mahabodhi Temple',
     category: 'TEERTH',
     timing: '5:00 AM - 9:00 PM',
-    description: 'UNESCO World Heritage site where Lord Buddha attained supreme enlightenment.',
+    description: 'Bodh Gaya • Buddhist pilgrimage site and UNESCO World Heritage Site where Buddha attained enlightenment.',
     lat: '24.6960',
     lng: '84.9915',
     imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
     isFeatured: true,
   },
   {
-    id: 'plc-6',
-    slug: 'mgb-mall',
-    title: 'MGB Food Mall & Cineplex',
-    category: 'MALL',
-    timing: '10:00 AM - 10:00 PM',
-    description: 'GB Road • Shopping, multi-cuisine food court & movie entertainment center.',
-    lat: '24.7950',
-    lng: '85.0020',
+    id: 'plc-10',
+    slug: 'bodh-gaya',
+    title: 'Bodh Gaya',
+    category: 'TEERTH',
+    timing: '5:00 AM - 9:00 PM',
+    description: 'Gaya District • Major international Buddhist pilgrimage destination with international monasteries.',
+    lat: '24.6960',
+    lng: '84.9915',
     isFeatured: true,
   },
   {
-    id: 'plc-7',
-    slug: 'ramna-tilkut',
-    title: 'Ramna Road Tilkut Bazaar',
-    category: 'MARKET',
-    timing: '8:00 AM - 9:00 PM',
-    description: 'Ramna Road • World Famous Gaya Jaggery & Sugar Tilkut, Anarsa & Sweet Market.',
-    lat: '24.7980',
-    lng: '85.0050',
+    id: 'plc-11',
+    slug: 'dungeshwari-caves',
+    title: 'Dungeshwari Cave Temples',
+    category: 'TEERTH',
+    timing: '6:00 AM - 5:30 PM',
+    description: 'Dungeshwari, Gaya • Buddhist meditation/pilgrimage location (Mahakala Caves) where Siddhartha meditated.',
+    lat: '24.7080',
+    lng: '85.0510',
     isFeatured: true,
   },
   {
-    id: 'plc-8',
-    slug: 'tibetan-market',
-    title: 'Tibetan Refugee Market',
-    category: 'MARKET',
-    timing: '9:00 AM - 8:00 PM',
-    description: 'Bodh Gaya • Authentic Tibetan handicrafts, woolen garments & souvenirs.',
-    lat: '24.6980',
-    lng: '84.9930',
+    id: 'plc-12',
+    slug: 'sujata-stupa',
+    title: 'Sujata Stupa',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:30 PM',
+    description: 'Bakraur, Bodh Gaya • Buddhist historical site commemorating Sujata offering kheer milk rice to Buddha.',
+    lat: '24.6975',
+    lng: '84.9995',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-13',
+    slug: 'muchalinda-lake',
+    title: 'Muchalinda Lake',
+    category: 'TEERTH',
+    timing: '5:00 AM - 9:00 PM',
+    description: 'Bodh Gaya • Important Buddhist site featuring Buddha statue protected by Snake King Muchalinda.',
+    lat: '24.6955',
+    lng: '84.9910',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-14',
+    slug: 'bhutan-monastery',
+    title: 'Royal Bhutan Monastery',
+    category: 'TEERTH',
+    timing: '7:00 AM - 7:00 PM',
+    description: 'Bodh Gaya • Serene Buddhist monastery featuring traditional Bhutanese clay reliefs and 7-foot Buddha.',
+    lat: '24.6985',
+    lng: '84.9900',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-15',
+    slug: 'tibetan-temple',
+    title: 'Tibetan Temple',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:00 PM',
+    description: 'Bodh Gaya • Vibrant Tibetan Buddhist temple featuring 20,000 kg bronze Prayer Wheel of Law.',
+    lat: '24.6970',
+    lng: '84.9920',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-16',
+    slug: 'thai-temple',
+    title: 'Thai Temple (Wat Thai)',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:00 PM',
+    description: 'Bodh Gaya • Exquisite Thai Buddhist temple with sloping gold-tiled roof & 25-meter bronze Buddha.',
+    lat: '24.6965',
+    lng: '84.9890',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-17',
+    slug: 'japanese-temple',
+    title: 'Japanese Temple / Indosan Nipponji',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:00 PM',
+    description: 'Bodh Gaya • Peaceful Japanese Zen Buddhist temple built in 1972 showcasing wooden pagoda architecture.',
+    lat: '24.6990',
+    lng: '84.9880',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-18',
+    slug: 'chinese-temple',
+    title: 'Chinese Temple',
+    category: 'TEERTH',
+    timing: '7:00 AM - 6:00 PM',
+    description: 'Bodh Gaya • Traditional Han-style Chinese Buddhist temple housing 200-year-old marble Buddha icons.',
+    lat: '24.6968',
+    lng: '84.9925',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-19',
+    slug: '80-feet-buddha',
+    title: '80 Feet Buddha Statue',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:30 PM',
+    description: 'Bodh Gaya • Major tourist attraction featuring an imposing 80-foot carved red sandstone Buddha statue.',
+    lat: '24.6995',
+    lng: '84.9870',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-20',
+    slug: 'gurpa-hill',
+    title: 'Gurpa Hill',
+    category: 'TEERTH',
+    timing: '6:00 AM - 5:00 PM',
+    description: 'Gurpa, Gaya District • Buddhist pilgrimage & natural rock summit destination (Gurupada Giri).',
+    lat: '24.6720',
+    lng: '85.2850',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-21',
+    slug: 'tapovan-gaya',
+    title: 'Tapovan',
+    category: 'TEERTH',
+    timing: '6:00 AM - 6:00 PM',
+    description: 'Tapovan, Gaya District • Religious & natural destination famous for ancient sulphur hot springs (Kunds).',
+    lat: '24.9010',
+    lng: '85.2310',
+    isFeatured: true,
+  },
+  {
+    id: 'plc-22',
+    slug: 'koteshwar-nath',
+    title: 'Koteshwar Nath Temple',
+    category: 'TEERTH',
+    timing: '5:00 AM - 8:30 PM',
+    description: 'Morhar River, Gaya District • Hindu religious destination housing millions of swayambhu Shiva lingams.',
+    lat: '24.9520',
+    lng: '84.9810',
     isFeatured: true,
   },
 ];
@@ -522,15 +675,65 @@ export class LostFoundStore {
     return ContentStore.getLostFoundItems();
   }
 
-  static addItem(item: Omit<LostFoundItem, 'id' | 'createdAt'>): LostFoundItem {
-    return ContentStore.addLostFoundItem(item);
+  static async fetchItemsFromApi(): Promise<LostFoundItem[]> {
+    try {
+      const res = await fetch('/api/lost-found', { cache: 'no-store' });
+      if (res.ok) {
+        const items: LostFoundItem[] = await res.json();
+        if (Array.isArray(items)) {
+          ContentStore.saveLostFoundItems(items);
+          return items;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch Lost & Found items from API:', e);
+    }
+    return ContentStore.getLostFoundItems();
   }
 
-  static updateItem(id: string, updated: Partial<LostFoundItem>): void {
+  static async addItem(item: Omit<LostFoundItem, 'id' | 'createdAt'>): Promise<LostFoundItem> {
+    const local = ContentStore.addLostFoundItem(item);
+    try {
+      const res = await fetch('/api/lost-found', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+      if (res.ok) {
+        const serverItem = await res.json();
+        const items = ContentStore.getLostFoundItems();
+        const idx = items.findIndex(i => i.id === local.id);
+        if (idx !== -1) items[idx] = serverItem;
+        ContentStore.saveLostFoundItems(items);
+        return serverItem;
+      }
+    } catch (e) {
+      console.error('Failed to save Lost & Found item to API:', e);
+    }
+    return local;
+  }
+
+  static async updateItem(id: string, updated: Partial<LostFoundItem>): Promise<void> {
     ContentStore.updateLostFoundItem(id, updated);
+    try {
+      await fetch('/api/lost-found', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updated }),
+      });
+    } catch (e) {
+      console.error('Failed to update Lost & Found item on API:', e);
+    }
   }
 
-  static deleteItem(id: string): void {
+  static async deleteItem(id: string): Promise<void> {
     ContentStore.deleteLostFoundItem(id);
+    try {
+      await fetch(`/api/lost-found?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+    } catch (e) {
+      console.error('Failed to delete Lost & Found item on API:', e);
+    }
   }
 }

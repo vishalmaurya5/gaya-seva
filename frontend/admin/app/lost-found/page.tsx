@@ -48,8 +48,12 @@ export default function AdminLostFoundPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [status, setStatus] = useState<'REPORTED' | 'VERIFIED' | 'REUNITED' | 'CLOSED'>('VERIFIED');
 
-  const loadItems = () => {
+  const loadItems = async () => {
     setItems(LostFoundStore.getItems());
+    const fresh = await LostFoundStore.fetchItemsFromApi();
+    if (fresh && fresh.length > 0) {
+      setItems(fresh);
+    }
   };
 
   useEffect(() => {
@@ -88,7 +92,7 @@ export default function AdminLostFoundPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !location.trim() || !reporterName.trim() || !reporterPhone.trim()) {
       alert('Please fill all required fields!');
@@ -96,7 +100,7 @@ export default function AdminLostFoundPage() {
     }
 
     if (editingItem) {
-      LostFoundStore.updateItem(editingItem.id, {
+      await LostFoundStore.updateItem(editingItem.id, {
         type,
         category,
         title: title.trim(),
@@ -109,7 +113,7 @@ export default function AdminLostFoundPage() {
         status,
       });
     } else {
-      LostFoundStore.addItem({
+      await LostFoundStore.addItem({
         type,
         category,
         title: title.trim(),
@@ -123,19 +127,19 @@ export default function AdminLostFoundPage() {
       });
     }
 
-    loadItems();
+    await loadItems();
     setIsModalOpen(false);
   };
 
-  const handleStatusChange = (id: string, newStatus: any) => {
-    LostFoundStore.updateItem(id, { status: newStatus });
-    loadItems();
+  const handleStatusChange = async (id: string, newStatus: any) => {
+    await LostFoundStore.updateItem(id, { status: newStatus });
+    await loadItems();
   };
 
-  const handleDelete = (id: string, itemTitle: string) => {
+  const handleDelete = async (id: string, itemTitle: string) => {
     if (confirm(`Are you sure you want to permanently delete report "${itemTitle}"?`)) {
-      LostFoundStore.deleteItem(id);
-      loadItems();
+      await LostFoundStore.deleteItem(id);
+      await loadItems();
     }
   };
 

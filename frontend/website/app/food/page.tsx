@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { UserStore, UserAccount } from '@/lib/userStore';
 import { getProfessionalWhatsAppUrl, formatPhoneNumber } from '@/lib/whatsappHelper';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
 interface FoodProvider {
   id: string;
@@ -258,91 +260,84 @@ export default function FoodPage() {
         </div>
 
         {/* Results Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProviders.map((res) => (
-            <div 
-              key={res.id} 
-              className="bg-white rounded-3xl border border-slate-300 shadow-md hover:shadow-xl transition-all p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group"
-            >
-              <div className="space-y-3">
-                {/* Header Badge */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="px-2.5 py-1 bg-amber-100 text-[#4A2E1A] text-[10px] font-black uppercase rounded-lg border border-amber-300 tracking-wider">
-                    {res.badge}
-                  </span>
-                  <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg text-xs font-black text-amber-800">
-                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                    <span>{res.rating}</span>
-                    <span className="text-[10px] text-slate-500 font-bold">({res.reviewsCount})</span>
-                  </div>
-                </div>
-
-                {/* Title & Tagline */}
-                <div>
-                  <h3 className="font-sans font-extrabold text-lg text-[#0F172A] tracking-tight leading-tight group-hover:text-[#F58220] transition-colors">
-                    {res.name}
-                  </h3>
-                  <p className="text-xs font-semibold text-[#1E293B] mt-1 leading-snug">
-                    {res.tagline}
-                  </p>
-                </div>
-
-                {/* Verification Badge */}
-                <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-xl w-fit">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>GayaSeva Verified Provider</span>
-                </div>
-
-                {/* Details Card */}
-                <div className="bg-[#F8F6EF] p-3.5 rounded-2xl border border-[#EBE6D6] space-y-2 text-xs font-bold text-[#0F172A]">
-                  <div className="flex items-center gap-2 text-slate-900">
-                    <MapPin className="w-4 h-4 text-[#F58220] shrink-0" />
-                    <span className="line-clamp-1">{res.area}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-900">
-                    <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>{res.timing}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-emerald-800">
-                    <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{res.deliveryAvailable ? 'Dharamshala Room Delivery Available' : 'Dine-In & Takeaway'}</span>
-                  </div>
-                </div>
-
-                {/* Popular Menu Preview */}
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[11px] font-black uppercase text-slate-700 tracking-wider">Popular Items:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {res.popularItems.map((item, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-300">
-                        {item}
+        <DirectoryGatedView categoryName="Satvik Food & Bhojanalaya" totalCount={filteredProviders.length} maxPreviewCount={2}>
+          {(visibleCount, hasAccess) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProviders.slice(0, visibleCount).map((res) => (
+                <div 
+                  key={res.id} 
+                  className="bg-white rounded-3xl border border-slate-300 shadow-md hover:shadow-xl transition-all p-6 flex flex-col justify-between space-y-5 relative overflow-hidden group"
+                >
+                  <div className="space-y-3">
+                    {/* Header Badge */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="px-2.5 py-1 bg-amber-100 text-[#4A2E1A] text-[10px] font-black uppercase rounded-lg border border-amber-300 tracking-wider">
+                        {res.badge}
                       </span>
-                    ))}
+                      <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg text-xs font-black text-amber-800">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span>{res.rating}</span>
+                        <span className="text-[10px] text-slate-500 font-bold">({res.reviewsCount})</span>
+                      </div>
+                    </div>
+
+                    {/* Title & Tagline */}
+                    <div>
+                      <h3 className="font-sans font-extrabold text-lg text-[#0F172A] tracking-tight leading-tight group-hover:text-[#F58220] transition-colors">
+                        {res.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-[#1E293B] mt-1 leading-snug">
+                        {res.tagline}
+                      </p>
+                    </div>
+
+                    {/* Verification Badge */}
+                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-xl w-fit">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>GayaSeva Verified Provider</span>
+                    </div>
+
+                    {/* Details Card */}
+                    <div className="bg-[#F8F6EF] p-3.5 rounded-2xl border border-[#EBE6D6] space-y-2 text-xs font-bold text-[#0F172A]">
+                      <div className="flex items-center gap-2 text-slate-900">
+                        <MapPin className="w-4 h-4 text-[#F58220] shrink-0" />
+                        <span className="line-clamp-1">{hasAccess ? res.area : '📍 Address & Location Locked'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-900">
+                        <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>{res.timing}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-emerald-800">
+                        <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{res.deliveryAvailable ? 'Dharamshala Room Delivery Available' : 'Dine-In & Takeaway'}</span>
+                      </div>
+                    </div>
+
+                    {/* Popular Menu Preview */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-black uppercase text-slate-700 tracking-wider">Popular Items:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {res.popularItems.map((item, i) => (
+                          <span key={i} className="text-[10px] font-bold bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-300">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
+
+                  <LockedContactBox 
+                    providerId={res.id} 
+                    providerName={res.name} 
+                    defaultPhone={res.phone}
+                    serviceCategory="Satvik Food & Bhojanalaya"
+                  />
+
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-2 flex gap-2">
-                <a
-                  href={`tel:${res.phone}`}
-                  className="flex-1 py-3 bg-[#1C0D02] hover:bg-[#3D2310] text-white text-xs font-extrabold rounded-2xl text-center flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-                >
-                  <Phone className="w-4 h-4 text-[#F6C343]" /> Call Now
-                </a>
-                <a
-                  href={getProfessionalWhatsAppUrl({ phone: res.phone, title: res.name, subtitle: res.tagline })}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 py-3 bg-[#25D366] hover:bg-[#1EBE5A] text-white text-xs font-extrabold rounded-2xl text-center flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-                >
-                  <MessageCircle className="w-4 h-4" /> WhatsApp
-                </a>
-              </div>
-
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </DirectoryGatedView>
 
         {filteredProviders.length === 0 && (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-300 p-8 space-y-4">

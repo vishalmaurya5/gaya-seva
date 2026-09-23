@@ -74,11 +74,11 @@ export default function HotelsManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -91,16 +91,16 @@ export default function HotelsManagementPage() {
       rating: 4.9,
     });
 
-    loadHotels();
+    await loadHotels();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingHotel) return;
 
-    UserStore.updateUser(editingHotel.id, {
+    await UserStore.updateUser(editingHotel.id, {
       name,
       email,
       phone,
@@ -111,22 +111,22 @@ export default function HotelsManagementPage() {
       documentUrl,
     });
 
-    loadHotels();
+    await loadHotels();
     setEditingHotel(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete Hotel / Dharamshala record "${name}"?`)) {
-      UserStore.deleteUser(id);
-      loadHotels();
+      await UserStore.deleteUser(id);
+      await loadHotels();
     }
   };
 
-  const handleApproveStatus = (hotel: UserAccount) => {
+  const handleApproveStatus = async (hotel: UserAccount) => {
     const newStatus: UserAccount['status'] = hotel.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(hotel.id, { status: newStatus });
-    loadHotels();
+    await UserStore.updateUser(hotel.id, { status: newStatus });
+    await loadHotels();
   };
 
   const openEditModal = (hotel: UserAccount) => {

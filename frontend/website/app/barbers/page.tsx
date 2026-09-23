@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Scissors, ShieldCheck, MapPin, Languages, Phone, MessageSquare, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 import { GayaSevaLogo } from '@/components/ui/GayaSevaLogo';
 import { UserStore, UserAccount } from '@/lib/userStore';
-import { formatPhoneNumber, getProfessionalWhatsAppUrl } from '@/lib/whatsappHelper';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
 
 export default function BarberDirectoryPage() {
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -67,6 +68,30 @@ export default function BarberDirectoryPage() {
       phone: '+919939778855',
       availabilityStatus: 'AVAILABLE',
       avatarUrl: '/uploads/gayaseva-partner-profiles/IMG_20240829_204658_1790016073002_xpy2mvg_1790016075236.jpg',
+    },
+    {
+      id: 'brb_default_3',
+      name: 'Suresh Thakur (Falgu Ghat)',
+      languages: ['Hindi', 'Magahi'],
+      services: ['Falgu Ghat Kshaur Karma', 'Pind Daan Mundan'],
+      area: 'Falgu River Ghat Zone',
+      rating: 4.8,
+      experience: '12+ Years Traditional Service',
+      status: 'VERIFIED',
+      phone: '+919835112233',
+      availabilityStatus: 'AVAILABLE',
+    },
+    {
+      id: 'brb_default_4',
+      name: 'Mahesh Thakur (Akshayavat)',
+      languages: ['Hindi'],
+      services: ['Akshayavat Mundan Rituals', 'Kshaur Karma'],
+      area: 'Akshayavat Circle',
+      rating: 4.9,
+      experience: '10+ Years Dedicated Barber',
+      status: 'VERIFIED',
+      phone: '+919835445566',
+      availabilityStatus: 'AVAILABLE',
     }
   ];
 
@@ -105,97 +130,74 @@ export default function BarberDirectoryPage() {
         <GayaSevaLogo size={64} className="shrink-0 drop-shadow-md" />
       </div>
 
-      {/* Barber Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {allBarbers.map((brb) => {
-          const isVerified = brb.status === 'VERIFIED';
-          const isAvailable = brb.availabilityStatus !== 'BOOKED';
-          return (
-            <div key={brb.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-lg transition-shadow">
-              <div className="space-y-3">
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#1C0D02] font-black text-base flex items-center justify-center shrink-0 border border-amber-300 overflow-hidden shadow-xs">
-                      {brb.avatarUrl ? (
-                        <img src={brb.avatarUrl} alt={brb.name} className="w-full h-full object-cover" />
-                      ) : (
-                        brb.name.substring(0, 2).toUpperCase()
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-black text-lg text-slate-900 flex items-center gap-1.5">{brb.name}</h3>
-                      
-                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                        {isVerified ? (
-                          <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-900 rounded-full inline-flex items-center gap-1 border border-emerald-300">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> GayaSeva Verified
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 border border-amber-300">
-                            <Clock className="w-3.5 h-3.5 text-amber-700" /> Pending Admin Approval
-                          </span>
-                        )}
+      {/* Directory Gated View */}
+      <DirectoryGatedView categoryName="Barber & Kshaur Karma" totalCount={allBarbers.length} maxPreviewCount={2}>
+        {(visibleCount) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {allBarbers.slice(0, visibleCount).map((brb) => {
+              const isVerified = brb.status === 'VERIFIED';
+              const isAvailable = brb.availabilityStatus !== 'BOOKED';
+              return (
+                <div key={brb.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-lg transition-shadow">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#1C0D02] font-black text-base flex items-center justify-center shrink-0 border border-amber-300 overflow-hidden shadow-xs">
+                          {brb.avatarUrl ? (
+                            <img src={brb.avatarUrl} alt={brb.name} className="w-full h-full object-cover" />
+                          ) : (
+                            brb.name.substring(0, 2).toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-black text-lg text-slate-900 flex items-center gap-1.5">{brb.name}</h3>
+                          
+                          <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                            {isVerified ? (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-900 rounded-full inline-flex items-center gap-1 border border-emerald-300">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> GayaSeva Verified
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 border border-amber-300">
+                                <Clock className="w-3.5 h-3.5 text-amber-700" /> Pending Admin Approval
+                              </span>
+                            )}
 
-                        {isAvailable ? (
-                          <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
-                            🟢 AVAILABLE FOR MUNDAN
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
-                            🔴 BUSY
-                          </span>
-                        )}
+                            {isAvailable ? (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                                🟢 AVAILABLE FOR MUNDAN
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                                🔴 BUSY
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
+                      <span className="text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⭐ {brb.rating}</span>
+                    </div>
+
+                    <div className="text-xs text-slate-700 font-medium space-y-1.5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                      <p className="font-bold text-slate-900">Languages: {brb.languages.join(' • ')}</p>
+                      <p>Services: {brb.services.join(' • ')}</p>
+                      <p>📍 {brb.area}</p>
+                      <p className="text-slate-600 font-semibold">{brb.experience}</p>
                     </div>
                   </div>
-                  <span className="text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⭐ {brb.rating}</span>
+
+                  <LockedContactBox 
+                    providerId={brb.id} 
+                    providerName={brb.name} 
+                    defaultPhone={brb.phone}
+                    serviceCategory="Barber & Kshaur Karma Service"
+                  />
                 </div>
-
-                <div className="text-xs text-slate-700 font-medium space-y-1.5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  <p className="font-bold text-slate-900">Languages: {brb.languages.join(' • ')}</p>
-                  <p>Services: {brb.services.join(' • ')}</p>
-                  <p>📍 {brb.area}</p>
-                  <p className="text-slate-600 font-semibold">{brb.experience}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <a
-                  href={`tel:${brb.phone}`}
-                  className="flex-1 py-3 bg-[#2A180B] hover:bg-[#3A2314] text-[#F6C343] text-xs font-black rounded-xl text-center shadow-sm flex items-center justify-center gap-1.5 border border-amber-500/30 transition-all active:scale-95"
-                >
-                  <Phone className="w-3.5 h-3.5 text-[#F58220]" />
-                  <span>Call Barber ({brb.phone})</span>
-                </a>
-
-                <a
-                  href={getProfessionalWhatsAppUrl({
-                    phone: formatPhoneNumber(brb.phone),
-                    title: brb.name,
-                    subtitle: 'Barber & Kshaur Karma Service',
-                    lang: 'hi',
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl text-center shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>WhatsApp</span>
-                </a>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="text-center pt-4">
-        <Link
-          href="/services?category=BARBER"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#F58220] hover:bg-[#E07210] text-white font-extrabold text-xs rounded-xl shadow-md transition-all"
-        >
-          <span>View All Barbers in Services Directory &rarr;</span>
-        </Link>
-      </div>
+              );
+            })}
+          </div>
+        )}
+      </DirectoryGatedView>
     </div>
   );
 }

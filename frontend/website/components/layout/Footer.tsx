@@ -88,6 +88,7 @@ export function Footer() {
               <li><Link href="/pick-drop" className="hover:text-[#F58220] transition-colors">🚕 Pick & Drop Cabs</Link></li>
               <li><Link href="/stay" className="hover:text-[#F58220] transition-colors">🏨 Stays & Hotels</Link></li>
               <li><Link href="/food" className="hover:text-[#F58220] transition-colors">🍱 Satvik Food</Link></li>
+              <li><Link href="/healthcare" className="hover:text-[#F58220] transition-colors">🏥 Hospitals & Medical</Link></li>
               <li><Link href="/puja-material" className="hover:text-[#F58220] transition-colors">🛒 Puja Kits & Tilkut</Link></li>
             </ul>
           </div>

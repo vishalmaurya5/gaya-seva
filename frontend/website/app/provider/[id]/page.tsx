@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Phone, MessageSquare, Star, MapPin } from 'lucide-react';
+import { ShieldCheck, Star, MapPin } from 'lucide-react';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
 export default function PublicProviderProfilePage({ params }: { params: { id: string } }) {
   const providerId = params.id || 'prov_100';
@@ -26,16 +27,14 @@ export default function PublicProviderProfilePage({ params }: { params: { id: st
               </p>
             </div>
           </div>
-
-          <div className="flex gap-2 w-full sm:w-auto">
-            <a href="tel:+919876543210" className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#4A2E1A] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5">
-              <Phone className="w-3.5 h-3.5" /> Call
-            </a>
-            <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#25D366] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
-            </a>
-          </div>
         </div>
+
+        <LockedContactBox 
+          providerId={providerId} 
+          providerName="Gaya Ji Certified Services" 
+          defaultPhone="+919876543210"
+          serviceCategory="Gaya Ji Teerth Provider"
+        />
 
         <div className="space-y-3 bg-[#F8F6EF] p-5 rounded-2xl text-xs text-gray-700">
           <h3 className="font-serif font-bold text-sm text-[#4A2E1A]">Services Offered</h3>

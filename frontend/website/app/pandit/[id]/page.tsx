@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Flame, ShieldCheck, MapPin, Languages, Phone, MessageSquare, Calendar, CheckCircle } from 'lucide-react';
+import { Flame, ShieldCheck, MapPin, Languages, Calendar, CheckCircle } from 'lucide-react';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
 export default function PanditDetailPage({ params }: { params: { id: string } }) {
   return (
@@ -23,24 +24,14 @@ export default function PanditDetailPage({ params }: { params: { id: string } })
               <p className="text-xs text-gray-500 mt-1">22+ Years Official Teerth Purohit Experience • Vishnupad Zone</p>
             </div>
           </div>
-
-          <div className="flex gap-2 w-full sm:w-auto">
-            <a
-              href="tel:+919876543210"
-              className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#4A2E1A] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
-            >
-              <Phone className="w-4 h-4 text-[#F58220]" /> Call
-            </a>
-            <a
-              href="https://wa.me/919876543210?text=Interested%20in%20Pinda%20Daan%20Booking"
-              target="_blank"
-              rel="noreferrer"
-              className="flex-1 sm:flex-initial px-4 py-2.5 bg-[#25D366] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
-            >
-              <MessageSquare className="w-4 h-4" /> WhatsApp
-            </a>
-          </div>
         </div>
+
+        <LockedContactBox 
+          providerId={params.id || 'pnd_100'} 
+          providerName="Pandit Rajesh Shastri" 
+          defaultPhone="+919876543210"
+          serviceCategory="Pind Daan Pandit & Teerth Purohit"
+        />
 
         {/* Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-gray-600">

@@ -28,11 +28,17 @@ import {
   Send,
   Calendar,
   Users as UsersIcon,
-  Clock
+  Clock,
+  Bus,
+  Camera,
+  Stethoscope,
+  Bike
 } from 'lucide-react';
 import { UserStore, UserAccount } from '@/lib/userStore';
 import { ContentStore, ServiceConfigItem } from '@/lib/contentStore';
 import { useLanguage } from '@/context/LanguageContext';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
 import { useLocation } from '@/context/LocationContext';
 import { GayaSevaLogo } from '@/components/ui/GayaSevaLogo';
 import { formatPhoneNumber, getProfessionalWhatsAppUrl } from '@/lib/whatsappHelper';
@@ -49,26 +55,6 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
     descEn: 'Authentic Gayawal Teerth Purohits for Falgu River, Vishnupad & Akshayavat rituals.',
     descHi: 'विष्णुपद, फल्गु नदी तट और अक्षयवट हेतु अधिकृत गयावाल तीर्थ पुरोहित।',
   },
-  BARBER: {
-    labelEn: 'Barber & Kshaur Karma (नाई/ठाकुर)',
-    labelHi: 'क्षौर कर्म एवं नाई (मुंडन सेवा)',
-    icon: Scissors,
-    color: 'text-amber-700',
-    bg: 'bg-amber-50/90',
-    border: 'border-amber-300',
-    descEn: 'Verified traditional Barbers (Nai/Thakur) for Pinda Daan Mundan & Kshaur Karma.',
-    descHi: 'पिंडदान मुंडन एवं क्षौर कर्म हेतु अधिकृत पारंपरिक नाई (ठाकुर) सेवा।',
-  },
-  DRIVER: {
-    labelEn: 'Pick & Drop Taxi',
-    labelHi: 'पिक एंड ड्रॉप (टैक्सी/ऑटो)',
-    icon: Car,
-    color: 'text-orange-600',
-    bg: 'bg-orange-50/90',
-    border: 'border-orange-300',
-    descEn: '24/7 Verified station pickup, outstation cabs, SUVs & auto-rickshaws.',
-    descHi: 'गया जंक्शन, एयरपोर्ट एवं बोधगया हेतु 24/7 सत्यापित टैक्सी एवं ऑटो।',
-  },
   HOTEL: {
     labelEn: 'Hotels & Dharamshalas',
     labelHi: 'होटल एवं धर्मशालाएं',
@@ -78,6 +64,46 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
     border: 'border-blue-300',
     descEn: 'Clean AC/Non-AC family rooms, dormitories & Yatri dharamshalas near Vishnupad.',
     descHi: 'विष्णुपद मंदिर के पास स्वच्छ एसी कमरे एवं बजट तीर्थ धर्मशालाएं।',
+  },
+  DRIVER: {
+    labelEn: 'Pick & Drop Taxi / Cabs',
+    labelHi: 'टैक्सी एवं कार पिकअप',
+    icon: Car,
+    color: 'text-orange-600',
+    bg: 'bg-orange-50/90',
+    border: 'border-orange-300',
+    descEn: '24/7 Verified station pickup, outstation cabs, Sedans & SUVs.',
+    descHi: 'गया जंक्शन, एयरपोर्ट एवं बोधगया हेतु 24/7 सत्यापित टैक्सी एवं कैब।',
+  },
+  AUTO: {
+    labelEn: 'E-Rickshaw & Auto',
+    labelHi: 'ई-रिक्शा एवं ऑटो सेवा',
+    icon: Bike,
+    color: 'text-[#F58220]',
+    bg: 'bg-amber-50/90',
+    border: 'border-amber-300',
+    descEn: 'Local auto-rickshaws and e-rickshaws for Falgu river, temple & station commute.',
+    descHi: 'स्थानीय विष्णुपद मंदिर, फल्गु तट एवं स्टेशन हेतु सुविधाजनक ऑटो एवं ई-रिक्शा।',
+  },
+  TRAVEL: {
+    labelEn: 'Tour & Travel Packages',
+    labelHi: 'टूर एवं ट्रैवल पैकेज',
+    icon: Bus,
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50/90',
+    border: 'border-indigo-300',
+    descEn: 'Custom tour packages, Tempo Travellers & sightseeing for Gaya & Bodh Gaya.',
+    descHi: 'गया, बोधगया एवं नालंदा भ्रमण हेतु बस, टेम्पो ट्रैवलर और ट्रैवल पैकेज।',
+  },
+  GUIDE: {
+    labelEn: 'Gaya Guide & Shrines',
+    labelHi: 'गया दर्शनीय स्थल गाइड',
+    icon: Compass,
+    color: 'text-purple-600',
+    bg: 'bg-purple-50/90',
+    border: 'border-purple-300',
+    descEn: 'Guided tours for 48 Vedis, Vishnupad, Pretshila & Bodh Gaya Mahabodhi Temple.',
+    descHi: '48 वेदी, प्रेतशिला, फल्गु एवं बोधगया महाबोधि मंदिर हेतु मार्गदर्शक गाइड।',
   },
   FOOD: {
     labelEn: 'Satvik Food & Catering',
@@ -89,9 +115,19 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
     descEn: 'Pure No-Onion No-Garlic Satvik Yatri thalis and ceremonial shradh food.',
     descHi: 'बिना लहसुन-प्याज का शुद्ध सात्विक भोजन एवं तीर्थयात्री थाली।',
   },
-  PUJA: {
-    labelEn: 'Puja Kits & Tilkut',
-    labelHi: 'पूजा सामग्री एवं तिलकुट',
+  HEALTHCARE: {
+    labelEn: 'Healthcare & Emergency',
+    labelHi: 'स्वास्थ्य एवं आपातकालीन चिकित्सा',
+    icon: Stethoscope,
+    color: 'text-red-600',
+    bg: 'bg-red-50/90',
+    border: 'border-red-300',
+    descEn: 'Nearby hospitals, 24/7 clinics, doctors & genuine pharmacies in Gaya Ji.',
+    descHi: 'गया जी में निकटतम अस्पताल, 24/7 क्लिनिक, डॉक्टर एवं 24/7 मेडिकल स्टोर।',
+  },
+  SHOP: {
+    labelEn: 'Local Business & Puja Shop',
+    labelHi: 'पूजा सामग्री एवं स्थानीय दुकानें',
     icon: ShoppingBag,
     color: 'text-pink-600',
     bg: 'bg-pink-50/90',
@@ -99,15 +135,45 @@ const STANDARD_CATEGORY_META: Record<string, { labelEn: string; labelHi: string;
     descEn: '48-Vedi Pind Daan samagri kits and Ramna Road famous jaggery/sugar Tilkut.',
     descHi: '48 वेदी पिंडदान सामग्री किट एवं रामना रोड का प्रसिद्ध शुद्ध तिलकुट।',
   },
-  GUIDE: {
-    labelEn: 'Gaya Guide & Shrines',
-    labelHi: 'गया दर्शनीय स्थल गाइड',
-    icon: Compass,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50/90',
-    border: 'border-purple-300',
-    descEn: 'Guided tours for 48 Vedis, Vishnupad, Pretshila & Bodh Gaya Mahabodhi Temple.',
-    descHi: '48 वेदी, प्रेतशिला, फल्गु एवं बोधगया महाबोधि मंदिर हेतु मार्गदर्शक गाइड।',
+  PUJA: {
+    labelEn: 'Puja Samagri & Tilkut',
+    labelHi: 'पूजा सामग्री एवं तिलकुट',
+    icon: ShoppingBag,
+    color: 'text-pink-600',
+    bg: 'bg-pink-50/90',
+    border: 'border-pink-300',
+    descEn: 'Authentic 48-Vedi samagri and famous Gaya Tilkut sweets.',
+    descHi: 'प्रसिद्ध गया तिलकुट, अनरसा एवं पूजा सामग्री की विश्वसनीय दुकानें।',
+  },
+  PHOTOGRAPHY: {
+    labelEn: 'Teerth Photography',
+    labelHi: 'तीर्थ यात्रा फोटोग्राफी',
+    icon: Camera,
+    color: 'text-sky-600',
+    bg: 'bg-sky-50/90',
+    border: 'border-sky-300',
+    descEn: 'Professional photographers for family Pind Daan rituals & Bodh Gaya tours.',
+    descHi: 'पिंडदान कर्मकांड एवं तीर्थ यात्रा की यादगार उच्च गुणवत्ता फोटोग्राफी।',
+  },
+  BARBER: {
+    labelEn: 'Barber & Kshaur Karma (नाई/ठाकुर)',
+    labelHi: 'क्षौर कर्म एवं नाई (मुंडन सेवा)',
+    icon: Scissors,
+    color: 'text-amber-700',
+    bg: 'bg-amber-50/90',
+    border: 'border-amber-300',
+    descEn: 'Verified traditional Barbers (Nai/Thakur) for Pinda Daan Mundan & Kshaur Karma.',
+    descHi: 'पिंडदान मुंडन एवं क्षौर कर्म हेतु अधिकृत पारंपरिक नाई (ठाकुर) सेवा।',
+  },
+  OTHER: {
+    labelEn: 'Other Local Services',
+    labelHi: 'अन्य आवश्यक स्थानीय सेवाएं',
+    icon: Sparkles,
+    color: 'text-gray-600',
+    bg: 'bg-gray-50/90',
+    border: 'border-gray-300',
+    descEn: 'Laundry, luggage storage, electronics repair, courier & general pilgrim support.',
+    descHi: 'कपड़े धोने (लॉन्ड्री), सामान रखने, मरम्मत, कूरियर एवं अन्य सहायता सेवाएं।',
   },
 };
 
@@ -422,148 +488,137 @@ function ServicesContent() {
       )}
 
       {/* 4. DYNAMIC SERVICES & PROVIDERS LISTING FEED */}
-      <div className="space-y-6">
-        {filteredListings.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <Sparkles className="w-12 h-12 text-amber-500 mx-auto" />
-            <h3 className="font-extrabold text-xl text-slate-900">No Services Found</h3>
-            <p className="text-sm text-slate-600 font-medium max-w-md mx-auto">
-              No registered service providers found matching your current selection or search term.
-            </p>
-            <button
-              onClick={() => { setSelectedCategory('ALL'); setSearchQuery(''); }}
-              className="px-6 py-3 bg-[#F58220] hover:bg-[#E07210] text-white text-sm font-extrabold rounded-xl shadow-md transition-all"
-            >
-              Reset Filter & View All
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredListings.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all space-y-5 flex flex-col justify-between group cursor-pointer"
-                onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
-              >
-                <div className="space-y-4">
-                  {/* Category Pill, Availability & Verified Status */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="px-3 py-1 text-xs font-extrabold bg-amber-100 text-amber-950 rounded-full border border-amber-300 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#F58220]" />
-                        <span>{item.categoryDisplay}</span>
-                      </span>
-
-                      {item.availabilityStatus !== 'BOOKED' ? (
-                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
-                          🟢 AVAILABLE
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
-                          🔴 BOOKED / BUSY
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="text-sm font-extrabold text-slate-900 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                      <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                      <span>{item.rating}</span>
-                    </span>
-                  </div>
-
-                  {/* Provider Header */}
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-[#1C0D02] font-black text-lg flex items-center justify-center shrink-0 border-2 border-amber-300 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                      {item.avatarUrl ? (
-                        <img src={item.avatarUrl} alt={item.title} className="w-full h-full object-cover" />
-                      ) : (
-                        item.title.substring(0, 2).toUpperCase()
-                      )}
-                    </div>
-
-                    <div className="space-y-1">
-                      <h4 className="font-extrabold text-lg text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap group-hover:text-[#F58220] transition-colors">
-                        <span>{item.title}</span>
-                        {item.isVerified && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold border border-emerald-300">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                            Verified
-                          </span>
-                        )}
-                      </h4>
-                      <p className="text-xs font-bold text-[#F58220] tracking-wide">{item.subtitle}</p>
-                    </div>
-                  </div>
-
-                  {/* Details Container */}
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-[#F58220]" />
-                        <span>{item.city}</span>
-                      </span>
-
-                      {item.distanceFormatted && (
-                        <span className="text-emerald-900 font-extrabold bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300 text-[11px]">
-                          📍 {item.distanceFormatted} away
-                        </span>
-                      )}
-                    </div>
-
-                    {item.languages && (
-                      <p className="text-xs text-slate-700 font-medium">
-                        Languages: <strong className="text-slate-900 font-bold">{item.languages.join(', ')}</strong>
-                      </p>
-                    )}
-
-                    {item.details && (
-                      <p className="text-xs text-slate-700 font-normal leading-relaxed pt-1 border-t border-slate-200 line-clamp-2">
-                        {item.details}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Direct Action Contact Buttons */}
-                <div className="pt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
-                    className="w-full py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-extrabold text-xs rounded-2xl text-center border border-amber-300 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <span>📋 पूरी जानकारी एवं बुकिंग (View Details)</span>
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`tel:${item.phone}`}
-                      className="flex-1 py-2.5 px-3 bg-[#1C0D02] hover:bg-black text-[#F6C343] font-black text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-1.5 transition-all border border-amber-500/30 active:scale-95"
-                    >
-                      <Phone className="w-3.5 h-3.5 text-[#F58220]" />
-                      <span>Call Now</span>
-                    </a>
-
-                    <a
-                      href={getProfessionalWhatsAppUrl({
-                        phone: item.whatsapp,
-                        title: item.title,
-                        subtitle: item.subtitle,
-                        lang: language,
-                      })}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-md text-center flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
-                      title="WhatsApp Direct Inquiry"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
-                    </a>
-                  </div>
-                </div>
+      <DirectoryGatedView 
+        categoryName={selectedCategory === 'ALL' ? 'GayaSeva' : (activeCategoryMeta ? activeCategoryMeta.labelHi : selectedCategory)} 
+        totalCount={filteredListings.length} 
+        maxPreviewCount={2}
+      >
+        {(visibleCount) => (
+          <div>
+            {filteredListings.length === 0 ? (
+              <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <Sparkles className="w-12 h-12 text-amber-500 mx-auto" />
+                <h3 className="font-extrabold text-xl text-slate-900">No Services Found</h3>
+                <p className="text-sm text-slate-600 font-medium max-w-md mx-auto">
+                  No registered service providers found matching your current selection or search term.
+                </p>
+                <button
+                  onClick={() => { setSelectedCategory('ALL'); setSearchQuery(''); }}
+                  className="px-6 py-3 bg-[#F58220] hover:bg-[#E07210] text-white text-sm font-extrabold rounded-xl shadow-md transition-all"
+                >
+                  Reset Filter & View All
+                </button>
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredListings.slice(0, visibleCount).map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all space-y-5 flex flex-col justify-between group cursor-pointer"
+                    onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
+                  >
+                    <div className="space-y-4">
+                      {/* Category Pill, Availability & Verified Status */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-3 py-1 text-xs font-extrabold bg-amber-100 text-amber-950 rounded-full border border-amber-300 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#F58220]" />
+                            <span>{item.categoryDisplay}</span>
+                          </span>
+
+                          {item.availabilityStatus !== 'BOOKED' ? (
+                            <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                              🟢 AVAILABLE
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                              🔴 BOOKED / BUSY
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-sm font-extrabold text-slate-900 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span>{item.rating}</span>
+                        </span>
+                      </div>
+
+                      {/* Provider Header */}
+                      <div className="flex items-start gap-3.5">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 text-[#1C0D02] font-black text-lg flex items-center justify-center shrink-0 border-2 border-amber-300 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                          {item.avatarUrl ? (
+                            <img src={item.avatarUrl} alt={item.title} className="w-full h-full object-cover" />
+                          ) : (
+                            item.title.substring(0, 2).toUpperCase()
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <h4 className="font-extrabold text-lg text-slate-900 leading-snug flex items-center gap-1.5 flex-wrap group-hover:text-[#F58220] transition-colors">
+                            <span>{item.title}</span>
+                            {item.isVerified && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-bold border border-emerald-300">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                Verified
+                              </span>
+                            )}
+                          </h4>
+                          <p className="text-xs font-bold text-[#F58220] tracking-wide">{item.subtitle}</p>
+                        </div>
+                      </div>
+
+                      {/* Details Container */}
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4 text-[#F58220]" />
+                            <span>{item.city}</span>
+                          </span>
+
+                          {item.distanceFormatted && (
+                            <span className="text-emerald-900 font-extrabold bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300 text-[11px]">
+                              📍 {item.distanceFormatted} away
+                            </span>
+                          )}
+                        </div>
+
+                        {item.languages && (
+                          <p className="text-xs text-slate-700 font-medium">
+                            Languages: <strong className="text-slate-900 font-bold">{item.languages.join(', ')}</strong>
+                          </p>
+                        )}
+
+                        {item.details && (
+                          <p className="text-xs text-slate-700 font-normal leading-relaxed pt-1 border-t border-slate-200 line-clamp-2">
+                            {item.details}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Direct Action Contact Buttons */}
+                    <div className="pt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => { setSelectedDetailItem(item); setBookingSuccess(false); }}
+                        className="w-full py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-950 font-extrabold text-xs rounded-2xl text-center border border-amber-300 transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <span>📋 पूरी जानकारी एवं बुकिंग (View Details)</span>
+                      </button>
+
+                      <LockedContactBox 
+                        providerId={item.id} 
+                        providerName={item.title} 
+                        defaultPhone={item.phone}
+                        serviceCategory={item.subtitle}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </DirectoryGatedView>
 
       {/* 5. INTERACTIVE SERVICE DETAIL & DIRECT BOOKING MODAL */}
       {selectedDetailItem && (

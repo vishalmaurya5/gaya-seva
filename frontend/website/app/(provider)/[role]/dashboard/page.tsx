@@ -77,12 +77,12 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
     loadProviderSession();
   }, [role]);
 
-  const handleToggleAvailability = (newStatus: 'AVAILABLE' | 'BOOKED') => {
+  const handleToggleAvailability = async (newStatus: 'AVAILABLE' | 'BOOKED') => {
     const nextIsAvailable = newStatus === 'AVAILABLE';
     setIsAvailable(nextIsAvailable);
 
     if (currentUser) {
-      const updatedUser = UserStore.updateUser(currentUser.id, {
+      const updatedUser = await UserStore.updateUser(currentUser.id, {
         availabilityStatus: newStatus,
       });
 
@@ -111,7 +111,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
     }
   };
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
@@ -119,7 +119,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
       ? (customVehicleInput.trim() || 'Custom Partner Service')
       : editCustomRole;
 
-    const updated = UserStore.updateUser(currentUser.id, {
+    const updated = await UserStore.updateUser(currentUser.id, {
       name: editName,
       phone: editPhone,
       email: editEmail,
@@ -142,13 +142,13 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
     router.push('/auth/login');
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (!currentUser) return;
     const confirmDelete = confirm(
       `क्या आप निश्चित रूप से अपना गयासेवा पार्टनर खाता हटाना चाहते हैं? (${currentUser.name})\nWarning: Deleting your partner profile will remove your service listings and verification badge.`
     );
     if (confirmDelete) {
-      UserStore.deleteUser(currentUser.id);
+      await UserStore.deleteUser(currentUser.id);
       localStorage.removeItem('GAYASEVA_CURRENT_USER');
       alert('आपका पार्टनर खाता सफलतापूर्वक हटा दिया गया है / Partner account deleted successfully.');
       router.push('/');

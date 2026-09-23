@@ -41,6 +41,7 @@ const ADMIN_NAV = [
   { key: 'users', name: 'Users & Admins', href: '/users', icon: Users },
   { key: 'popup_ads', name: '📢 Popup Advertisements', href: '/popup-ads', icon: Sparkles },
   { key: 'slider_banners', name: '🖼️ Slider Banners', href: '/slider-banners', icon: Layers },
+  { key: 'payments', name: '💳 Razorpay Payments & Fees', href: '/payments', icon: Settings },
   { key: 'places', name: '📍 Sacred Places & Markets', href: '/places', icon: MapPin },
   { key: 'services_config', name: '🛠️ Service Catalog & Fares', href: '/services-config', icon: Sliders },
   { key: 'analytics', name: '📊 Analytics & Conversion', href: '/analytics', icon: Activity },

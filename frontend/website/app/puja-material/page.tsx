@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ShoppingBag, ShieldCheck, Phone, MessageSquare } from 'lucide-react';
+import { ShoppingBag, ShieldCheck } from 'lucide-react';
+import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
+import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
 export default function PujaMaterialPage() {
   const items = [
@@ -19,37 +21,39 @@ export default function PujaMaterialPage() {
         <p className="text-xs text-[#F8F6EF]/80">Verified Puja Material, Flowers, Prasad & Samagri Suppliers in Gaya Ji.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {items.map((item) => (
-          <div key={item.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-serif font-bold text-base text-[#4A2E1A]">{item.name}</h3>
-                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1 mt-1">
-                  <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
-                </span>
+      <DirectoryGatedView categoryName="Puja Kits & Samagri" totalCount={items.length} maxPreviewCount={2}>
+        {(visibleCount, hasAccess) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {items.slice(0, visibleCount).map((item) => (
+              <div key={item.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-serif font-bold text-base text-[#4A2E1A]">{item.name}</h3>
+                      <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1 mt-1">
+                        <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
+                      </span>
+                    </div>
+                    <span className="text-sm font-serif font-bold text-[#F58220]">{item.price}</span>
+                  </div>
+
+                  <div className="text-xs text-gray-600 bg-[#F8F6EF] p-3 rounded-xl">
+                    <p>🪔 Category: {item.category}</p>
+                    <p>🏪 Provider: {hasAccess ? item.provider : '🔒 Provider Details Locked'}</p>
+                  </div>
+                </div>
+
+                <LockedContactBox 
+                  providerId={item.id} 
+                  providerName={item.provider} 
+                  defaultPhone={item.phone}
+                  serviceCategory="Puja Material & Tilkut"
+                />
               </div>
-              <span className="text-sm font-serif font-bold text-[#F58220]">{item.price}</span>
-            </div>
-
-            <div className="text-xs text-gray-600 bg-[#F8F6EF] p-3 rounded-xl">
-              <p>🪔 Category: {item.category}</p>
-              <p>🏪 Provider: {item.provider}</p>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <a
-                href={`https://wa.me/${item.phone.replace('+', '')}?text=Order%20Puja%20Material:%20${encodeURIComponent(item.name)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-2 bg-[#25D366] text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1"
-              >
-                <MessageSquare className="w-3.5 h-3.5" /> Order via WhatsApp
-              </a>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )}
+      </DirectoryGatedView>
     </div>
   );
 }

@@ -76,13 +76,13 @@ export default function OtherVendorsManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -96,18 +96,18 @@ export default function OtherVendorsManagementPage() {
       rating: 4.8,
     });
 
-    loadVendors();
+    await loadVendors();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingVendor) return;
 
     const langs = languagesStr.split(',').map(s => s.trim()).filter(Boolean);
 
-    UserStore.updateUser(editingVendor.id, {
+    await UserStore.updateUser(editingVendor.id, {
       name,
       email,
       phone,
@@ -119,22 +119,22 @@ export default function OtherVendorsManagementPage() {
       documentUrl,
     });
 
-    loadVendors();
+    await loadVendors();
     setEditingVendor(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete vendor record "${name}"?`)) {
-      UserStore.deleteUser(id);
-      loadVendors();
+      await UserStore.deleteUser(id);
+      await loadVendors();
     }
   };
 
-  const handleApproveStatus = (vendor: UserAccount) => {
+  const handleApproveStatus = async (vendor: UserAccount) => {
     const newStatus: UserAccount['status'] = vendor.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(vendor.id, { status: newStatus });
-    loadVendors();
+    await UserStore.updateUser(vendor.id, { status: newStatus });
+    await loadVendors();
   };
 
   const openEditModal = (vendor: UserAccount) => {

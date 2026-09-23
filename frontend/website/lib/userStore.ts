@@ -3,7 +3,7 @@ export interface UserAccount {
   name: string;
   email: string;
   phone: string;
-  role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
+  role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'AUTO' | 'TRAVEL' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'HEALTHCARE' | 'PHOTOGRAPHY' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
   customRole?: string;
   status: 'VERIFIED' | 'PENDING' | 'SUSPENDED';
   city?: string;
@@ -186,7 +186,7 @@ export const UserStore = {
     }
   },
 
-  addUser(user: Omit<UserAccount, 'id' | 'createdAt'>): UserAccount {
+  async addUser(user: Omit<UserAccount, 'id' | 'createdAt'>): Promise<UserAccount> {
     const users = this.getUsers();
     const newUser: UserAccount = {
       availabilityStatus: 'AVAILABLE',
@@ -197,19 +197,23 @@ export const UserStore = {
     const updated = [newUser, ...users];
     this.saveUsers(updated);
 
-    // Sync with Centralized API Server asynchronously
+    // Sync with Centralized API Server
     if (typeof window !== 'undefined') {
-      fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newUser),
-      }).catch(console.error);
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUser),
+        });
+      } catch (e) {
+        console.error('Failed to sync add user with API server:', e);
+      }
     }
 
     return newUser;
   },
 
-  updateUser(id: string, updates: Partial<UserAccount>): UserAccount | null {
+  async updateUser(id: string, updates: Partial<UserAccount>): Promise<UserAccount | null> {
     const users = this.getUsers();
     let updatedUser: UserAccount | null = null;
     const updated = users.map((u) => {
@@ -224,27 +228,35 @@ export const UserStore = {
 
       // Sync update with API Server
       if (typeof window !== 'undefined') {
-        fetch(API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, ...updates }),
-        }).catch(console.error);
+        try {
+          await fetch(API_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updates }),
+          });
+        } catch (e) {
+          console.error('Failed to sync update user with API server:', e);
+        }
       }
     }
     return updatedUser;
   },
 
-  deleteUser(id: string): boolean {
+  async deleteUser(id: string): Promise<boolean> {
     const users = this.getUsers();
     const filtered = users.filter((u) => u.id !== id);
     if (filtered.length !== users.length) {
       this.saveUsers(filtered);
 
-      // Sync deletion with API Server
+      // Sync deletion with API Server and await completion
       if (typeof window !== 'undefined') {
-        fetch(`${API_URL}?id=${id}`, {
-          method: 'DELETE',
-        }).catch(console.error);
+        try {
+          await fetch(`${API_URL}?id=${id}`, {
+            method: 'DELETE',
+          });
+        } catch (e) {
+          console.error('Failed to sync deletion with API server:', e);
+        }
       }
       return true;
     }

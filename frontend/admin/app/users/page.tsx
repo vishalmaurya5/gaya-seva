@@ -72,11 +72,11 @@ export default function UsersAndAdminsPage() {
     return isUserOrAdminRole && matchesSearch && matchesStatus;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
-    UserStore.addUser({
+    await UserStore.addUser({
       name,
       email: email || `${phone.replace(/\s+/g, '')}@gayaseva.org`,
       phone,
@@ -85,16 +85,16 @@ export default function UsersAndAdminsPage() {
       city: city || 'Gaya Ji',
     });
 
-    loadUsers();
+    await loadUsers();
     setShowCreateModal(false);
     resetForm();
   };
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
 
-    UserStore.updateUser(editingUser.id, {
+    await UserStore.updateUser(editingUser.id, {
       name,
       email,
       phone,
@@ -103,23 +103,23 @@ export default function UsersAndAdminsPage() {
       city,
     });
 
-    loadUsers();
+    await loadUsers();
     setEditingUser(null);
     resetForm();
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete user account "${name}"? This action cannot be undone.`)) {
-      UserStore.deleteUser(id);
-      loadUsers();
+      await UserStore.deleteUser(id);
+      await loadUsers();
     }
   };
 
-  const handleStatusToggle = (user: UserAccount) => {
+  const handleStatusToggle = async (user: UserAccount) => {
     const nextStatus: UserAccount['status'] = 
       user.status === 'VERIFIED' ? 'SUSPENDED' : 'VERIFIED';
-    UserStore.updateUser(user.id, { status: nextStatus });
-    loadUsers();
+    await UserStore.updateUser(user.id, { status: nextStatus });
+    await loadUsers();
   };
 
   const openEditModal = (user: UserAccount) => {

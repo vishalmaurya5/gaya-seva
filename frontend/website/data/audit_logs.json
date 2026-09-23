@@ -1,0 +1,78 @@
+[
+  {
+    "id": "log_1790180154010_829",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "USER_DELETED",
+    "category": "USER_MANAGEMENT",
+    "target": "Account: Vikramaditya Sharma",
+    "details": "Deleted user account from system store",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-23T16:15:55.088Z"
+  },
+  {
+    "id": "log_1790180150249_712",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "USER_DELETED",
+    "category": "USER_MANAGEMENT",
+    "target": "Account: Pandit Rajesh Shastri",
+    "details": "Deleted user account from system store",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-23T16:15:50.811Z"
+  },
+  {
+    "id": "log_1790180144912_741",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "USER_DELETED",
+    "category": "USER_MANAGEMENT",
+    "target": "Account: Sri Vishnupad Yatri Dharamshala",
+    "details": "Deleted user account from system store",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-23T16:15:49.088Z"
+  },
+  {
+    "id": "log_1790180147624_240",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "USER_DELETED",
+    "category": "USER_MANAGEMENT",
+    "target": "Account: Ramesh Kumar (Taxi Service)",
+    "details": "Deleted user account from system store",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-23T16:15:48.537Z"
+  },
+  {
+    "id": "log_1790180142153_902",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "USER_DELETED",
+    "category": "USER_MANAGEMENT",
+    "target": "Account: Sunita Banerjee",
+    "details": "Deleted user account from system store",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-23T16:15:48.512Z"
+  },
+  {
+    "id": "log_init_1",
+    "actor": "Vishal Verma (Super Admin)",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "SYSTEM_INITIALIZED",
+    "category": "SYSTEM_CONFIG",
+    "target": "GayaSeva Engine v2.4",
+    "details": "Central Admin Audit Logger engine initialized successfully",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-21T10:00:00.000Z"
+  },
+  {
+    "id": "log_init_2",
+    "actor": "System Auto Guard",
+    "action": "SECURITY_CHECK_PASSED",
+    "category": "AUTH",
+    "target": "Node Sync Server",
+    "details": "RBAC Access permissions verified for Super Admin",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-21T11:15:30.000Z"
+  }
+]

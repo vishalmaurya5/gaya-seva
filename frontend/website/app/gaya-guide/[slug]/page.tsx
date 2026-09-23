@@ -44,21 +44,44 @@ export default function PlaceDetailPage({ params }: { params: { slug: string } }
             </p>
           </div>
 
-          <div className="bg-[#F8F6EF] p-5 rounded-2xl border border-[#EBE6D6] space-y-2 text-xs sm:text-sm font-bold text-[#0F172A]">
+          <div className="bg-[#F8F6EF] p-5 rounded-2xl border border-[#EBE6D6] space-y-3 text-xs sm:text-sm font-bold text-[#0F172A]">
             <h3 className="font-sans font-extrabold text-base text-[#0F172A] flex items-center gap-2 mb-1">
-              <Navigation className="w-5 h-5 text-[#F58220]" /> How to Reach {placeName}
+              <Navigation className="w-5 h-5 text-[#F58220]" /> How to Reach {placeName} &amp; Live Map Location
             </h3>
-            <p>• <strong className="text-slate-900">From Gaya Railway Station:</strong> 4.0 km (15 mins via Pick & Drop Auto/Taxi)</p>
-            <p>• <strong className="text-slate-900">From Bodh Gaya:</strong> 12 km via Main Teerth Bypass Road</p>
-            <p>• <strong className="text-slate-900">From Gaya International Airport:</strong> 10 km via Airport Highway</p>
+            <p>• <strong className="text-slate-900">From Gaya Railway Station:</strong> ~4.0 - 15 km (15-35 mins via Pick &amp; Drop Auto/Taxi)</p>
+            <p>• <strong className="text-slate-900">From Bodh Gaya:</strong> Direct access via Teerth Bypass Road</p>
+            <p>• <strong className="text-slate-900">From Gaya International Airport:</strong> Direct access via Airport Highway</p>
+
+            {/* Embedded Live Google Map */}
+            <div className="mt-3 overflow-hidden rounded-2xl border border-amber-300 shadow-sm bg-amber-50">
+              <iframe
+                title={`Google Map for ${placeName}`}
+                width="100%"
+                height="220"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(placeName + ' Gaya Bodh Gaya Bihar')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+              />
+            </div>
+
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ' Gaya Bodh Gaya Bihar')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-sm transition-all"
+            >
+              <Navigation className="w-4 h-4" /> Open {placeName} in Google Maps
+            </a>
           </div>
 
           <div>
             <h3 className="font-sans font-extrabold text-lg text-[#0F172A] mb-2 flex items-center gap-2">
-              <Flame className="w-5 h-5 text-[#F6C343]" /> Religious Significance & Pinda Daan Rituals
+              <Flame className="w-5 h-5 text-[#F6C343]" /> Cultural &amp; Spiritual Significance
             </h3>
             <p className="text-sm font-semibold text-[#1E293B] leading-relaxed">
-              Mentioned in ancient Puranas, offering Pinda Daan at {placeName} grants eternal salvation to ancestors up to seven generations. Gayatri Mantras and Vedic oblations performed here under Gayawal Teerth Purohits carry immortal spiritual merit.
+              {placeName} is a central highlight of Gaya &amp; Bodh Gaya heritage. Mentioned in historic texts and sacred traditions, visiting {placeName} brings spiritual peace, cultural enrichment, and ancestral merit.
             </p>
           </div>
 

@@ -33,6 +33,7 @@ import { UserAccount } from '@/lib/userStore';
 
 export function Navbar() {
   const { t, language } = useLanguage();
+  const isHindi = language === 'hi';
   const { locationName, requestLocation } = useLocation();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,14 +43,13 @@ export function Navbar() {
 
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
 
-  const isHindi = language === 'hi';
-
   const checkUserSession = () => {
     if (typeof window === 'undefined') return;
     try {
       const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
       if (stored) {
-        setCurrentUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setCurrentUser(parsed);
       } else {
         setCurrentUser(null);
       }
@@ -63,11 +63,21 @@ export function Navbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
+    
+    // Interval check every 1 second to ensure instant update across tab states
+    const interval = setInterval(checkUserSession, 1000);
+
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('storage', checkUserSession);
+    window.addEventListener('focus', checkUserSession);
+    window.addEventListener('gayaseva_auth_change', checkUserSession);
+
     return () => {
+      clearInterval(interval);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('storage', checkUserSession);
+      window.removeEventListener('focus', checkUserSession);
+      window.removeEventListener('gayaseva_auth_change', checkUserSession);
     };
   }, []);
 
@@ -259,6 +269,15 @@ export function Navbar() {
                     <Search className="w-4 h-4 text-red-600 shrink-0" />
                     <span>{isHindi ? '🔎 खोया और पाया पोर्टल (Lost & Found)' : '🔎 Lost & Found Portal'}</span>
                   </Link>
+
+                  <Link 
+                    href="/healthcare"
+                    onClick={() => setServicesDropdownOpen(false)}
+                    className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-red-50 text-[#0F172A] hover:text-red-600 font-bold text-xs transition-colors"
+                  >
+                    <span className="text-sm">🏥</span>
+                    <span>{isHindi ? 'अस्पताल एवं आपातकालीन चिकित्सा' : 'Hospitals & Medical Care'}</span>
+                  </Link>
                 </div>
               )}
             </div>
@@ -287,6 +306,19 @@ export function Navbar() {
             >
               <Luggage className="w-3.5 h-3.5 text-blue-500" />
               <span>{isHindi ? 'यात्रा प्लान' : 'Trip Plan'}</span>
+            </Link>
+
+            {/* Lost & Found */}
+            <Link 
+              href="/help/lost-and-found" 
+              className={`px-2.5 py-1 rounded-lg text-xs xl:text-sm font-extrabold transition-all duration-200 flex items-center gap-1.5 ${
+                pathname === '/help/lost-and-found' 
+                  ? 'text-red-600 bg-red-50/80 shadow-2xs' 
+                  : 'text-slate-800 hover:text-red-600 hover:bg-red-50/50'
+              }`}
+            >
+              <Search className="w-3.5 h-3.5 text-red-500" />
+              <span>{isHindi ? 'खोया-पाया' : 'Lost & Found'}</span>
             </Link>
 
             {/* Arrangeman Link */}
@@ -502,6 +534,28 @@ export function Navbar() {
                 >
                   <Luggage className="w-4 h-4 text-blue-500" />
                   <span>{isHindi ? 'यात्रा प्लान' : 'Trip Plan'}</span>
+                </Link>
+              </li>
+
+              <li>
+                <Link 
+                  href="/help/lost-and-found" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-red-50/80 text-red-700 font-extrabold border border-red-200"
+                >
+                  <Search className="w-4 h-4 text-red-600" />
+                  <span>{isHindi ? '🔎 खोया और पाया पोर्टल' : '🔎 Lost & Found Portal'}</span>
+                </Link>
+              </li>
+
+              <li>
+                <Link 
+                  href="/healthcare" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-red-50/50 text-red-700 font-extrabold border border-red-100"
+                >
+                  <span className="text-sm">🏥</span>
+                  <span>{isHindi ? 'अस्पताल एवं चिकित्सा सेवाएं' : 'Hospitals & Medical Care'}</span>
                 </Link>
               </li>
 

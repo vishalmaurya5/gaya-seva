@@ -134,11 +134,14 @@ import fs from 'fs';
 import path from 'path';
 
 function getFilePath(): string {
-  // Save to workspace root data/users.json
   const possiblePaths = [
+    path.join(process.cwd(), '..', 'data', 'users.json'),
     path.join(process.cwd(), 'data', 'users.json'),
     path.join(process.cwd(), '..', '..', 'data', 'users.json'),
   ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
   return possiblePaths[0];
 }
 
@@ -165,7 +168,14 @@ function writeUsers(users: UserAccount[]) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf-8');
+    const dataStr = JSON.stringify(users, null, 2);
+    fs.writeFileSync(filePath, dataStr, 'utf-8');
+
+    // Also sync website local data directory if different
+    const localWebsitePath = path.join(process.cwd(), 'data', 'users.json');
+    if (localWebsitePath !== filePath && fs.existsSync(path.dirname(localWebsitePath))) {
+      fs.writeFileSync(localWebsitePath, dataStr, 'utf-8');
+    }
   } catch (e) {
     console.error('Failed to write users to file store:', e);
   }

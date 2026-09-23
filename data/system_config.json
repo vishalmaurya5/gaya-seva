@@ -1,0 +1,9 @@
+{
+  "customer_access_fee": 5,
+  "provider_registration_fee": 49,
+  "customer_access_duration_days": 0,
+  "currency": "INR",
+  "payment_enabled": true,
+  "refund_enabled": true,
+  "updatedAt": "2026-09-23T20:00:00.000Z"
+}

@@ -129,8 +129,8 @@ export default function VerificationPage() {
     return true;
   });
 
-  const handleAction = (id: string, name: string, newStatus: 'VERIFIED' | 'REJECTED' | 'SUSPENDED') => {
-    const updated = UserStore.updateUser(id, { status: newStatus as any });
+  const handleAction = async (id: string, name: string, newStatus: 'VERIFIED' | 'REJECTED' | 'SUSPENDED') => {
+    const updated = await UserStore.updateUser(id, { status: newStatus as any });
     if (updated) {
       reloadUsers();
       if (newStatus === 'VERIFIED') {

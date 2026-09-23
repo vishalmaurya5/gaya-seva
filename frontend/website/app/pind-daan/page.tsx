@@ -104,6 +104,143 @@ export default function PindDaanPage() {
           </div>
         </div>
 
+        {/* 8 Essential Pind Daan Locations Section */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-md uppercase tracking-wider">
+              IMPORTANT SHRADDH &amp; VEDI SITES
+            </span>
+            <h2 className="text-2xl font-serif font-bold text-[#4A2E1A] pt-1">
+              8 Essential Pind Daan Locations in Gaya Ji (आठ मुख्य गया पिंडदान वेदी)
+            </h2>
+            <p className="text-xs text-slate-600 font-medium max-w-3xl">
+              According to the Gaya Mahatmya (Vayu Purana), performing Pind Daan at these sacred Vedis, ghats, and hills grants ultimate Moksha and peace to seven generations of departed ancestors.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            {/* 1. Vishnupad */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">1. 🛕 Vishnupad (विष्णुपद मंदिर)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Primary 1st Vedi</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Primary holy site containing Lord Vishnu&apos;s 40 cm footprint stamped in basalt rock. Oblations (pindas) offered directly at the footprint ensure instant karmic relief.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 4.0 km from Station</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Vishnupad+Temple+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 2. Falgu River */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">2. 🌊 Falgu River (फल्गु नदी एवं देवघाट)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Water &amp; Sand Tarpan</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Sacred river bank where Yatris take holy bath and perform water tarpan and sand Pind Daan oblations for departed lineage members.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 3.5 km from Station</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Falgu+River+Devghat+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 3. Akshay Vat */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">3. 🌳 Akshay Vat (अक्षयवट अमर वटवृक्ष)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Suphal Blessing Vedi</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                The immortal banyan tree under which Shri Ram performed Shradh. Gayawal Panda Ji grants the final &quot;Suphal&quot; blessing here to conclude Pind Daan.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 1.2 km from Vishnupad</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Akshayavat+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 4. Sita Kund */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">4. 🌸 Sita Kund (सीता कुण्ड)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Mata Sita Shrine</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Located across Falgu river where Devi Sita performed Pind Daan with Falgu sand for King Dasharatha when Lord Rama was absent.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 4.2 km from Station</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Sita+Kund+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 5. Pretshila */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">5. 🏔️ Pretshila (प्रेतशिला पर्वत)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Unnatural Demise Shradh</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Sacred hill (670 steps) for ancestors who suffered unnatural or unfulfilled deaths. Sattu Pinda offered at Brahma Kund grants soul peace.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 11.0 km North of Gaya</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Pretshila+Hill+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 6. Ramshila */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">6. ⛰️ Ramshila (रामशिला पर्वत)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Treta Yuga Ram Site</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Ancient hill shrine where Lord Rama offered Pind Daan for King Dasharatha. Features ancient Rameshwar Shiva temple atop the hill.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 5.0 km from Station</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Ramshila+Hill+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 7. Brahmayoni */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">7. 🌄 Brahmayoni (ब्रह्मयोनि पर्वत)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">Rebirth Liberation</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                Sacred hill (424 steps) housing Matreyi Cave &amp; Ashtabhuja temple. Performing rites here frees ancestors from the cycle of rebirth.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 4.8 km from Station</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Brahmayoni+Hill+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+
+            {/* 8. Gayasur Vedis */}
+            <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-900 text-sm">8. 🔱 Gayasur Vedis (गयासुर 48 वेदी परिक्रमा)</span>
+                <span className="bg-amber-100 text-amber-950 font-extrabold px-2 py-0.5 rounded text-[10px]">48-Vedi Circuit</span>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                The ancient 48-Vedi pilgrimage circuit established over the body of Demon Gayasur by Lord Vishnu &amp; Devas for eternal ancestor salvation.
+              </p>
+              <div className="flex items-center justify-between pt-2 border-t border-orange-200/50 text-[11px] text-gray-600">
+                <span>📍 3.8 km Circuit Zone</span>
+                <a href="https://www.google.com/maps/search/?api=1&query=Gayasur+Asura+Shila+Gaya" target="_blank" rel="noopener noreferrer" className="text-amber-800 font-bold underline">Google Maps</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Action Banner */}
         <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
