@@ -49,12 +49,17 @@ export function Navbar() {
       const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
       if (stored) {
         const parsed = JSON.parse(stored);
-        setCurrentUser(parsed);
+        setCurrentUser((prev) => {
+          if (!prev || prev.id !== parsed.id || prev.name !== parsed.name || prev.role !== parsed.role) {
+            return parsed;
+          }
+          return prev;
+        });
       } else {
-        setCurrentUser(null);
+        setCurrentUser((prev) => (prev !== null ? null : prev));
       }
     } catch (e) {
-      setCurrentUser(null);
+      setCurrentUser((prev) => (prev !== null ? null : prev));
     }
   };
 

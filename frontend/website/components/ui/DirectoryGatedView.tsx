@@ -82,8 +82,6 @@ export function DirectoryGatedView({
           createdAt: new Date().toISOString(),
         });
         localStorage.setItem(key, JSON.stringify(records));
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new Event('gayaseva_access_change'));
       }
     } catch (e) {}
   };

@@ -28,17 +28,14 @@ export function StickyAccessPassBar() {
         const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
         if (stored) {
           const usr = JSON.parse(stored);
-          setCurrentUser(usr);
+          setCurrentUser((prev: any) => (!prev || prev.id !== usr.id ? usr : prev));
           
           // Fetch access status
           fetch(`/api/access/status?userId=${usr.id}`)
             .then((r) => r.json())
             .then((data) => {
-              if (data?.hasAccess) {
-                setHasAccess(true);
-              } else {
-                setHasAccess(false);
-              }
+              const isAccessActive = !!data?.hasAccess;
+              setHasAccess((prev) => (prev !== isAccessActive ? isAccessActive : prev));
             })
             .catch(() => setHasAccess(false));
         } else {
