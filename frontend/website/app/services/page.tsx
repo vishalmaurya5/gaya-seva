@@ -283,6 +283,7 @@ function ServicesContent() {
       lng?: number;
       priceText?: string;
       availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+      isRegistered?: boolean;
     }> = [];
 
     // Map Users from UserStore
@@ -312,6 +313,7 @@ function ServicesContent() {
         lng: u.lng,
         priceText: 'GayaSeva 0% Commission Direct Rate',
         availabilityStatus: u.availabilityStatus || 'AVAILABLE',
+        isRegistered: true,
       });
     });
 
@@ -336,6 +338,7 @@ function ServicesContent() {
         googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(s.title + ' Gaya Ji')}`,
         priceText: s.priceText,
         availabilityStatus: s.availabilityStatus || 'AVAILABLE',
+        isRegistered: false,
       });
     });
 
@@ -557,13 +560,19 @@ function ServicesContent() {
                             <span>{item.categoryDisplay}</span>
                           </span>
 
-                          {item.availabilityStatus !== 'BOOKED' ? (
-                            <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
-                              🟢 AVAILABLE
-                            </span>
+                          {item.isRegistered ? (
+                            item.availabilityStatus !== 'BOOKED' ? (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                                🟢 AVAILABLE
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                                🔴 BOOKED / BUSY
+                              </span>
+                            )
                           ) : (
-                            <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
-                              🔴 BOOKED / BUSY
+                            <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-400 text-slate-950 rounded-full inline-flex items-center gap-1 border border-amber-500">
+                              📋 ENQUIRY NOW (पूछताछ उपलब्ध)
                             </span>
                           )}
                         </div>

@@ -31,6 +31,7 @@ export default function VerificationPage() {
   const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState('');
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [docImageErrors, setDocImageErrors] = useState<Record<string, boolean>>({});
 
   // Direct Profile Photo Edit State
   const [editingProfileUser, setEditingProfileUser] = useState<UserAccount | null>(null);
@@ -75,14 +76,44 @@ export default function VerificationPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleDocFileUpload = (user: UserAccount, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocFileUpload = async (user: UserAccount, e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const file = e.target.files[0];
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', 'gayaseva-partner-documents');
+      formData.append('filename', file.name);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          UserStore.updateUser(user.id, { documentUrl: data.url });
+          AuditLogStore.log('DOCUMENT_UPLOADED', `Partner: ${user.name} (${user.id})`, `Uploaded verification document file: ${data.url}`, 'VERIFICATION');
+          setDocImageErrors((prev) => ({ ...prev, [user.id]: false }));
+          reloadUsers();
+          setNotification(`📄 Verification document uploaded for ${user.name}`);
+          setTimeout(() => setNotification(''), 4000);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Admin document upload API failed, falling back to data URL:', err);
+    }
+
+    // Fallback to FileReader dataUrl if API route is unavailable
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
       UserStore.updateUser(user.id, { documentUrl: dataUrl });
       AuditLogStore.log('DOCUMENT_UPLOADED', `Partner: ${user.name} (${user.id})`, 'Uploaded device file for Govt verification document', 'VERIFICATION');
+      setDocImageErrors((prev) => ({ ...prev, [user.id]: false }));
       reloadUsers();
       setNotification(`📄 Verification document uploaded for ${user.name}`);
       setTimeout(() => setNotification(''), 4000);
@@ -381,29 +412,41 @@ export default function VerificationPage() {
                     {p.documentUrl ? (
                       <div className="bg-white p-3 rounded-xl border border-gray-300 space-y-2">
                         {/* Inline Image Preview if document is an image URL or dataURL */}
-                        {p.documentUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) || p.documentUrl.startsWith('data:image/') || p.documentUrl.startsWith('http') ? (
+                        {!docImageErrors[p.id] && (p.documentUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) || p.documentUrl.startsWith('data:image/') || p.documentUrl.startsWith('http') || p.documentUrl.startsWith('/uploads/')) ? (
                           <div 
                             onClick={() => {
                               setPreviewModalUrl(p.documentUrl!);
                               setPreviewTitle(`${p.name} — Govt ID Document`);
                             }}
-                            className="relative h-32 w-full bg-slate-100 rounded-lg overflow-hidden border border-gray-200 cursor-pointer group flex items-center justify-center"
+                            className="relative h-36 w-full bg-slate-100 rounded-lg overflow-hidden border border-gray-200 cursor-pointer group flex items-center justify-center"
                           >
                             <img 
                               src={p.documentUrl} 
                               alt="Govt ID Document" 
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = 'none';
+                              onError={() => {
+                                setDocImageErrors((prev) => ({ ...prev, [p.id]: true }));
                               }}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1">
                               🔍 Click to Zoom Document
                             </div>
                           </div>
-                        ) : null}
+                        ) : p.documentUrl.toLowerCase().endsWith('.pdf') ? (
+                          <div className="h-28 w-full bg-red-50 rounded-lg border border-red-200 flex flex-col items-center justify-center gap-1 p-2 text-red-900">
+                            <FileText className="w-8 h-8 text-red-600" />
+                            <span className="font-bold text-xs">PDF Verification Document</span>
+                            <span className="text-[10px] text-red-700">Click &apos;Open Full Document&apos; below to view PDF</span>
+                          </div>
+                        ) : (
+                          <div className="h-28 w-full bg-amber-50 rounded-lg border border-amber-200 flex flex-col items-center justify-center gap-1 p-2 text-amber-900">
+                            <FileText className="w-7 h-7 text-amber-600" />
+                            <span className="font-bold text-xs">Document Attached ({p.documentUrl.substring(0, 30)}...)</span>
+                            <span className="text-[10px] text-amber-800">Use &apos;Open Full Document&apos; or Re-upload file above</span>
+                          </div>
+                        )}
 
-                        <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center justify-between gap-2 text-xs pt-1">
                           <a 
                             href={p.documentUrl} 
                             target="_blank" 

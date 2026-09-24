@@ -13,7 +13,7 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
-import { ContentStore, SliderBanner } from '../../lib/contentStore';
+import { ContentStore, SliderBanner, SliderBannerStore } from '../../lib/contentStore';
 
 export default function AdminSliderBannersPage() {
   const [banners, setBanners] = useState<SliderBanner[]>([]);
@@ -32,8 +32,9 @@ export default function AdminSliderBannersPage() {
   const [isActive, setIsActive] = useState(true);
   const [sequence, setSequence] = useState(1);
 
-  const loadBanners = () => {
-    setBanners(ContentStore.getSliderBanners());
+  const loadBanners = async () => {
+    const fetched = await SliderBannerStore.fetchBannersFromApi();
+    setBanners(fetched);
   };
 
   useEffect(() => {
@@ -70,12 +71,12 @@ export default function AdminSliderBannersPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) return;
 
     if (editingBanner) {
-      ContentStore.updateSliderBanner(editingBanner.id, {
+      await SliderBannerStore.updateBanner(editingBanner.id, {
         title,
         subtitle,
         badgeText,
@@ -88,7 +89,7 @@ export default function AdminSliderBannersPage() {
         sequence,
       });
     } else {
-      ContentStore.addSliderBanner({
+      await SliderBannerStore.addBanner({
         title,
         subtitle,
         badgeText,
@@ -103,19 +104,19 @@ export default function AdminSliderBannersPage() {
     }
 
     setIsModalOpen(false);
-    loadBanners();
+    await loadBanners();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this slider banner?')) {
-      ContentStore.deleteSliderBanner(id);
-      loadBanners();
+      await SliderBannerStore.deleteBanner(id);
+      await loadBanners();
     }
   };
 
-  const handleToggleActive = (banner: SliderBanner) => {
-    ContentStore.updateSliderBanner(banner.id, { isActive: !banner.isActive });
-    loadBanners();
+  const handleToggleActive = async (banner: SliderBanner) => {
+    await SliderBannerStore.updateBanner(banner.id, { isActive: !banner.isActive });
+    await loadBanners();
   };
 
   return (

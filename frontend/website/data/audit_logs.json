@@ -1,5 +1,16 @@
 [
   {
+    "id": "log_1790246730753_968",
+    "actor": "Vishal Verma",
+    "actorEmail": "vishalverma5359@gayaseva.com",
+    "action": "PROVIDER_APPROVED",
+    "category": "VERIFICATION",
+    "target": "Partner: Suresh Kumar Agarwal (Hotel Gaya Dham) (usr_1790245517267)",
+    "details": "Approved partner application & activated verified tick badge",
+    "ip": "127.0.0.1",
+    "timestamp": "2026-09-24T10:45:32.180Z"
+  },
+  {
     "id": "log_1790180154010_829",
     "actor": "Vishal Verma",
     "actorEmail": "vishalverma5359@gayaseva.com",

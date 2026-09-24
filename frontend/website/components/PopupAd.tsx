@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { X, Phone, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
-import { ContentStore, PopupAd as PopupAdType } from '@/lib/contentStore';
+import { ContentStore, PopupAd as PopupAdType, PopupAdStore } from '@/lib/contentStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { getProfessionalWhatsAppUrl } from '@/lib/whatsappHelper';
 
@@ -11,20 +11,27 @@ export function PopupAd() {
   const { t, language } = useLanguage();
   const [ad, setAd] = useState<PopupAdType | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check if dismissed today
     const dismissedUntil = localStorage.getItem('gayaseva_popup_dismissed_until');
     if (dismissedUntil && Number(dismissedUntil) > Date.now()) {
       return;
     }
 
-    const activeAd = ContentStore.getActivePopupAd();
-    if (activeAd) {
-      setAd(activeAd);
-      const timer = setTimeout(() => setIsVisible(true), 800);
-      return () => clearTimeout(timer);
-    }
+    const loadAd = async () => {
+      await PopupAdStore.fetchAdsFromApi();
+      const activeAd = ContentStore.getActivePopupAd();
+      if (activeAd) {
+        setAd(activeAd);
+        const timer = setTimeout(() => setIsVisible(true), 800);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    loadAd();
   }, []);
 
   const handleClose = (dontShowToday: boolean = false) => {
@@ -36,7 +43,7 @@ export function PopupAd() {
     }
   };
 
-  if (!isVisible || !ad) return null;
+  if (!mounted || !isVisible || !ad) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">

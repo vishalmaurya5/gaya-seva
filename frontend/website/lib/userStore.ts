@@ -18,6 +18,8 @@ export interface UserAccount {
   rating?: number;
   password?: string;
   availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+  description?: string;
+  features?: string[];
 }
 
 const STORAGE_KEY = 'GAYASEVA_USERS_STORE';

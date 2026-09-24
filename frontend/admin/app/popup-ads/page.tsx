@@ -12,7 +12,7 @@ import {
   Image as ImageIcon,
   X
 } from 'lucide-react';
-import { ContentStore, PopupAd } from '../../lib/contentStore';
+import { ContentStore, PopupAd, PopupAdStore } from '../../lib/contentStore';
 
 export default function AdminPopupAdsPage() {
   const [ads, setAds] = useState<PopupAd[]>([]);
@@ -29,8 +29,9 @@ export default function AdminPopupAdsPage() {
   const [isActive, setIsActive] = useState(true);
   const [delaySeconds, setDelaySeconds] = useState(1);
 
-  const loadAds = () => {
-    setAds(ContentStore.getPopupAds());
+  const loadAds = async () => {
+    const fetched = await PopupAdStore.fetchAdsFromApi();
+    setAds(fetched);
   };
 
   useEffect(() => {
@@ -63,12 +64,12 @@ export default function AdminPopupAdsPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) return;
 
     if (editingAd) {
-      ContentStore.updatePopupAd(editingAd.id, {
+      await PopupAdStore.updateAd(editingAd.id, {
         title,
         subtitle,
         imageUrl,
@@ -79,7 +80,7 @@ export default function AdminPopupAdsPage() {
         delaySeconds,
       });
     } else {
-      ContentStore.addPopupAd({
+      await PopupAdStore.addAd({
         title,
         subtitle,
         imageUrl,
@@ -92,19 +93,19 @@ export default function AdminPopupAdsPage() {
     }
 
     setIsModalOpen(false);
-    loadAds();
+    await loadAds();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this popup advertisement?')) {
-      ContentStore.deletePopupAd(id);
-      loadAds();
+      await PopupAdStore.deleteAd(id);
+      await loadAds();
     }
   };
 
-  const handleToggleActive = (ad: PopupAd) => {
-    ContentStore.updatePopupAd(ad.id, { isActive: !ad.isActive });
-    loadAds();
+  const handleToggleActive = async (ad: PopupAd) => {
+    await PopupAdStore.updateAd(ad.id, { isActive: !ad.isActive });
+    await loadAds();
   };
 
   return (

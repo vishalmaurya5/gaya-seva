@@ -1,0 +1,80 @@
+[
+  {
+    "id": "log_1790245626634_8e5uy",
+    "event_key": "PAYMENT_SUCCESS",
+    "recipient": "hotelgayadham@gmail.com",
+    "subject": "GayaSeva — Payment Receipt #pay_TfqApo4b5MDmyd",
+    "status": "SENT",
+    "related_type": "PAYMENT",
+    "related_id": "pay_1790245600969",
+    "retry_count": 0,
+    "created_at": "2026-09-24T10:27:06.634Z",
+    "provider_message_id": "<c9d203f5-7a18-b1bc-8cb6-1a1cf56e16f8@gmail.com>",
+    "sent_at": "2026-09-24T10:27:09.906Z"
+  },
+  {
+    "id": "log_1790245544284_ffyzo",
+    "event_key": "PROVIDER_PAYMENT_SUCCESS",
+    "recipient": "hotelgayadham@gmail.com",
+    "subject": "GayaSeva — Provider Registration Payment Successful",
+    "status": "SENT",
+    "related_type": "PAYMENT",
+    "related_id": "pay_1790245519120",
+    "retry_count": 0,
+    "created_at": "2026-09-24T10:25:44.284Z",
+    "provider_message_id": "<1c80829c-1605-1d79-890d-ce2b1659677d@gmail.com>",
+    "sent_at": "2026-09-24T10:25:48.723Z"
+  },
+  {
+    "id": "log_1790245518457_qn8ub",
+    "event_key": "PROVIDER_REGISTERED",
+    "recipient": "hotelgayadham@gmail.com",
+    "subject": "Welcome to GayaSeva — Your Service Provider Registration is Received",
+    "status": "SENT",
+    "related_type": "PROVIDER",
+    "related_id": "usr_1790245517267",
+    "retry_count": 0,
+    "created_at": "2026-09-24T10:25:18.457Z",
+    "provider_message_id": "<4645c296-1492-9a9b-1dd0-f11fd2df97e3@gmail.com>",
+    "sent_at": "2026-09-24T10:25:21.662Z"
+  },
+  {
+    "id": "log_1790242713596_qx5b8",
+    "event_key": "PAYMENT_SUCCESS",
+    "recipient": "rameshpathak@gmail.com",
+    "subject": "GayaSeva — Payment Receipt #pay_TfpLdDHb8SXVOO",
+    "status": "SENT",
+    "related_type": "PAYMENT",
+    "related_id": "pay_1790242691152",
+    "retry_count": 0,
+    "created_at": "2026-09-24T09:38:33.596Z",
+    "provider_message_id": "<09ce162b-66cc-95a4-3bc9-f224999c21b4@gmail.com>",
+    "sent_at": "2026-09-24T09:38:36.883Z"
+  },
+  {
+    "id": "log_1790242642373_cg76u",
+    "event_key": "PROVIDER_PAYMENT_SUCCESS",
+    "recipient": "rameshpathak@gmail.com",
+    "subject": "GayaSeva — Provider Registration Payment Successful",
+    "status": "SENT",
+    "related_type": "PAYMENT",
+    "related_id": "pay_1790242610809",
+    "retry_count": 0,
+    "created_at": "2026-09-24T09:37:22.373Z",
+    "provider_message_id": "<44d9985b-5e93-63df-9f0d-eec4558bf18a@gmail.com>",
+    "sent_at": "2026-09-24T09:37:25.626Z"
+  },
+  {
+    "id": "log_1790242610287_b9684",
+    "event_key": "PROVIDER_REGISTERED",
+    "recipient": "rameshpathak@gmail.com",
+    "subject": "Welcome to GayaSeva — Your Service Provider Registration is Received",
+    "status": "SENT",
+    "related_type": "PROVIDER",
+    "related_id": "usr_1790242608847",
+    "retry_count": 0,
+    "created_at": "2026-09-24T09:36:50.287Z",
+    "provider_message_id": "<51f6aa9a-f186-b270-b87d-ffc0bcf01f07@gmail.com>",
+    "sent_at": "2026-09-24T09:36:54.177Z"
+  }
+]

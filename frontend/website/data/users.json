@@ -12,34 +12,46 @@
     "rating": 5
   },
   {
-    "id": "usr_1790180321835",
-    "name": "Vishu Aryan",
-    "email": "7004394874@gayaseva.org",
-    "phone": "7004394874",
-    "password": "Babu@730123",
-    "role": "PILGRIM",
-    "customRole": "",
+    "id": "usr_1790242608847",
+    "name": "Pt. Ramesh Kumar Pathak (Pt. Ramesh Pathak Puja Sewa)",
+    "email": "rameshpathak@gmail.com",
+    "phone": "9546101001",
+    "password": "Pathak@8765",
+    "role": "PANDIT",
+    "customRole": "Pind Daan, Shradh & Vedic Karmakand",
     "status": "VERIFIED",
-    "city": "Manpur gaya",
+    "city": "\tPind Daan, Gaya Shraddh, Asthi Visarjan",
     "languages": [
-      "Hindi"
+      "Hindi",
+      "English",
+      "Bengali",
+      "Telugu",
+      "Tamil",
+      "Sanskrit"
     ],
-    "createdAt": "2026-09-23T16:18:41.873Z",
+    "createdAt": "2026-09-24T09:36:50.207Z",
+    "avatarUrl": "/uploads/gayaseva-partner-profiles/profile_1790242584393_nzo3eq8_1790242584419_ekhez.jpeg",
+    "profilePicUrl": "/uploads/gayaseva-partner-profiles/profile_1790242584393_nzo3eq8_1790242584419_ekhez.jpeg",
+    "documentUrl": "/uploads/gayaseva-partner-documents/documnts_1790242577679_q202q69_1790242579375_ckblq.jpeg",
     "rating": 5
   },
   {
-    "id": "usr_1790222805383",
-    "name": "GayaSeva Member",
-    "email": "8294559962@gayaseva.org",
-    "phone": "8294559962",
-    "role": "PILGRIM",
-    "customRole": "",
+    "id": "usr_1790245517267",
+    "name": "Suresh Kumar Agarwal (Hotel Gaya Dham)",
+    "email": "hotelgayadham@gmail.com",
+    "phone": "9546101002",
+    "password": "Gaya#2345",
+    "role": "HOTEL",
+    "customRole": "AC/Non-AC rooms near Vishnupad",
     "status": "VERIFIED",
-    "city": "Gaya Ji",
+    "city": "demo for testing",
     "languages": [
-      "Hindi"
+      "Hindi",
+      "English"
     ],
-    "createdAt": "2026-09-24T04:06:45.632Z",
-    "rating": 5
+    "createdAt": "2026-09-24T10:25:18.452Z",
+    "documentUrl": "/uploads/gayaseva-partner-documents/documnts_1790245494290_ghy8gqs_1790245495721_tumw7.jpeg",
+    "rating": 5,
+    "availabilityStatus": "AVAILABLE"
   }
 ]

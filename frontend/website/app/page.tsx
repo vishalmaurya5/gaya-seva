@@ -365,6 +365,9 @@ export default function HomePage() {
       </section>
       </div>
 
+      {/* 🖼️ HOMEPAGE RECTANGULAR SLIDER BANNERS */}
+      <RectangularBannerSlider />
+
       {/* SECTION 4: 📊 LIVE YATRI KEY METRICS COUNTER */}
       <section className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-6">

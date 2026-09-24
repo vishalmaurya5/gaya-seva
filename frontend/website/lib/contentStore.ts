@@ -67,12 +67,24 @@ export interface LostFoundItem {
 }
 
 // Initial Default Data (Popup Ads default empty until added by Admin)
-const INITIAL_POPUP_ADS: PopupAd[] = [];
+const INITIAL_POPUP_ADS: PopupAd[] = [
+  {
+    id: 'pop-promo-1',
+    title: '🙏 Gaya Ji Pinda Daan & Yatra Special Offer',
+    subtitle: 'Book Verified Teerth Pandits, Safe Hotel Stays, and Express Pickup Taxi Direct at 0% Commission.',
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
+    actionUrl: '/services',
+    phone: '+91 9117588242',
+    whatsapp: '919117588242',
+    isActive: true,
+    delaySeconds: 1,
+  },
+];
 
 const INITIAL_SLIDER_BANNERS: SliderBanner[] = [
   {
     id: 'sld-1',
-    title: '🚕 Gaya Railway Station Express Pick & Drop Cab',
+    title: '🚖 Gaya Railway Station Express Pick & Drop Cab',
     subtitle: '24/7 Guaranteed direct pickup from GAYA Junction to Vishnupad Temple & Bodh Gaya.',
     badgeText: 'EXPRESS TRANSPORT',
     imageUrl: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80',
@@ -108,6 +120,19 @@ const INITIAL_SLIDER_BANNERS: SliderBanner[] = [
     whatsapp: '917301232069',
     isActive: true,
     sequence: 3,
+  },
+  {
+    id: 'sld-4',
+    title: 'Apne Business ka Promotion GayaSeva Homepage par Karwayein!',
+    subtitle: 'Agar aap Hotel, Dharamshala, Restaurant, Taxi/Bike Service, Pandit Ji, Pooja Samagri, Travel Service, Local Shop, Guide ya koi other local service provide karte hain, to aapka promotional slider GayaSeva Homepage par display kiya ja sakta hai.',
+    badgeText: 'SPECIAL OFFER',
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
+    actionUrl: '/provider/register',
+    buttonText: 'Enquiry Now',
+    phone: '+91 9117588242',
+    whatsapp: '919117588242',
+    isActive: true,
+    sequence: 4,
   },
 ];
 
@@ -465,11 +490,10 @@ export class ContentStore {
         return INITIAL_POPUP_ADS;
       }
       const parsed: PopupAd[] = JSON.parse(stored);
-      const cleaned = parsed.filter(ad => ad.id !== 'pop-1');
-      if (cleaned.length !== parsed.length) {
-        this.savePopupAds(cleaned);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
       }
-      return cleaned;
+      return INITIAL_POPUP_ADS;
     } catch {
       return INITIAL_POPUP_ADS;
     }
@@ -734,6 +758,150 @@ export class LostFoundStore {
       });
     } catch (e) {
       console.error('Failed to delete Lost & Found item on API:', e);
+    }
+  }
+}
+
+export class SliderBannerStore {
+  static getBanners(): SliderBanner[] {
+    return ContentStore.getSliderBanners();
+  }
+
+  static getActiveBanners(): SliderBanner[] {
+    return ContentStore.getActiveSliderBanners();
+  }
+
+  static async fetchBannersFromApi(): Promise<SliderBanner[]> {
+    try {
+      const res = await fetch('/api/slider-banners', { cache: 'no-store' });
+      if (res.ok) {
+        const banners: SliderBanner[] = await res.json();
+        if (Array.isArray(banners) && banners.length > 0) {
+          ContentStore.saveSliderBanners(banners);
+          return banners;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch slider banners from API:', e);
+    }
+    return ContentStore.getSliderBanners();
+  }
+
+  static async addBanner(banner: Omit<SliderBanner, 'id'>): Promise<SliderBanner> {
+    const local = ContentStore.addSliderBanner(banner);
+    try {
+      const res = await fetch('/api/slider-banners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(banner),
+      });
+      if (res.ok) {
+        const serverBanner = await res.json();
+        const banners = ContentStore.getSliderBanners();
+        const idx = banners.findIndex(b => b.id === local.id);
+        if (idx !== -1) banners[idx] = serverBanner;
+        ContentStore.saveSliderBanners(banners);
+        return serverBanner;
+      }
+    } catch (e) {
+      console.error('Failed to save slider banner to API:', e);
+    }
+    return local;
+  }
+
+  static async updateBanner(id: string, updated: Partial<SliderBanner>): Promise<void> {
+    ContentStore.updateSliderBanner(id, updated);
+    try {
+      await fetch('/api/slider-banners', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updated }),
+      });
+    } catch (e) {
+      console.error('Failed to update slider banner on API:', e);
+    }
+  }
+
+  static async deleteBanner(id: string): Promise<void> {
+    ContentStore.deleteSliderBanner(id);
+    try {
+      await fetch(`/api/slider-banners?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+    } catch (e) {
+      console.error('Failed to delete slider banner on API:', e);
+    }
+  }
+}
+
+export class PopupAdStore {
+  static getAds(): PopupAd[] {
+    return ContentStore.getPopupAds();
+  }
+
+  static getActiveAd(): PopupAd | null {
+    return ContentStore.getActivePopupAd();
+  }
+
+  static async fetchAdsFromApi(): Promise<PopupAd[]> {
+    try {
+      const res = await fetch('/api/popup-ads', { cache: 'no-store' });
+      if (res.ok) {
+        const ads: PopupAd[] = await res.json();
+        if (Array.isArray(ads) && ads.length > 0) {
+          ContentStore.savePopupAds(ads);
+          return ads;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch popup ads from API:', e);
+    }
+    return ContentStore.getPopupAds();
+  }
+
+  static async addAd(ad: Omit<PopupAd, 'id'>): Promise<PopupAd> {
+    const local = ContentStore.addPopupAd(ad);
+    try {
+      const res = await fetch('/api/popup-ads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ad),
+      });
+      if (res.ok) {
+        const serverAd = await res.json();
+        const ads = ContentStore.getPopupAds();
+        const idx = ads.findIndex(a => a.id === local.id);
+        if (idx !== -1) ads[idx] = serverAd;
+        ContentStore.savePopupAds(ads);
+        return serverAd;
+      }
+    } catch (e) {
+      console.error('Failed to save popup ad to API:', e);
+    }
+    return local;
+  }
+
+  static async updateAd(id: string, updated: Partial<PopupAd>): Promise<void> {
+    ContentStore.updatePopupAd(id, updated);
+    try {
+      await fetch('/api/popup-ads', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updated }),
+      });
+    } catch (e) {
+      console.error('Failed to update popup ad on API:', e);
+    }
+  }
+
+  static async deleteAd(id: string): Promise<void> {
+    ContentStore.deletePopupAd(id);
+    try {
+      await fetch(`/api/popup-ads?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+    } catch (e) {
+      console.error('Failed to delete popup ad on API:', e);
     }
   }
 }

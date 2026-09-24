@@ -22,7 +22,10 @@ import {
   Edit3,
   Trash2,
   X,
-  LogOut
+  LogOut,
+  ExternalLink,
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 import { UserStore, UserAccount } from '@/lib/userStore';
 import { ContentStore } from '@/lib/contentStore';
@@ -40,6 +43,9 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
   const [editEmail, setEditEmail] = useState('');
   const [editCity, setEditCity] = useState('');
   const [editCustomRole, setEditCustomRole] = useState('');
+  const [editGoogleMapsUrl, setEditGoogleMapsUrl] = useState('');
+  const [editLanguagesStr, setEditLanguagesStr] = useState('');
+  const [editDescription, setEditDescription] = useState('');
   const [customVehicleInput, setCustomVehicleInput] = useState('');
 
   const loadProviderSession = () => {
@@ -51,11 +57,14 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
           const freshUser = UserStore.getUsers().find((u) => u.id === sessionObj.id) || sessionObj;
           setCurrentUser(freshUser);
           setIsAvailable(freshUser.availabilityStatus !== 'BOOKED');
-          setEditName(freshUser.name);
-          setEditPhone(freshUser.phone);
-          setEditEmail(freshUser.email);
+          setEditName(freshUser.name || '');
+          setEditPhone(freshUser.phone || '');
+          setEditEmail(freshUser.email || '');
           setEditCity(freshUser.city || 'Gaya Ji');
           setEditCustomRole(freshUser.customRole || role.toUpperCase());
+          setEditGoogleMapsUrl(freshUser.googleMapsUrl || '');
+          setEditLanguagesStr(freshUser.languages ? freshUser.languages.join(', ') : 'Hindi, Sanskrit');
+          setEditDescription(freshUser.description || '');
         } catch {
           const fallback = UserStore.getUsers().find((u) => u.role.toLowerCase() === role);
           if (fallback) {
@@ -119,12 +128,17 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
       ? (customVehicleInput.trim() || 'Custom Partner Service')
       : editCustomRole;
 
+    const parsedLangs = editLanguagesStr.split(',').map((s) => s.trim()).filter(Boolean);
+
     const updated = await UserStore.updateUser(currentUser.id, {
       name: editName,
       phone: editPhone,
       email: editEmail,
       city: editCity,
       customRole: resolvedRoleTitle,
+      googleMapsUrl: editGoogleMapsUrl.trim() || undefined,
+      languages: parsedLangs.length > 0 ? parsedLangs : undefined,
+      description: editDescription.trim() || undefined,
     });
 
     if (updated) {
@@ -161,7 +175,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8 font-sans text-slate-950 antialiased">
       
-      {/* 1. Header Banner with Dark Vedic Contrast */}
+      {/* 1. Header Banner with Dark Contrast */}
       <div className="bg-gradient-to-r from-[#1C0D02] via-[#2A180B] to-[#3D2310] text-white p-6 sm:p-8 rounded-3xl shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-2 border-[#F58220]/40 relative overflow-hidden">
         <div className="flex items-center gap-4 z-10">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#F58220] to-[#F6C343] flex items-center justify-center font-extrabold text-3xl text-white shadow-lg border-2 border-white/20 shrink-0">
@@ -195,15 +209,15 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
         {/* Actions & Availability Toggle */}
         <div className="flex flex-wrap items-center gap-3 z-10">
           <button
-            onClick={() => setIsAvailable(!isAvailable)}
+            onClick={() => handleToggleAvailability(isAvailable ? 'BOOKED' : 'AVAILABLE')}
             className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-xs shadow-lg transition-all cursor-pointer ${
               isAvailable 
-                ? 'bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/30' 
-                : 'bg-slate-800 text-slate-300 border border-slate-700'
+                ? 'bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/30 hover:bg-emerald-400' 
+                : 'bg-red-600 text-white ring-4 ring-red-600/30 hover:bg-red-500'
             }`}
           >
             <Power className="w-4 h-4" />
-            <span>{isAvailable ? 'ONLINE & AVAILABLE' : 'OFFLINE'}</span>
+            <span>{isAvailable ? '🟢 ONLINE & AVAILABLE' : '🔴 FULLY BOOKED / BUSY'}</span>
           </button>
 
           <button
@@ -232,7 +246,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
         </div>
       </div>
 
-      {/* 2. High Contrast Verification Status Notice Banner */}
+      {/* 2. Verification Status Notice Banner */}
       {isPending && (
         <div className="bg-amber-950 text-amber-100 border-2 border-amber-500/50 rounded-3xl p-6 space-y-2 shadow-xl animate-fadeIn">
           <div className="flex items-center gap-2 font-extrabold text-base text-[#F6C343]">
@@ -245,124 +259,134 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
         </div>
       )}
 
-      {isVerified && (
-        <div className="bg-emerald-950 text-emerald-100 border-2 border-emerald-500/50 rounded-3xl p-6 space-y-2 shadow-xl">
-          <div className="flex items-center gap-2 font-extrabold text-base text-emerald-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-            <span>PARTNER ACCOUNT FULLY VERIFIED (आपका खाता सत्यापित है)</span>
-          </div>
-          <p className="text-xs text-emerald-200 font-bold leading-relaxed">
-            Congratulations! Your account is background-verified. Your service card in public listings displays the green Verified Tick Badge.
-          </p>
-        </div>
-      )}
-
-      {/* 2.5 Live Service Availability Status Control Card */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-900 shadow-2xl space-y-5 font-sans">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="space-y-1">
-            <h2 className="text-lg sm:text-xl font-extrabold text-slate-950 flex items-center gap-2.5">
-              <Power className={`w-6 h-6 ${isAvailable ? 'text-emerald-500' : 'text-red-600'}`} />
-              Service Booking Availability Status (बुक है / उपलब्ध)
+      {/* 3. Live Card Preview Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#F58220]" /> Public Listing Card Live Preview (आपकी लाइव कार्ड प्रोफाइल)
             </h2>
-            <p className="text-xs text-slate-700 font-bold leading-relaxed max-w-2xl">
-              Toggle your availability below. When set to <strong className="text-emerald-600 font-extrabold">AVAILABLE</strong>, your card on the GayaSeva website displays a green status badge and accepts calls/bookings. When set to <strong className="text-red-600 font-extrabold">BOOKED</strong>, your card will update to show <strong className="text-red-600 font-extrabold">🔴 BOOKED / BUSY</strong>.
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Pilgrims see your profile with live AVAILABLE / BOOKED status and custom details across GayaSeva directory.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-900 p-2 rounded-2xl border-2 border-slate-800 shadow-lg shrink-0">
-            <button
-              type="button"
-              onClick={() => handleToggleAvailability('AVAILABLE')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                isAvailable
-                  ? 'bg-emerald-500 text-slate-950 shadow-md ring-4 ring-emerald-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-950 animate-pulse" />
-              🟢 AVAILABLE (उपलब्ध)
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleToggleAvailability('BOOKED')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                !isAvailable
-                  ? 'bg-red-600 text-white shadow-md ring-4 ring-red-500/40'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-white" />
-              🔴 BOOKED (बुक है)
-            </button>
-          </div>
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="px-4 py-2.5 bg-[#F58220] hover:bg-[#E07210] text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Edit3 className="w-4 h-4" /> Edit Profile Details
+          </button>
         </div>
 
-        <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold flex items-center justify-between gap-3">
-          <span>Current Active Status: <strong className={isAvailable ? 'text-emerald-700 font-black' : 'text-red-700 font-black'}>{isAvailable ? 'AVAILABLE FOR BOOKING (🟢)' : 'CURRENTLY BOOKED / BUSY (🔴)'}</strong></span>
-          <span className="text-[10px] text-slate-500 font-mono">Live Website Sync Enabled</span>
+        {/* Public Card Mockup (Exact layout as shown in directory) */}
+        <div className="max-w-md mx-auto bg-white p-6 rounded-3xl border-2 border-slate-200 shadow-lg space-y-4 font-sans relative">
+          <div className="flex justify-between items-start gap-2">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {isVerified ? (
+                  <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-900 rounded-full inline-flex items-center gap-1 border border-emerald-300">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> GayaSeva Verified
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 border border-amber-300">
+                    <Clock className="w-3.5 h-3.5 text-amber-700" /> Pending Admin Verification
+                  </span>
+                )}
+
+                {isAvailable ? (
+                  <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 animate-pulse">
+                    🟢 AVAILABLE FOR BOOKING
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1">
+                    🔴 FULLY BOOKED / BUSY
+                  </span>
+                )}
+              </div>
+
+              <h3 className="font-serif font-bold text-lg text-[#4A2E1A] pt-1">
+                {currentUser?.name || `${role} Partner`}
+              </h3>
+            </div>
+
+            <span className="text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shrink-0">
+              ⭐ {currentUser?.rating || 5.0}
+            </span>
+          </div>
+
+          <div className="text-xs text-slate-700 space-y-2 bg-[#F8F6EF] p-4 rounded-2xl border border-orange-100">
+            <p className="font-bold text-[#4A2E1A] flex items-center gap-1">
+              📍 <span>{currentUser?.customRole || 'Dharamshala, Family Rooms, Pilgrim Stay'}</span>
+            </p>
+            <p className="text-slate-600 font-medium flex items-center gap-1">
+              🏢 <span>{currentUser?.city || 'Near Vishnupad Temple Premises, Gaya Ji'}</span>
+            </p>
+            {currentUser?.description ? (
+              <p className="text-slate-800 font-semibold pt-1 border-t border-amber-200/60">
+                🛏️ {currentUser.description}
+              </p>
+            ) : (
+              <p className="text-slate-600 font-semibold pt-1 border-t border-amber-200/60">
+                🛏️ AC/Non-AC rooms near Vishnupad • Vehicle Parking Available
+              </p>
+            )}
+            {currentUser?.languages && currentUser.languages.length > 0 && (
+              <p className="text-slate-700 font-bold">
+                🗣️ Languages: {currentUser.languages.join(' • ')}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between text-xs text-emerald-950 font-bold">
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> ₹5 Access Pass Active
+              </span>
+              <span className="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full uppercase font-black">Unlocked</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button className="py-2.5 bg-[#2A180B] text-[#F6C343] font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-xs">
+                <Phone className="w-3.5 h-3.5 text-[#F58220]" /> Call ({currentUser?.phone || '9546101002'})
+              </button>
+
+              <button className="py-2.5 bg-[#075E54] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-xs">
+                <MessageSquare className="w-3.5 h-3.5" /> WhatsApp
+              </button>
+            </div>
+
+            {currentUser?.googleMapsUrl ? (
+              <a
+                href={currentUser.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-amber-900 bg-white border border-amber-300 py-2.5 rounded-xl hover:bg-amber-50 transition"
+              >
+                <Navigation className="w-3.5 h-3.5 text-[#F58220]" />
+                <span>Google Maps Directions</span>
+                <ExternalLink className="w-3 h-3 text-amber-700" />
+              </a>
+            ) : (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="w-full text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 py-2.5 rounded-xl hover:bg-amber-100 transition"
+              >
+                + Add Google Maps Directions Link
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 3. Role-Specific Metric & Action View */}
-      {role === 'driver' && (
-        <div className="space-y-6">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-900 shadow-2xl space-y-5">
-            <h2 className="text-xl font-extrabold text-slate-950 flex items-center gap-2.5">
-              <Car className="w-6 h-6 text-[#F58220]" /> Active Ride Request
-            </h2>
-
-            <div className="p-5 bg-slate-950 text-white rounded-2xl border-2 border-amber-500/30 space-y-4 shadow-lg">
-              <div className="flex justify-between items-start text-xs">
-                <div className="space-y-1">
-                  <p className="font-extrabold text-base text-white">Pick &amp; Drop: Station &rarr; Vishnupad Temple</p>
-                  <p className="text-amber-200 font-bold text-xs">Customer: Rahul Kumar &bull; 2 Passengers &bull; Cash Payment</p>
-                </div>
-                <div className="text-right bg-amber-400/20 px-3 py-1.5 rounded-xl border border-amber-400/40">
-                  <span className="font-black text-2xl text-[#F6C343] font-mono">₹350</span>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button className="flex-1 py-3 bg-gradient-to-r from-[#F58220] to-[#E07210] hover:from-[#E07210] hover:to-[#C86000] text-slate-950 font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer active:scale-95">
-                  ACCEPT RIDE
-                </button>
-                <button className="px-5 py-3 bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-xs rounded-xl border border-slate-700 transition-all cursor-pointer">
-                  REJECT
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {role === 'pandit' && (
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-900 shadow-2xl space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-950 flex items-center gap-2.5">
-            <Flame className="w-6 h-6 text-[#F58220]" /> Pandit Ritual Bookings
-          </h2>
-          <p className="text-xs text-slate-800 font-bold">Manage Pinda Daan, Tripindi Shradh, and Teerth Puja requests.</p>
-        </div>
-      )}
-
-      {role === 'hotel' && (
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-slate-900 shadow-2xl space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-950 flex items-center gap-2.5">
-            <Hotel className="w-6 h-6 text-blue-600" /> Hotel &amp; Guest House Management
-          </h2>
-          <p className="text-xs text-slate-800 font-bold">Manage room capacity, parking, and teerth yatri room bookings.</p>
-        </div>
-      )}
-
-      {/* 4. Edit Partner Profile Modal */}
+      {/* EDIT PROFILE DETAILS MODAL */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full space-y-5 animate-fadeIn border-2 border-slate-900 font-sans text-slate-950">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-lg w-full space-y-5 animate-fadeIn border-2 border-slate-900 font-sans text-slate-950 my-8">
             <div className="flex justify-between items-center border-b-2 border-slate-100 pb-3">
               <h3 className="font-extrabold text-xl text-slate-950 flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-[#F58220]" />
-                Edit Partner Profile Details
+                Manage Partner Details (अपनी जानकारी बदलें)
               </h3>
               <button 
                 onClick={() => setShowEditModal(false)}
@@ -374,18 +398,19 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
 
             <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs font-bold">
               <div>
-                <label className="block text-slate-900 font-extrabold mb-1">Partner Full Name *</label>
+                <label className="block text-slate-900 font-extrabold mb-1">Partner / Property Name *</label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g. Suresh Kumar Agarwal (Hotel Gaya Dham)"
                   className="w-full px-3.5 py-3 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-900 font-extrabold mb-1">Mobile Phone *</label>
+                <label className="block text-slate-900 font-extrabold mb-1">Mobile Phone (Calls & WhatsApp) *</label>
                 <input
                   type="tel"
                   required
@@ -405,7 +430,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
                 />
               </div>
 
-              {role === 'driver' && (
+              {role === 'driver' ? (
                 <div>
                   <label className="block text-slate-900 font-extrabold mb-1">Vehicle / Cab Category</label>
                   <select
@@ -432,27 +457,59 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
                     />
                   )}
                 </div>
-              )}
-
-              {role !== 'driver' && (
+              ) : (
                 <div>
-                  <label className="block text-slate-900 font-extrabold mb-1">Service Specialization / Role Title</label>
+                  <label className="block text-slate-900 font-extrabold mb-1">Category Tags / Specialization Title</label>
                   <input
                     type="text"
                     value={editCustomRole}
                     onChange={(e) => setEditCustomRole(e.target.value)}
-                    placeholder="e.g. Pinda Daan & Vedic Specialist / AC Dharamshala"
+                    placeholder="e.g. Dharamshala, Family Rooms, Pilgrim Stay"
                     className="w-full px-3.5 py-3 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-slate-900 font-extrabold mb-1">Operating Location in Gaya Ji</label>
+                <label className="block text-slate-900 font-extrabold mb-1">Room Specs / Features / Description</label>
+                <textarea
+                  rows={2}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="e.g. AC/Non-AC rooms near Vishnupad, Vehicle Parking Available"
+                  className="w-full px-3.5 py-2.5 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-900 font-extrabold mb-1">Languages Spoken (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editLanguagesStr}
+                  onChange={(e) => setEditLanguagesStr(e.target.value)}
+                  placeholder="e.g. Hindi, Sanskrit, English, Bengali, Maithili"
+                  className="w-full px-3.5 py-3 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-900 font-extrabold mb-1">Operating Location / Full Address in Gaya Ji</label>
                 <input
                   type="text"
                   value={editCity}
                   onChange={(e) => setEditCity(e.target.value)}
+                  placeholder="e.g. Dharamshala Road, Near Vishnupad Temple, Gaya Ji"
+                  className="w-full px-3.5 py-3 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-900 font-extrabold mb-1">Google Maps Navigation Link (URL)</label>
+                <input
+                  type="url"
+                  value={editGoogleMapsUrl}
+                  onChange={(e) => setEditGoogleMapsUrl(e.target.value)}
+                  placeholder="https://maps.google.com/?q=..."
                   className="w-full px-3.5 py-3 border-2 border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:border-[#F58220]"
                 />
               </div>
@@ -469,7 +526,7 @@ export default function RoleProviderDashboardPage({ params }: { params: { role: 
                   type="submit"
                   className="px-5 py-2.5 bg-gradient-to-r from-[#F58220] to-[#E07210] text-white font-black text-xs rounded-xl shadow-md active:scale-95 transition-all cursor-pointer"
                 >
-                  Save Partner Changes
+                  Save Partner Details
                 </button>
               </div>
             </form>

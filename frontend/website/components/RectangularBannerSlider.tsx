@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Phone, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
-import { ContentStore, SliderBanner } from '@/lib/contentStore';
+import { ContentStore, SliderBanner, SliderBannerStore } from '@/lib/contentStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { getProfessionalWhatsAppUrl } from '@/lib/whatsappHelper';
 
@@ -11,10 +11,15 @@ export function RectangularBannerSlider() {
   const { language } = useLanguage();
   const [banners, setBanners] = useState<SliderBanner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const active = ContentStore.getActiveSliderBanners();
-    setBanners(active);
+    setMounted(true);
+    const loadBanners = async () => {
+      await SliderBannerStore.fetchBannersFromApi();
+      setBanners(ContentStore.getActiveSliderBanners());
+    };
+    loadBanners();
 
     const handleStorage = () => {
       setBanners(ContentStore.getActiveSliderBanners());
@@ -31,7 +36,7 @@ export function RectangularBannerSlider() {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  if (banners.length === 0) return null;
+  if (!mounted || banners.length === 0) return null;
 
   const current = banners[currentIndex];
 

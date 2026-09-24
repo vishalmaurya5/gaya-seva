@@ -25,6 +25,7 @@ interface HotelItem {
   isBiharTourismRecognized: boolean;
   googleMapsQuery: string;
   availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+  isRegistered?: boolean;
 }
 
 const OFFICIAL_HOTELS: HotelItem[] = [
@@ -287,11 +288,17 @@ export default function StayPage() {
       isBiharTourismRecognized: false,
       googleMapsQuery: encodeURIComponent(u.name + ' Gaya'),
       availabilityStatus: u.availabilityStatus || 'AVAILABLE',
+      isRegistered: true,
+    }));
+
+    const officialList: HotelItem[] = OFFICIAL_HOTELS.map((oh) => ({
+      ...oh,
+      isRegistered: false,
     }));
 
     const merged = [
       ...fromUserStore,
-      ...OFFICIAL_HOTELS.filter((oh) => !fromUserStore.some((rh) => rh.phone === oh.phone)),
+      ...officialList.filter((oh) => !fromUserStore.some((rh) => rh.cleanPhone === oh.cleanPhone)),
     ];
     return merged;
   }, [registeredHotels]);
@@ -421,32 +428,50 @@ export default function StayPage() {
                 <div key={htl.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition">
                   <div className="space-y-3">
                     <div className="flex justify-between items-start gap-2">
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div className="flex flex-wrap items-center gap-1.5">
                           {htl.isBiharTourismRecognized && (
-                            <span className="px-2 py-0.5 text-[9px] font-extrabold bg-amber-100 text-amber-950 rounded border border-amber-300 flex items-center gap-1">
-                              <Sparkles className="w-2.5 h-2.5 text-amber-600" /> Bihar Tourism Recognized
+                            <span className="px-2.5 py-1 text-[10px] font-extrabold bg-amber-100 text-amber-950 rounded-full border border-amber-300 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-amber-600" /> Bihar Tourism Recognized
                             </span>
                           )}
 
-                          <span className="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 rounded inline-flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3" /> GayaSeva Verified
+                          <span className="px-2.5 py-1 text-[10px] font-extrabold bg-emerald-100 text-emerald-950 rounded-full border border-emerald-300 inline-flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3 text-emerald-700" /> GayaSeva Verified
                           </span>
+
+                          {htl.isRegistered ? (
+                            isAvailable ? (
+                              <span className="px-2.5 py-1 text-[10px] font-black bg-emerald-500 text-slate-950 rounded-full inline-flex items-center gap-1 shadow-xs">
+                                🟢 AVAILABLE FOR STAY
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 text-[10px] font-black bg-red-600 text-white rounded-full inline-flex items-center gap-1 shadow-xs">
+                                🔴 FULLY BOOKED
+                              </span>
+                            )
+                          ) : (
+                            <span className="px-2.5 py-1 text-[10px] font-black bg-amber-100 text-amber-950 rounded-full inline-flex items-center gap-1 border border-amber-400 shadow-xs">
+                              📋 ENQUIRY NOW (पूछताछ उपलब्ध)
+                            </span>
+                          )}
                         </div>
 
-                        <h3 className="font-serif font-bold text-base text-[#4A2E1A] pt-1">{htl.name}</h3>
+                        <h3 className="font-sans font-black text-lg text-slate-950 tracking-tight pt-1 leading-snug">
+                          {htl.name}
+                        </h3>
                       </div>
                       
-                      <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 shrink-0">⭐ {htl.rating}</span>
+                      <span className="text-xs font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shrink-0">⭐ {htl.rating}</span>
                     </div>
 
-                    <div className="text-xs text-gray-600 space-y-1 bg-[#F8F6EF] p-3 rounded-xl border border-orange-100">
-                      <p className="flex items-start gap-1">
+                    <div className="text-xs text-slate-900 font-bold space-y-1.5 bg-[#FDFBF7] p-3.5 rounded-2xl border border-amber-200/80 shadow-2xs">
+                      <p className="flex items-start gap-1.5 text-slate-900 font-bold">
                         <MapPin className="w-3.5 h-3.5 text-[#F58220] shrink-0 mt-0.5" />
-                        <span>{hasAccess ? (isHindi ? htl.locationHi : htl.locationEn) : (isHindi ? '📍 सटीक पता एवं फोन नंबर लॉक है' : '📍 Location & Phone Locked')}</span>
+                        <span className="text-slate-950 font-extrabold">{hasAccess ? (isHindi ? htl.locationHi : htl.locationEn) : (isHindi ? '📍 सटीक पता एवं फोन नंबर लॉक है' : '📍 Location & Phone Locked')}</span>
                       </p>
-                      <p>🛏️ {isHindi ? htl.capacityHi : htl.capacityEn}</p>
-                      <p>🚗 {htl.parking ? (isHindi ? 'वाहन पार्किंग सुविधा उपलब्ध' : 'Vehicle Parking Available') : (isHindi ? 'सीमित पार्किंग' : 'Limited Parking')}</p>
+                      <p className="text-slate-900 font-bold">🛏️ {isHindi ? htl.capacityHi : htl.capacityEn}</p>
+                      <p className="text-slate-800 font-semibold">🚗 {htl.parking ? (isHindi ? 'वाहन पार्किंग सुविधा उपलब्ध' : 'Vehicle Parking Available') : (isHindi ? 'सीमित पार्किंग' : 'Limited Parking')}</p>
                     </div>
                   </div>
 
