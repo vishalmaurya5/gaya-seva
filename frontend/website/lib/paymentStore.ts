@@ -78,16 +78,24 @@ export const PaymentStore = {
     }
   },
 
-  async fetchAccessRecordsFromApi(): Promise<CustomerAccessRecord[]> {
+  async fetchAccessRecordsFromApi(userId?: string): Promise<CustomerAccessRecord[]> {
     if (typeof window === 'undefined') return [];
     try {
-      const res = await fetch('/api/payments/access-status', { cache: 'no-store' });
+      const url = userId ? `/api/payments/access-status?userId=${encodeURIComponent(userId)}` : '/api/payments/access-status';
+      const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data)) {
-          localStorage.setItem(ACCESS_KEY, JSON.stringify(data));
+        const recordsList = Array.isArray(data) ? data : (data.records || (data.record ? [data.record] : []));
+        if (Array.isArray(recordsList)) {
+          const current = this.getCustomerAccessRecords();
+          const mergedMap = new Map<string, CustomerAccessRecord>();
+          current.forEach(r => mergedMap.set(r.id, r));
+          recordsList.forEach(r => mergedMap.set(r.id, r));
+          const updated = Array.from(mergedMap.values());
+          localStorage.setItem(ACCESS_KEY, JSON.stringify(updated));
           window.dispatchEvent(new Event('storage'));
-          return data;
+          window.dispatchEvent(new Event('gayaseva_access_change'));
+          return updated;
         }
       }
     } catch (e) {}

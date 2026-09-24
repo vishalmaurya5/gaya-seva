@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Flame, 
   Car, 
@@ -195,11 +195,36 @@ function ServicesContent() {
   const [inquiryCount, setInquiryCount] = useState('1');
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
+  const router = useRouter();
+
+  const categoryRouteMap: Record<string, string> = useMemo(
+    () => ({
+      PANDIT: '/pandit',
+      BARBER: '/barbers',
+      KSHAUR: '/barbers',
+      DRIVER: '/pick-drop',
+      TAXI: '/pick-drop',
+      PICK_DROP: '/pick-drop',
+      HOTEL: '/stay',
+      STAY: '/stay',
+      FOOD: '/food',
+      PUJA: '/puja-material',
+      PUJA_KIT: '/puja-material',
+      GUIDE: '/gaya',
+    }),
+    []
+  );
+
   useEffect(() => {
     // Read category from URL query param if present e.g. /services?category=PANDIT
     const catParam = searchParams.get('category');
     if (catParam) {
-      setSelectedCategory(catParam.toUpperCase());
+      const upper = catParam.toUpperCase();
+      if (categoryRouteMap[upper]) {
+        router.replace(categoryRouteMap[upper]);
+        return;
+      }
+      setSelectedCategory(upper);
     }
     // Load initial state from UserStore & ContentStore
     setUsers(UserStore.getUsers());
@@ -218,7 +243,7 @@ function ServicesContent() {
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, [searchParams]);
+  }, [searchParams, router, categoryRouteMap]);
 
   // GRAPH ENGINE: Dynamically extract & loop through all registered categories (including custom vendor roles!)
   const dynamicCategories = useMemo(() => {
@@ -447,7 +472,13 @@ function ServicesContent() {
             return (
               <button
                 key={catKey}
-                onClick={() => setSelectedCategory(catKey)}
+                onClick={() => {
+                  if (categoryRouteMap[catKey]) {
+                    router.push(categoryRouteMap[catKey]);
+                  } else {
+                    setSelectedCategory(catKey);
+                  }
+                }}
                 className={`px-5 py-3 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-2.5 border-2 ${
                   isSelected
                     ? 'bg-[#1C0D02] text-[#F6C343] border-[#1C0D02] shadow-md scale-102'

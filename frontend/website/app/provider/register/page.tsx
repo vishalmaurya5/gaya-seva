@@ -361,15 +361,6 @@ export default function ProviderRegisterPage() {
     setProfilePicError(null);
     setDocError(null);
 
-    // Strict Requirement Validation
-    if (!profilePicPreview) {
-      setProfilePicError('कृपया अपनी प्रोफाइल फोटो अपलोड करें या फोटो URL दर्ज करें / Profile photo is strictly REQUIRED for registration');
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 200, behavior: 'smooth' });
-      }
-      return;
-    }
-
     if (!uploadedFile || !uploadedFile.url) {
       setDocError('कृपया अपना पहचान पत्र / सरकारी आधार दस्तावेज अपलोड करें / Govt ID document upload is strictly REQUIRED for verification');
       return;
@@ -400,8 +391,8 @@ export default function ProviderRegisterPage() {
       status: 'PENDING',
       city: operatingCity || 'Gaya Ji',
       languages: selectedLangs,
-      avatarUrl: profilePicPreview,
-      profilePicUrl: profilePicPreview,
+      avatarUrl: profilePicPreview || undefined,
+      profilePicUrl: profilePicPreview || undefined,
       documentUrl: uploadedFile.url,
       googleMapsUrl: googleMapsUrl.trim() || undefined,
       lat: detectedLat || undefined,
@@ -550,7 +541,7 @@ export default function ProviderRegisterPage() {
                 <label className="font-bold text-gray-900 flex items-center gap-1.5 text-xs">
                   <ImageIcon className="w-4 h-4 text-[#F58220]" />
                   <span>Profile Picture / Photo</span>
-                  <span className="text-red-600 font-black text-[11px] bg-red-100 px-2 py-0.5 rounded-full border border-red-200">* REQUIRED</span>
+                  <span className="text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">(Optional / ऐच्छिक)</span>
                 </label>
                 <div className="flex gap-1 bg-white p-1 rounded-xl border border-gray-200 text-[10px] font-bold">
                   <button

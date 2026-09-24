@@ -117,31 +117,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-10 space-y-6">
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-xl space-y-6">
+    <div className="max-w-md mx-auto px-4 sm:px-6 py-10 sm:py-16 font-sans">
+      <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/90 shadow-2xl space-y-6 relative overflow-hidden backdrop-blur-md">
         
+        {/* Top Premium Color Bar */}
+        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-slate-950 via-[#F58220] to-[#F6C343]" />
+
         {/* Header Branding */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3 pt-2">
           <div className="flex justify-center mb-1">
             <GayaSevaLogo size={68} showText={false} className="drop-shadow-md" />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#4A2E1A]">GayaSeva Universal Login</h1>
-          <p className="text-xs text-gray-500">
-            Sign in with your registered Mobile Number or Email to open your personal dashboard.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            GayaSeva Universal Login
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-slate-600 max-w-sm mx-auto">
+            अपने पंजीकृत मोबाइल नंबर या ईमेल द्वारा तुरंत लॉग इन करें।
           </p>
         </div>
 
         {/* Graph Engine Status Indicator */}
-        <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-[11px] text-amber-900 flex items-center gap-2">
+        <div className="p-3.5 bg-amber-50/80 border border-amber-200/90 rounded-2xl text-[11px] text-amber-950 flex items-center gap-2.5 shadow-2xs font-medium">
           <Cpu className="w-4 h-4 text-[#F58220] shrink-0 animate-pulse" />
           <span>
-            <strong>Graph Auto-Routing Active:</strong> Enter details below — system automatically detects Yatri, Pandit, Driver, or Admin role & opens dashboard.
+            <strong className="font-extrabold">Auto-Role Detection:</strong> Enter details below — system automatically detects Yatri, Pandit, Driver, or Admin role &amp; opens dashboard.
           </span>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
+          <div className="p-4 bg-red-50 border border-red-200/90 rounded-2xl text-xs font-bold text-red-700 flex items-center gap-2.5 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
             <span>{error}</span>
           </div>
@@ -149,54 +154,54 @@ export default function LoginPage() {
 
         {/* Success & Graph Routing Alert */}
         {success && (
-          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1 animate-fadeIn">
-            <div className="flex items-center gap-2 font-bold">
+          <div className="p-4 bg-emerald-50 border border-emerald-200/90 rounded-2xl text-xs text-emerald-800 space-y-1 shadow-2xs">
+            <div className="flex items-center gap-2 font-extrabold">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Identity Verified Successfully!</span>
             </div>
             {resolvedUserRole && (
               <p className="text-[11px] text-emerald-700 pl-6 font-semibold">
-                Graph Role Engine: Routing directly to <strong className="underline">{resolvedUserRole}</strong>...
+                Routing directly to <strong className="underline font-extrabold">{resolvedUserRole}</strong>...
               </p>
             )}
           </div>
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4 text-xs">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="font-bold text-gray-700 block mb-1">
-              Mobile Number or Email Address *
+            <label className="text-xs font-extrabold text-slate-800 tracking-tight block mb-1.5">
+              Mobile Number or Email Address * (मोबाइल नंबर / ईमेल)
             </label>
             <div className="relative">
-              <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+              <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-4" />
               <input
                 type="text"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder="+91 98765 43210 or user@gayaseva.org"
-                className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-[#F58220] focus:ring-2 focus:ring-[#F58220]/20"
+                className="w-full pl-10 pr-4 py-3.5 border border-slate-200/90 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 bg-slate-50/70 focus:bg-white focus:border-[#F58220] focus:ring-4 focus:ring-[#F58220]/15 transition-all outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-bold text-gray-700 block mb-1">Password *</label>
+            <label className="text-xs font-extrabold text-slate-800 tracking-tight block mb-1.5">Password * (पासवर्ड)</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-4" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-10 py-3 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-[#F58220] focus:ring-2 focus:ring-[#F58220]/20"
+                className="w-full pl-10 pr-12 py-3.5 border border-slate-200/90 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 bg-slate-50/70 focus:bg-white focus:border-[#F58220] focus:ring-4 focus:ring-[#F58220]/15 transition-all outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+                className="absolute right-3.5 top-4 text-slate-400 hover:text-slate-700 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -205,22 +210,22 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-gradient-to-r from-[#F58220] to-[#E07210] hover:from-[#E07210] hover:to-[#C86000] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+            className="w-full py-4 bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D96B00] hover:from-[#E07210] hover:to-[#C45E00] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer tracking-wide"
           >
-            <span>Log In & Open Dashboard</span> <ArrowRight className="w-4 h-4" />
+            <span>Log In &amp; Open Dashboard</span> <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center border-t border-gray-100 pt-4 text-xs text-gray-600 space-y-2">
+        <div className="text-center border-t border-slate-100 pt-5 text-xs font-bold text-slate-600 space-y-2">
           <p>
             New Pilgrim / Yatri?{' '}
-            <Link href="/auth/register" className="font-bold text-[#F58220] hover:underline">
-              Create Yatri Account
+            <Link href="/auth/register" className="font-extrabold text-[#F58220] hover:text-[#E07210] hover:underline transition-colors">
+              Create New Account
             </Link>
           </p>
           <p>
             Service Provider / Vendor?{' '}
-            <Link href="/provider/register" className="font-bold text-emerald-600 hover:underline">
+            <Link href="/provider/register" className="font-extrabold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors">
               Register as Service Partner
             </Link>
           </p>
@@ -230,5 +235,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-

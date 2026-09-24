@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Lock, Sparkles, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { ConfigStore, SystemConfig } from '@/lib/configStore';
+import { ConfigStore, SystemConfig, DEFAULT_CONFIG } from '@/lib/configStore';
 import { formatPhoneNumber } from '@/lib/whatsappHelper';
 
 interface DirectoryGatedViewProps {
@@ -19,8 +20,9 @@ export function DirectoryGatedView({
   maxPreviewCount = 2,
   children,
 }: DirectoryGatedViewProps) {
+  const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [config, setConfig] = useState<SystemConfig>(ConfigStore.getConfig());
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
@@ -29,21 +31,65 @@ export function DirectoryGatedView({
   useEffect(() => {
     ConfigStore.fetchConfig().then(setConfig);
 
-    try {
-      const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
-      if (stored) {
-        const usr = JSON.parse(stored);
-        setCurrentUser(usr);
-        checkAccess(usr);
-      } else {
+    const handleAuthOrAccessChange = () => {
+      try {
+        const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
+        if (stored) {
+          const usr = JSON.parse(stored);
+          setCurrentUser(usr);
+          checkAccess(usr);
+        } else {
+          setCurrentUser(null);
+          setHasAccess(false);
+          setLoading(false);
+        }
+      } catch {
         setLoading(false);
       }
-    } catch {
-      setLoading(false);
+    };
+
+    handleAuthOrAccessChange();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleAuthOrAccessChange);
+      window.addEventListener('gayaseva_access_change', handleAuthOrAccessChange);
     }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleAuthOrAccessChange);
+        window.removeEventListener('gayaseva_access_change', handleAuthOrAccessChange);
+      }
+    };
   }, []);
 
+  const syncActiveAccess = (userId: string) => {
+    if (typeof window === 'undefined' || !userId) return;
+    try {
+      const key = 'GAYASEVA_CUSTOMER_ACCESS_STORE';
+      const stored = localStorage.getItem(key);
+      let records: any[] = stored ? JSON.parse(stored) : [];
+      if (!Array.isArray(records)) records = [];
+      const existing = records.find((r) => r.userId === userId && r.status === 'ACTIVE');
+      if (!existing) {
+        records.push({
+          id: 'access_' + userId,
+          userId: userId,
+          accessType: 'LIFETIME',
+          status: 'ACTIVE',
+          amount: 5,
+          currency: 'INR',
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem(key, JSON.stringify(records));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('gayaseva_access_change'));
+      }
+    } catch (e) {}
+  };
+
   const checkAccess = async (user: any) => {
+    if (!user || !user.id) return;
     setLoading(true);
     try {
       const res = await fetch('/api/providers/details', {
@@ -54,8 +100,21 @@ export function DirectoryGatedView({
 
       if (res.ok) {
         const data = await res.json();
-        if (!data.locked) {
+        if (!data.locked || data.hasAccess) {
           setHasAccess(true);
+          syncActiveAccess(user.id);
+        } else {
+          setHasAccess(false);
+        }
+      } else {
+        // Fallback check to access-status API
+        const statusRes = await fetch(`/api/payments/access-status?userId=${user.id}`);
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.hasAccess) {
+            setHasAccess(true);
+            syncActiveAccess(user.id);
+          }
         }
       }
     } catch (e) {
@@ -122,8 +181,12 @@ export function DirectoryGatedView({
 
             if (verifyRes.ok) {
               setPaymentMessage('✅ Access Pass Successfully Activated!');
+              setHasAccess(true);
               await checkAccess(currentUser);
-              window.dispatchEvent(new Event('storage'));
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('storage'));
+                window.dispatchEvent(new Event('gayaseva_access_change'));
+              }
             } else {
               const err = await verifyRes.json();
               alert(`Payment Verification Error: ${err.error || 'Verification failed'}`);
@@ -204,12 +267,12 @@ export function DirectoryGatedView({
           <div className="pt-2 max-w-md mx-auto">
             {!currentUser ? (
               <Link
-                href={`/auth/login?redirect=${encodeURIComponent('/help/lost-and-found')}`}
+                href={`/auth/register?redirect=${encodeURIComponent(pathname || '/services')}`}
                 id="unlock-access-btn"
                 className="w-full py-4 bg-gradient-to-r from-[#F58220] to-[#F6C343] hover:from-[#E07210] hover:to-[#E5B232] text-slate-950 text-sm font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95"
               >
                 <Lock className="w-4 h-4" />
-                <span>Register / Login &amp; Activate ₹{config.customer_access_fee} Access Pass</span>
+                <span>Create New Account &amp; Activate ₹{config.customer_access_fee} Access Pass</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (

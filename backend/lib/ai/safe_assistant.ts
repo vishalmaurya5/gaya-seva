@@ -137,6 +137,18 @@ export class SafeAIAssistant {
       };
     }
 
+    if (lower.includes('pass') || lower.includes('unlock') || lower.includes('access')) {
+      return {
+        text: 'GayaSeva Teerth Access Passes: ₹49 Day Pass (24 hrs), ₹99 Trip Pass (7 days), ₹199 Family Pass (30 days). Unlocks directory contacts & custom trip plans.',
+      };
+    }
+
+    if (lower.includes('register') || lower.includes('partner') || lower.includes('provider')) {
+      return {
+        text: 'Register as a Service Provider on GayaSeva for ₹49 one-time onboarding fee. Profile photo is 100% OPTIONAL (ऐच्छिक), Govt ID upload is required. Enjoy 0% commission direct bookings.',
+      };
+    }
+
     if (lower.includes('vishnupad')) {
       return { text: this.getGuidePlace('vishnupad') };
     }
@@ -149,7 +161,7 @@ export class SafeAIAssistant {
       return { text: this.getGuidePlace('bodh gaya') };
     }
 
-    return { text: 'Welcome to GayaSeva Assistant! I can help you search verified local services, Pandits, Stay options, and Gaya Ji pilgrimage guide information.' };
+    return { text: 'Welcome to GayaSeva Assistant! I can help you search verified local services, Pandits, Stay options, Access Passes, Provider Registration, and Gaya Ji pilgrimage guide information.' };
   }
 }
 

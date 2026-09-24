@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { DirectoryGatedView } from '@/components/ui/DirectoryGatedView';
+import { PaymentStore } from '@/lib/paymentStore';
 
 type TripPurpose = 'PIND_DAAN' | 'TEMPLE' | 'BUDDHIST' | 'FAMILY' | 'SPIRITUAL' | 'SIGHTSEEING';
 
@@ -64,10 +65,6 @@ export default function MyTripPage() {
   const [isCustomDays, setIsCustomDays] = useState<boolean>(false);
   const [customDaysCount, setCustomDaysCount] = useState<number>(4);
   const [selectedPurposes, setSelectedPurposes] = useState<TripPurpose[]>(['PIND_DAAN', 'TEMPLE', 'BUDDHIST']);
-  const [needPandit, setNeedPandit] = useState<boolean>(true);
-  const [needTaxi, setNeedTaxi] = useState<boolean>(true);
-
-  // Active view tab in results
   const [activeDayTab, setActiveDayTab] = useState<number>(0); // 0 = All Days
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
 
@@ -153,7 +150,7 @@ export default function MyTripPage() {
           titleEn: 'Mangla Gauri Shaktipeeth Temple',
           titleHi: 'माँ मंगला गौरी शक्तिपीठ मंदिर',
           categoryTag: 'Shaktipeeth Darshan',
-          descriptionEn: 'Ascend Bhasmakoot hill to visit one of India&apos;s 18 Mahashaktipeeths. Experience magnificent evening Maha Aarti and sunset views over Gaya city.',
+          descriptionEn: 'Ascend Bhasmakoot hill to visit one of India\'s 18 Mahashaktipeeths. Experience magnificent evening Maha Aarti and sunset views over Gaya city.',
           descriptionHi: 'भस्माकूट पर्वत पर स्थित माँ मंगला गौरी के दर्शन करें एवं शाम की दिव्य आरती में सम्मिलित हों।',
           distanceKm: '2.8 km from Vishnupad Temple',
           travelTimeMin: '10 mins via Auto',
@@ -210,7 +207,7 @@ export default function MyTripPage() {
             titleEn: '80-Feet Great Buddha Statue (Daijokyo)',
             titleHi: '80 फीट विशाल बुद्ध प्रतिमा',
             categoryTag: 'Landmark Monument',
-            descriptionEn: 'Marvel at India&apos;s majestic 80-foot high red-granite Great Buddha statue set in peaceful Japanese gardens near Daijokyo Buddhist Temple.',
+            descriptionEn: 'Marvel at India\'s majestic 80-foot high red-granite Great Buddha statue set in peaceful Japanese gardens near Daijokyo Buddhist Temple.',
             descriptionHi: 'जापानी शैली के मनोरम उद्यान में स्थित भारत की 80 फीट ऊंची महान बुद्ध प्रतिमा का अवलोकन करें।',
             distanceKm: '1.5 km from Mahabodhi Temple',
             travelTimeMin: '5 mins via Auto / E-Rickshaw',
@@ -396,57 +393,220 @@ export default function MyTripPage() {
     return itineraryData.filter(d => d.dayNumber === activeDayTab);
   }, [itineraryData, activeDayTab]);
 
-  const handleShareWhatsApp = () => {
-    const textLines = [
-      `🚩 *My Customized Gaya Ji Trip Plan (${activeDaysCount} Days)*`,
-      `Purposes: ${selectedPurposes.map(p => PURPOSE_OPTIONS.find(o => o.id === p)?.emoji).join(' ')}`,
-      ``,
-      ...itineraryData.map(d => 
-        `*${d.titleEn}*\n` +
-        d.activities.map(a => `• ${a.timeBlock}: ${a.titleEn} (${a.distanceKm})`).join('\n')
-      ),
-      ``,
-      `Plan generated on GayaSeva Platform: https://gayaseva.org/my-trip`
-    ];
+  const [hasAccess, setHasAccess] = useState<boolean>(false);
 
-    const shareUrl = `https://wa.me/?text=${encodeURIComponent(textLines.join('\n'))}`;
-    window.open(shareUrl, '_blank');
+  const syncAccessState = async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
+      if (stored) {
+        const usr = JSON.parse(stored);
+        if (usr && usr.id) {
+          // 1. Fast local check
+          if (PaymentStore.hasActiveCustomerAccess(usr.id)) {
+            setHasAccess(true);
+            return;
+          }
+          // 2. Fetch fresh status from backend API
+          const res = await fetch(`/api/payments/access-status?userId=${encodeURIComponent(usr.id)}`, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.hasAccess) {
+              setHasAccess(true);
+              const key = 'GAYASEVA_CUSTOMER_ACCESS_STORE';
+              const localStored = localStorage.getItem(key);
+              let records: any[] = localStored ? JSON.parse(localStored) : [];
+              if (!Array.isArray(records)) records = [];
+              if (!records.some((r) => r.userId === usr.id && r.status === 'ACTIVE')) {
+                records.push({
+                  id: 'access_' + usr.id,
+                  userId: usr.id,
+                  accessType: 'LIFETIME',
+                  status: 'ACTIVE',
+                  amount: 5,
+                  currency: 'INR',
+                  createdAt: new Date().toISOString(),
+                });
+                localStorage.setItem(key, JSON.stringify(records));
+              }
+              return;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+    setHasAccess(false);
+  };
+
+  React.useEffect(() => {
+    syncAccessState();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', syncAccessState);
+      window.addEventListener('gayaseva_access_change', syncAccessState);
+      window.addEventListener('focus', syncAccessState);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', syncAccessState);
+        window.removeEventListener('gayaseva_access_change', syncAccessState);
+        window.removeEventListener('focus', syncAccessState);
+      }
+    };
+  }, []);
+
+  const checkHasAccess = (): boolean => {
+    return hasAccess;
+  };
+
+  const promptUnlockAccess = () => {
+    const banner = document.getElementById('unlock-access-banner');
+    if (banner) {
+      banner.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      alert(
+        isHindi
+          ? 'सम्पूर्ण गया यात्रा प्लान एवं गाइड अनलॉक करने के लिए कृपया ₹5 Access Pass चालू करें।'
+          : 'Please activate ₹5 Access Pass to unlock, save, share & print the complete trip itinerary.'
+      );
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!checkHasAccess()) {
+      promptUnlockAccess();
+      return;
+    }
+    const title = `🚩 My Gaya ${activeDaysCount}-Day Trip Itinerary (GayaSeva.org)\n\n`;
+    const details = itineraryData.map(d => `${isHindi ? d.titleHi : d.titleEn}:\n` + d.activities.map(a => `• ${a.timeBlock}: ${isHindi ? a.titleHi : a.titleEn} (${a.distanceKm})`).join('\n')).join('\n\n');
+    const fullText = title + details + `\n\nPlan your custom trip at: https://gayaseva.org/my-trip`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
   };
 
   const handleSavePlan = () => {
-    if (typeof window !== 'undefined') {
-      const planPayload = {
+    if (!checkHasAccess()) {
+      promptUnlockAccess();
+      return;
+    }
+    try {
+      localStorage.setItem('GAYASEVA_SAVED_TRIP_PLAN', JSON.stringify({
         days: activeDaysCount,
-        purposes: selectedPurposes,
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem('GAYASEVA_SAVED_TRIP_PLAN', JSON.stringify(planPayload));
+        selectedPurposes,
+        savedAt: new Date().toISOString()
+      }));
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (e) {
+      console.error('Failed to save plan:', e);
     }
   };
 
   const handlePrintPlan = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
+    if (!checkHasAccess()) {
+      promptUnlockAccess();
+      return;
     }
+
+    const printWin = window.open('', '_blank', 'width=900,height=800');
+    if (!printWin) {
+      alert(isHindi ? 'कृपया प्रिंट विंडो खोलने की अनुमति दें।' : 'Please allow popups to print the itinerary PDF.');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>GayaSeva - ${activeDaysCount}-Day Gaya Trip Itinerary</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+            body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 24px; color: #0f172a; line-height: 1.5; background: #fff; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #f58220; padding-bottom: 16px; margin-bottom: 24px; }
+            .logo { font-size: 24px; font-weight: 800; color: #2a180b; }
+            .logo span { color: #f58220; }
+            .sub { font-size: 12px; color: #64748b; font-weight: 600; }
+            .badge { background: #fff7ed; border: 1px solid #ffedd5; color: #c2410c; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+            .day-card { border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 24px; overflow: hidden; page-break-inside: avoid; }
+            .day-title { background: #2a180b; color: #fff; padding: 14px 20px; font-size: 16px; font-weight: 800; }
+            .day-subtitle { font-size: 12px; color: #fde68a; font-weight: 500; margin-top: 2px; }
+            .act-list { padding: 16px 20px; }
+            .act-item { border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 14px; }
+            .act-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+            .act-tag { display: inline-block; background: #fef3c7; color: #78350f; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; margin-bottom: 4px; }
+            .act-name { font-size: 14px; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0; }
+            .act-desc { font-size: 12px; color: #475569; margin-bottom: 6px; }
+            .act-meta { font-size: 11px; color: #64748b; font-weight: 600; display: flex; gap: 16px; }
+            .footer { border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 32px; font-size: 11px; color: #94a3b8; text-align: center; }
+            @media print {
+              body { padding: 0; }
+              .day-card { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="logo">Gaya<span>Seva</span></div>
+              <div class="sub">Verified Pilgrimage & Tourism Directory • Gaya, Bihar</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge">${activeDaysCount}-Day Customized Itinerary</span>
+              <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Generated on: ${new Date().toLocaleDateString('en-IN')}</div>
+            </div>
+          </div>
+
+          ${itineraryData.map(day => `
+            <div class="day-card">
+              <div class="day-title">
+                ${isHindi ? day.titleHi : day.titleEn}
+                <div class="day-subtitle">${isHindi ? day.subtitleHi : day.subtitleEn}</div>
+              </div>
+              <div class="act-list">
+                ${day.activities.map(act => `
+                  <div class="act-item">
+                    <span class="act-tag">${act.timeBlock} • ${act.categoryTag}</span>
+                    <div class="act-name">${isHindi ? act.titleHi : act.titleEn}</div>
+                    <div class="act-desc">${isHindi ? act.descriptionHi : act.descriptionEn}</div>
+                    <div class="act-meta">
+                      <span>📍 ${act.distanceKm}</span>
+                      <span>⏱️ ${act.travelTimeMin}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+
+          <div class="footer">
+            <p><strong>GayaSeva.org</strong> — Direct Zero-Commission Booking for Pandits, Cabs, Hotels & Satvik Food</p>
+            <p>Need assistance during your trip? Visit https://gayaseva.org or call our helpline.</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWin.document.write(htmlContent);
+    printWin.document.close();
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8 text-gray-800 font-sans">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8 font-sans">
       
-      {/* Header Banner */}
-      <div className="bg-[#2A180B] text-white p-6 sm:p-8 rounded-3xl border border-[#F58220]/30 shadow-xl space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-[#F6C343] font-semibold text-xs uppercase tracking-wider">
-              <Compass className="w-4 h-4 text-[#F58220]" />
-              <span>GAYASEVA TRIP ITINERARY PLANNER</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white flex items-center gap-2">
+      {/* Banner & Header Card */}
+      <div className="bg-gradient-to-r from-slate-950 via-[#2A180B] to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-amber-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2 tracking-tight">
               📅 {isHindi ? 'अपनी गया जी यात्रा प्लान करें' : 'Plan My Gaya Trip'}
             </h1>
-            <p className="text-xs sm:text-sm text-[#F8F6EF]/80 max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#F8F6EF]/80 max-w-2xl font-medium">
               {isHindi
                 ? 'पिंडदान, मंदिर दर्शन, बोधगया बौद्ध यात्रा एवं दर्शनीय स्थलों हेतु दूरी, समय एवं मैप नेविगेशन के साथ कस्टमाइज्ड यात्रा योजना तैयार करें।'
                 : 'Generate a customized 1-Day, 2-Day, 3-Day or multi-day itinerary with exact distances, travel times, Google Maps navigation & direct booking options.'}
@@ -460,11 +620,11 @@ export default function MyTripPage() {
       </div>
 
       {/* Interactive Planner Form Card */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm space-y-6">
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
         
         {/* Step 1: Duration Selector */}
         <div className="space-y-3">
-          <label className="font-serif font-bold text-sm text-[#4A2E1A] flex items-center gap-2">
+          <label className="font-extrabold text-sm text-slate-900 flex items-center gap-2 tracking-tight">
             <Calendar className="w-4 h-4 text-[#F58220]" />
             <span>1. {isHindi ? 'यात्रा कितने दिनों की है?' : 'How many days is your trip?'}</span>
           </label>
@@ -473,7 +633,7 @@ export default function MyTripPage() {
             <button
               type="button"
               onClick={() => { setDays(1); setIsCustomDays(false); setActiveDayTab(0); }}
-              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 ${
+              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 cursor-pointer ${
                 days === 1 && !isCustomDays
                   ? 'bg-[#2A180B] text-white border-[#2A180B] shadow-md font-bold'
                   : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-amber-300'
@@ -486,7 +646,7 @@ export default function MyTripPage() {
             <button
               type="button"
               onClick={() => { setDays(2); setIsCustomDays(false); setActiveDayTab(0); }}
-              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 relative ${
+              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 relative cursor-pointer ${
                 days === 2 && !isCustomDays
                   ? 'bg-[#2A180B] text-white border-[#2A180B] shadow-md font-bold'
                   : 'bg-amber-50/70 text-amber-950 border-amber-300 hover:bg-amber-100/80'
@@ -500,7 +660,7 @@ export default function MyTripPage() {
             <button
               type="button"
               onClick={() => { setDays(3); setIsCustomDays(false); setActiveDayTab(0); }}
-              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 ${
+              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 cursor-pointer ${
                 days === 3 && !isCustomDays
                   ? 'bg-[#2A180B] text-white border-[#2A180B] shadow-md font-bold'
                   : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-amber-300'
@@ -513,7 +673,7 @@ export default function MyTripPage() {
             <button
               type="button"
               onClick={() => { setIsCustomDays(true); setActiveDayTab(0); }}
-              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 ${
+              className={`p-3.5 rounded-2xl border transition-all text-center space-y-1 cursor-pointer ${
                 isCustomDays
                   ? 'bg-[#2A180B] text-white border-[#2A180B] shadow-md font-bold'
                   : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-amber-300'
@@ -544,7 +704,7 @@ export default function MyTripPage() {
 
         {/* Step 2: Purpose Checkboxes */}
         <div className="space-y-3">
-          <label className="font-serif font-bold text-sm text-[#4A2E1A] flex items-center gap-2">
+          <label className="font-extrabold text-sm text-slate-900 flex items-center gap-2 tracking-tight">
             <Filter className="w-4 h-4 text-[#F58220]" />
             <span>2. {isHindi ? 'आपकी यात्रा का उद्देश्य क्या है? (बहुविकल्प चुनें)' : 'What is the purpose of your visit? (Select all that apply)'}</span>
           </label>
@@ -557,7 +717,7 @@ export default function MyTripPage() {
                   key={item.id}
                   type="button"
                   onClick={() => togglePurpose(item.id)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all space-y-1 ${
+                  className={`p-3.5 rounded-2xl border text-left transition-all space-y-1 cursor-pointer ${
                     isSelected
                       ? 'bg-amber-50 border-[#F58220] text-amber-950 ring-2 ring-[#F58220]/20 shadow-xs'
                       : 'bg-white border-gray-200 text-gray-700 hover:border-amber-200'
@@ -584,71 +744,112 @@ export default function MyTripPage() {
         </div>
 
         {/* Action Controls Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100 text-xs">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>
-              {isHindi ? 'कस्टमाइज्ड यात्रा विवरण नीचे तैयार है:' : 'Dynamic itinerary generated below:'}
-            </span>
+        {checkHasAccess() ? (
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2 text-slate-700 font-medium">
+              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>
+                {isHindi ? 'कस्टमाइज्ड यात्रा विवरण नीचे अनलॉक्ड है:' : 'Dynamic itinerary unlocked below:'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="flex items-center gap-1.5 bg-emerald-600 text-white px-3.5 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-2xs cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>{isHindi ? 'WhatsApp शेयर' : 'Share WhatsApp'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSavePlan}
+                className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-950 px-3.5 py-2 rounded-xl font-bold hover:bg-amber-100 transition cursor-pointer"
+              >
+                <Bookmark className="w-3.5 h-3.5 text-amber-600" />
+                <span>{savedSuccess ? (isHindi ? 'सेव हो गया!' : 'Saved!') : (isHindi ? 'सेव करें' : 'Save Plan')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintPlan}
+                className="flex items-center gap-1.5 bg-slate-100 border border-slate-300 text-slate-800 px-3.5 py-2 rounded-xl font-bold hover:bg-slate-200 transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-slate-700" />
+                <span>{isHindi ? 'प्रिंट / PDF' : 'Print PDF'}</span>
+              </button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleShareWhatsApp}
-              className="flex items-center gap-1.5 bg-emerald-600 text-white px-3.5 py-2 rounded-xl font-semibold hover:bg-emerald-700 transition shadow-2xs"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>{isHindi ? 'WhatsApp शेयर' : 'Share WhatsApp'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSavePlan}
-              className="flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-950 px-3.5 py-2 rounded-xl font-semibold hover:bg-amber-100 transition"
-            >
-              <Bookmark className="w-3.5 h-3.5 text-amber-600" />
-              <span>{savedSuccess ? (isHindi ? 'सेव हो गया!' : 'Saved!') : (isHindi ? 'सेव करें' : 'Save Plan')}</span>
-            </button>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2 text-amber-900 font-extrabold bg-amber-50 px-3.5 py-2.5 rounded-xl border border-amber-200/80">
+              <Lock className="w-4 h-4 text-[#F58220] shrink-0" />
+              <span>
+                {isHindi
+                  ? '🔒 सम्पूर्ण कस्टमाइज्ड गया यात्रा प्लान एवं गाइड विवरण देखने के लिए ₹5 Access Pass चालू करें'
+                  : '🔒 Full Customized Trip Plan & Guide Details Locked (Activate ₹5 Pass)'}
+              </span>
+            </div>
 
             <button
               type="button"
-              onClick={handlePrintPlan}
-              className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 text-gray-800 px-3.5 py-2 rounded-xl font-semibold hover:bg-gray-200 transition"
+              onClick={promptUnlockAccess}
+              className="px-4 py-2.5 bg-gradient-to-r from-[#F58220] to-[#F6C343] hover:from-[#E07210] hover:to-[#E5B232] text-slate-950 font-black rounded-xl shadow-md text-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>{isHindi ? 'प्रिंट / PDF' : 'Print PDF'}</span>
+              <span>{isHindi ? 'अभी अनलॉक करें' : 'Unlock Pass Now'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
-
+        )}
       </div>
 
-      {/* Generated Itinerary Output Display (Locked via DirectoryGatedView) */}
+      {/* Generated Itinerary Output Display (Fully Locked via DirectoryGatedView) */}
       <div className="space-y-6">
         <DirectoryGatedView
           categoryName={isHindi ? 'गया यात्रा प्लान एवं संपूर्ण गाइड' : 'Custom Gaya Trip Plan & Itinerary'}
           totalCount={displayedDays.length}
-          maxPreviewCount={1}
+          maxPreviewCount={0}
         >
           {(visibleItemsCount, hasAccess) => {
+            if (!hasAccess) {
+              return (
+                <div className="bg-slate-50 border-2 border-dashed border-amber-300/80 p-8 rounded-3xl text-center space-y-4">
+                  <div className="w-12 h-12 rounded-full bg-amber-100 text-[#F58220] flex items-center justify-center mx-auto border border-amber-300">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-extrabold text-slate-900">
+                      {isHindi ? '🔒 संपूर्ण यात्रा विवरण लॉक है' : '🔒 Full Itinerary Details Locked'}
+                    </h3>
+                    <p className="text-xs text-slate-600 max-w-md mx-auto font-medium">
+                      {isHindi
+                        ? 'दूरी, समय, गूगल मैप्स नेविगेशन एवं पंडा जी / टैक्सी संपर्क के साथ पूरा शेड्यूल अनलॉक करने के लिए नीचे पास सक्रिय करें।'
+                        : 'Unlock exact day-by-day activity timelines, distances, travel times & Pandit/Cab contacts with the ₹5 Access Pass below.'}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
             const itemsToShow = displayedDays.slice(0, visibleItemsCount);
 
             return (
               <div className="space-y-6">
                 {/* Day Filter Tabs Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-3">
-                  <h2 className="text-xl font-serif font-bold text-stone-900 flex items-center gap-2 tracking-tight">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                  <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2 tracking-tight">
                     <Navigation className="w-5 h-5 text-[#F58220]" />
                     <span>{activeDaysCount}-Day Gaya Trip Itinerary</span>
                   </h2>
 
-                  <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-2xl text-xs font-medium">
+                  <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl text-xs font-medium">
                     <button
                       type="button"
                       onClick={() => setActiveDayTab(0)}
-                      className={`px-3.5 py-1.5 rounded-xl transition-all ${
-                        activeDayTab === 0 ? 'bg-[#2A180B] text-white shadow-sm font-semibold' : 'text-stone-600 hover:text-stone-900'
+                      className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                        activeDayTab === 0 ? 'bg-[#2A180B] text-white shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       All Days ({activeDaysCount})
@@ -659,8 +860,8 @@ export default function MyTripPage() {
                         key={d.dayNumber}
                         type="button"
                         onClick={() => setActiveDayTab(d.dayNumber)}
-                        className={`px-3 py-1.5 rounded-xl transition-all ${
-                          activeDayTab === d.dayNumber ? 'bg-[#2A180B] text-white shadow-sm font-semibold' : 'text-stone-600 hover:text-stone-900'
+                        className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                          activeDayTab === d.dayNumber ? 'bg-[#2A180B] text-white shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
                         Day {d.dayNumber}
@@ -669,25 +870,26 @@ export default function MyTripPage() {
                   </div>
                 </div>
 
-                {/* Render Day Cards (Preview / Full) */}
+                {/* Render Day Cards */}
                 <div className="space-y-8">
                   {itemsToShow.map((day) => (
-                    <div key={day.dayNumber} className="bg-white rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    <div key={day.dayNumber} className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                       
                       {/* Day Header Banner */}
-                      <div className="bg-[#2A180B] text-white p-5 sm:p-6 border-b border-[#F58220]/20 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <span className="text-[11px] font-bold uppercase tracking-widest text-[#F6C343] block">
+                      <div className="bg-gradient-to-r from-slate-950 via-[#2A180B] to-slate-900 text-white p-5 sm:p-6 border-b border-amber-500/20 flex flex-wrap items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 px-2.5 py-0.5 bg-amber-500/20 border border-amber-500/30 rounded-md inline-block">
                             DAY {day.dayNumber} ITINERARY
                           </span>
-                          <h3 className="text-lg sm:text-xl font-serif font-bold text-white tracking-tight">
+                          <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
                             {isHindi ? day.titleHi : day.titleEn}
                           </h3>
-                          <p className="text-xs text-stone-300 mt-0.5 font-sans">
+                          <p className="text-xs sm:text-sm text-amber-200/90 font-medium">
                             {isHindi ? day.subtitleHi : day.subtitleEn}
                           </p>
                         </div>
-                        <div className="bg-white/10 px-3.5 py-1.5 rounded-xl border border-white/10 text-xs font-semibold text-[#F6C343] flex items-center gap-1.5">
+                        <div className="bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15 text-xs font-bold text-amber-300 flex items-center gap-1.5 shrink-0">
+                          <Sparkles className="w-3.5 h-3.5 text-[#F58220]" />
                           <span>{day.activities.length} Key Rites &amp; Stops</span>
                         </div>
                       </div>
@@ -695,21 +897,21 @@ export default function MyTripPage() {
                       {/* Activity Timeline List */}
                       <div className="p-6 sm:p-8 space-y-6">
                         {day.activities.map((act, idx) => (
-                          <div key={idx} className="relative pl-6 sm:pl-8 border-l-2 border-amber-200/80 pb-6 last:pb-0 last:border-l-0">
+                          <div key={idx} className="relative pl-7 sm:pl-9 border-l-2 border-amber-400/40 pb-6 last:pb-0 last:border-l-0">
                             {/* Timeblock Indicator Circle */}
-                            <div className="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-stone-50 border-2 border-[#F58220] flex items-center justify-center text-xs font-bold text-stone-900 shadow-2xs">
+                            <div className="absolute -left-[18px] top-0 w-8 h-8 rounded-full bg-slate-900 border-2 border-[#F58220] flex items-center justify-center text-xs shadow-md">
                               {act.timeBlock === 'MORNING' ? '🌅' : act.timeBlock === 'AFTERNOON' ? '☀️' : '🌆'}
                             </div>
 
-                            <div className="bg-stone-50/70 p-5 rounded-2xl border border-stone-200/80 space-y-3">
+                            <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-3.5">
                               
                               {/* Title & Tag */}
-                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/60 pb-2.5">
-                                <div className="space-y-0.5">
-                                  <span className="text-[10px] uppercase font-bold text-amber-900 bg-amber-100/90 border border-amber-200/60 px-2 py-0.5 rounded-md tracking-wider">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                                <div className="space-y-1">
+                                  <span className="text-[10px] font-black uppercase text-amber-900 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg tracking-wider">
                                     {act.timeBlock} • {act.categoryTag}
                                   </span>
-                                  <h4 className="text-base font-serif font-bold text-stone-900 pt-1 tracking-tight">
+                                  <h4 className="text-base sm:text-lg font-extrabold text-slate-900 pt-1 tracking-tight">
                                     {isHindi ? act.titleHi : act.titleEn}
                                   </h4>
                                 </div>
@@ -719,28 +921,28 @@ export default function MyTripPage() {
                                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.googleMapsQuery)}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 text-xs font-semibold text-stone-700 bg-white border border-stone-300 px-3 py-1.5 rounded-xl hover:border-amber-400 hover:text-amber-800 transition shadow-2xs"
+                                  className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl hover:bg-amber-50 hover:border-amber-300 hover:text-amber-900 transition-all shadow-2xs"
                                 >
                                   <Navigation className="w-3.5 h-3.5 text-[#F58220]" />
                                   <span>Google Maps</span>
-                                  <ExternalLink className="w-3 h-3 text-stone-400" />
+                                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                                 </a>
                               </div>
 
                               {/* Description */}
-                              <p className="text-xs text-stone-700 leading-relaxed font-sans">
+                              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                                 {isHindi ? act.descriptionHi : act.descriptionEn}
                               </p>
 
                               {/* Distance & Travel Time Badges */}
-                              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-stone-200/60">
-                                <div className="flex flex-wrap items-center gap-4 text-stone-600 text-[11px] font-medium">
-                                  <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-stone-200">
+                              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs border-t border-slate-100">
+                                <div className="flex flex-wrap items-center gap-3 text-slate-600 text-xs font-semibold">
+                                  <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
                                     <MapPin className="w-3.5 h-3.5 text-[#F58220]" />
                                     <span>{act.distanceKm}</span>
                                   </span>
 
-                                  <span className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-stone-200">
+                                  <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
                                     <Clock className="w-3.5 h-3.5 text-amber-600" />
                                     <span>{act.travelTimeMin}</span>
                                   </span>
@@ -750,10 +952,10 @@ export default function MyTripPage() {
                                 {act.actionUrl && (
                                   <Link
                                     href={act.actionUrl}
-                                    className="flex items-center gap-1 font-bold text-xs text-[#2A180B] hover:text-[#F58220] transition group"
+                                    className="flex items-center gap-1.5 font-extrabold text-xs text-[#2A180B] hover:text-[#F58220] transition-all group"
                                   >
                                     <span>{isHindi ? act.actionLabelHi : act.actionLabelEn}</span>
-                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
+                                    <ArrowRight className="w-4 h-4 text-[#F58220] group-hover:translate-x-1 transition-transform" />
                                   </Link>
                                 )}
                               </div>
@@ -779,31 +981,31 @@ export default function MyTripPage() {
           <span>VERIFIED GAYASEVA LOCAL DIRECTORY</span>
         </div>
 
-        <h3 className="text-xl font-serif font-bold text-white">
+        <h3 className="text-xl font-extrabold text-white tracking-tight">
           {isHindi ? 'अपनी यात्रा हेतु सत्यापित सेवा साझेदार बुक करें' : 'Book Verified Partners for Your Itinerary'}
         </h3>
-        <p className="text-xs text-[#F8F6EF]/80 max-w-2xl">
+        <p className="text-xs text-[#F8F6EF]/80 max-w-2xl font-medium">
           {isHindi
             ? '0% कमीशन पर सीधे गयावाल पंडा जी, ड्राइवर, होटल एवं सात्विक भोजनालय से संपर्क करें।'
             : 'Connect directly with verified Pandits, pick & drop cabs, AC rooms, and satvik restaurants with zero hidden fees.'}
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
-          <Link href="/pandit" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white">
+          <Link href="/pandit" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white font-semibold">
             <Flame className="w-4 h-4 text-[#F6C343]" />
-            <span className="font-semibold">Pandit Ji (/pandit)</span>
+            <span>Pandit Ji (/pandit)</span>
           </Link>
-          <Link href="/pick-drop" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white">
+          <Link href="/pick-drop" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white font-semibold">
             <Car className="w-4 h-4 text-[#F6C343]" />
-            <span className="font-semibold">Taxi &amp; Auto (/pick-drop)</span>
+            <span>Taxi &amp; Auto (/pick-drop)</span>
           </Link>
-          <Link href="/stay" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white">
+          <Link href="/stay" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white font-semibold">
             <Hotel className="w-4 h-4 text-[#F6C343]" />
-            <span className="font-semibold">Hotels &amp; Rooms (/stay)</span>
+            <span>Hotels &amp; Rooms (/stay)</span>
           </Link>
-          <Link href="/food" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white">
+          <Link href="/food" className="bg-white/10 p-3 rounded-2xl border border-white/10 hover:bg-white/20 transition flex items-center gap-2 text-white font-semibold">
             <UtensilsCrossed className="w-4 h-4 text-[#F6C343]" />
-            <span className="font-semibold">Satvik Food (/food)</span>
+            <span>Satvik Food (/food)</span>
           </Link>
         </div>
       </div>
@@ -811,4 +1013,3 @@ export default function MyTripPage() {
     </div>
   );
 }
-

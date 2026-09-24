@@ -199,7 +199,7 @@ export function Navbar() {
                   <div className="h-px bg-slate-100 my-1" />
 
                   <Link 
-                    href="/services?category=PANDIT"
+                    href="/pandit"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-amber-50 text-slate-800 hover:text-[#F58220] font-bold text-xs transition-colors"
                   >
@@ -208,7 +208,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=BARBER"
+                    href="/barbers"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-amber-50 text-slate-800 hover:text-[#F58220] font-bold text-xs transition-colors"
                   >
@@ -217,7 +217,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=DRIVER"
+                    href="/pick-drop"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-orange-50 text-slate-800 hover:text-orange-600 font-bold text-xs transition-colors"
                   >
@@ -226,7 +226,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=HOTEL"
+                    href="/stay"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-blue-50 text-slate-800 hover:text-blue-600 font-bold text-xs transition-colors"
                   >
@@ -235,7 +235,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=FOOD"
+                    href="/food"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-emerald-50 text-slate-800 hover:text-emerald-600 font-bold text-xs transition-colors"
                   >
@@ -244,7 +244,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=PUJA"
+                    href="/puja-material"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-pink-50 text-slate-800 hover:text-pink-600 font-bold text-xs transition-colors"
                   >
@@ -253,7 +253,7 @@ export function Navbar() {
                   </Link>
 
                   <Link 
-                    href="/services?category=GUIDE"
+                    href="/gaya"
                     onClick={() => setServicesDropdownOpen(false)}
                     className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-purple-50 text-slate-800 hover:text-purple-600 font-bold text-xs transition-colors"
                   >

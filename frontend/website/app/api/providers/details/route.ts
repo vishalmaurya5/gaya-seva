@@ -18,14 +18,23 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { providerId, userId } = body;
 
-    if (!providerId) {
-      return NextResponse.json({ error: 'providerId is required' }, { status: 400, headers: corsHeaders() });
-    }
-
     const systemConfig = readSystemConfig();
 
     // Verify server-side authorization: User must have ACTIVE customer access
     const isAuthorized = canViewProviderDetails(userId);
+
+    // If providerId is omitted, caller is just checking overall directory/contact access status
+    if (!providerId) {
+      return NextResponse.json(
+        {
+          locked: !isAuthorized,
+          hasAccess: isAuthorized,
+          accessFee: systemConfig.customer_access_fee,
+          currency: systemConfig.currency || 'INR',
+        },
+        { headers: corsHeaders() }
+      );
+    }
 
     if (!isAuthorized) {
       return NextResponse.json(

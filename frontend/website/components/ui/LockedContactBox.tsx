@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Phone, MessageSquare, Lock, ShieldCheck, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
-import { ConfigStore, SystemConfig } from '@/lib/configStore';
+import { ConfigStore, SystemConfig, DEFAULT_CONFIG } from '@/lib/configStore';
 import { PaymentStore } from '@/lib/paymentStore';
 import { formatPhoneNumber, getProfessionalWhatsAppUrl } from '@/lib/whatsappHelper';
 
@@ -15,8 +16,9 @@ interface LockedContactBoxProps {
 }
 
 export function LockedContactBox({ providerId, providerName, defaultPhone, serviceCategory }: LockedContactBoxProps) {
+  const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [config, setConfig] = useState<SystemConfig>(ConfigStore.getConfig());
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [unlockedPhone, setUnlockedPhone] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -26,21 +28,65 @@ export function LockedContactBox({ providerId, providerName, defaultPhone, servi
   useEffect(() => {
     ConfigStore.fetchConfig().then(setConfig);
 
-    try {
-      const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
-      if (stored) {
-        const usr = JSON.parse(stored);
-        setCurrentUser(usr);
-        checkAndFetchAccess(usr);
-      } else {
+    const handleAuthOrAccessChange = () => {
+      try {
+        const stored = localStorage.getItem('GAYASEVA_CURRENT_USER');
+        if (stored) {
+          const usr = JSON.parse(stored);
+          setCurrentUser(usr);
+          checkAndFetchAccess(usr);
+        } else {
+          setCurrentUser(null);
+          setHasAccess(false);
+          setLoading(false);
+        }
+      } catch {
         setLoading(false);
       }
-    } catch {
-      setLoading(false);
+    };
+
+    handleAuthOrAccessChange();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleAuthOrAccessChange);
+      window.addEventListener('gayaseva_access_change', handleAuthOrAccessChange);
     }
-  }, [providerId]);
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleAuthOrAccessChange);
+        window.removeEventListener('gayaseva_access_change', handleAuthOrAccessChange);
+      }
+    };
+  }, [providerId, defaultPhone]);
+
+  const syncActiveAccess = (userId: string) => {
+    if (typeof window === 'undefined' || !userId) return;
+    try {
+      const key = 'GAYASEVA_CUSTOMER_ACCESS_STORE';
+      const stored = localStorage.getItem(key);
+      let records: any[] = stored ? JSON.parse(stored) : [];
+      if (!Array.isArray(records)) records = [];
+      const existing = records.find((r) => r.userId === userId && r.status === 'ACTIVE');
+      if (!existing) {
+        records.push({
+          id: 'access_' + userId,
+          userId: userId,
+          accessType: 'LIFETIME',
+          status: 'ACTIVE',
+          amount: 5,
+          currency: 'INR',
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem(key, JSON.stringify(records));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('gayaseva_access_change'));
+      }
+    } catch (e) {}
+  };
 
   const checkAndFetchAccess = async (user: any) => {
+    if (!user || !user.id) return;
     setLoading(true);
     try {
       // Fetch fresh access status from backend
@@ -52,9 +98,21 @@ export function LockedContactBox({ providerId, providerName, defaultPhone, servi
 
       if (res.ok) {
         const data = await res.json();
-        if (!data.locked && data.phone) {
+        if (!data.locked) {
           setHasAccess(true);
-          setUnlockedPhone(data.phone);
+          setUnlockedPhone(data.phone || defaultPhone || null);
+          syncActiveAccess(user.id);
+        }
+      } else if (defaultPhone) {
+        // Fallback check to access status API if defaultPhone prop was supplied
+        const statusRes = await fetch(`/api/payments/access-status?userId=${user.id}`);
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.hasAccess) {
+            setHasAccess(true);
+            setUnlockedPhone(defaultPhone);
+            syncActiveAccess(user.id);
+          }
         }
       }
     } catch (e) {
@@ -124,8 +182,13 @@ export function LockedContactBox({ providerId, providerName, defaultPhone, servi
 
             if (verifyRes.ok) {
               setPaymentMessage('✅ Access Pass Successfully Activated!');
+              setHasAccess(true);
+              if (defaultPhone) setUnlockedPhone(defaultPhone);
               await checkAndFetchAccess(currentUser);
-              window.dispatchEvent(new Event('storage'));
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('storage'));
+                window.dispatchEvent(new Event('gayaseva_access_change'));
+              }
             } else {
               const err = await verifyRes.json();
               alert(`Payment Verification Error: ${err.error || 'Verification failed'}`);
@@ -231,11 +294,11 @@ export function LockedContactBox({ providerId, providerName, defaultPhone, servi
 
       {!currentUser ? (
         <Link
-          href={`/auth/login?redirect=${encodeURIComponent('/services')}`}
+          href={`/auth/register?redirect=${encodeURIComponent(pathname || '/services')}`}
           className="w-full py-2.5 bg-[#F58220] hover:bg-[#E07210] text-white text-xs font-black rounded-xl text-center shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95"
         >
           <Lock className="w-3.5 h-3.5" />
-          <span>Register / Login &amp; Activate ₹{config.customer_access_fee} Access Pass</span>
+          <span>Create New Account &amp; Activate ₹{config.customer_access_fee} Access Pass</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       ) : (

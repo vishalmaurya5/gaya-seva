@@ -105,7 +105,11 @@ export default function CustomerDashboardPage() {
   useEffect(() => {
     refreshUserSession();
     window.addEventListener('storage', refreshUserSession);
-    return () => window.removeEventListener('storage', refreshUserSession);
+    window.addEventListener('gayaseva_access_change', refreshUserSession);
+    return () => {
+      window.removeEventListener('storage', refreshUserSession);
+      window.removeEventListener('gayaseva_access_change', refreshUserSession);
+    };
   }, []);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -310,7 +314,7 @@ export default function CustomerDashboardPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-bold">
               <Link
-                href="/services?category=PANDIT"
+                href="/pandit"
                 className="p-4 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 rounded-2xl text-[#1C0D02] space-y-2 transition-all hover:shadow-md"
               >
                 <Flame className="w-6 h-6 text-[#F58220]" />
@@ -319,7 +323,7 @@ export default function CustomerDashboardPage() {
               </Link>
 
               <Link
-                href="/services?category=BARBER"
+                href="/barbers"
                 className="p-4 bg-orange-50 hover:bg-orange-100/80 border border-orange-200 rounded-2xl text-[#1C0D02] space-y-2 transition-all hover:shadow-md"
               >
                 <span className="text-xl">✂️</span>
@@ -328,7 +332,7 @@ export default function CustomerDashboardPage() {
               </Link>
 
               <Link
-                href="/services?category=DRIVER"
+                href="/pick-drop"
                 className="p-4 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 rounded-2xl text-[#1C0D02] space-y-2 transition-all hover:shadow-md"
               >
                 <Car className="w-6 h-6 text-blue-600" />
@@ -337,7 +341,7 @@ export default function CustomerDashboardPage() {
               </Link>
 
               <Link
-                href="/services?category=HOTEL"
+                href="/stay"
                 className="p-4 bg-purple-50 hover:bg-purple-100/80 border border-purple-200 rounded-2xl text-[#1C0D02] space-y-2 transition-all hover:shadow-md"
               >
                 <Hotel className="w-6 h-6 text-purple-600" />
