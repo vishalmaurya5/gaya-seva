@@ -54,7 +54,7 @@ export class SMTPEmailService {
     const port = parseInt(process.env.SMTP_PORT || '587', 10);
     const secure = process.env.SMTP_SECURE === 'true';
     const user = process.env.SMTP_USER || '';
-    const pass = process.env.SMTP_PASSWORD || '';
+    const pass = process.env.SMTP_PASSWORD || process.env.SMTP_PASS || '';
 
     this.transporter = nodemailer.createTransport({
       host,
@@ -62,6 +62,21 @@ export class SMTPEmailService {
       secure,
       auth: user ? { user, pass } : undefined,
     });
+  }
+
+  /**
+   * Verify SMTP transporter connection and credentials.
+   */
+  public async verifyConnection(): Promise<{ success: boolean; error?: string }> {
+    if (!this.transporter) {
+      return { success: false, error: 'Transporter not initialized' };
+    }
+    try {
+      await this.transporter.verify();
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'SMTP Connection failed' };
+    }
   }
 
   /**
@@ -94,10 +109,11 @@ export class SMTPEmailService {
     try {
       logEntry.status = 'SENDING';
       
-      const fromEmail = process.env.SMTP_FROM_EMAIL || 'noreply@gayaseva.org';
+      const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@gayaseva.org';
       const fromName = process.env.SMTP_FROM_NAME || 'GayaSeva';
+      const pass = process.env.SMTP_PASSWORD || process.env.SMTP_PASS || '';
 
-      if (this.transporter && process.env.SMTP_PASSWORD) {
+      if (this.transporter && pass) {
         await this.transporter.sendMail({
           from: `"${fromName}" <${fromEmail}>`,
           to: options.recipient,

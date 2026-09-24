@@ -25,13 +25,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400, headers: corsHeaders() });
     }
 
-    // Sanitize filename
-    const ext = path.extname(rawFilename) || '.jpg';
-    const baseName = path.basename(rawFilename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
-    const sanitizedFileName = `${baseName}_${Date.now()}${ext}`;
+    // 1. Strict File Size Enforcement (Max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ error: 'Security Error: File size exceeds 5MB limit' }, { status: 400, headers: corsHeaders() });
+    }
 
-    // Target upload directory: public/uploads/<bucket>
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', bucket);
+    // 2. Extension & MIME Type Whitelisting
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
+    const ext = (path.extname(rawFilename) || '.jpg').toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return NextResponse.json({ error: `Security Error: Extension ${ext} is not allowed` }, { status: 400, headers: corsHeaders() });
+    }
+
+    if (file.type && !allowedMimeTypes.includes(file.type.toLowerCase())) {
+      return NextResponse.json({ error: `Security Error: MIME type ${file.type} is disallowed` }, { status: 400, headers: corsHeaders() });
+    }
+
+    // 3. Sanitized Bucket Path & Safe Filename
+    const safeBucket = bucket.replace(/[^a-zA-Z0-9_-]/g, '');
+    const baseName = path.basename(rawFilename, ext).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 30);
+    const sanitizedFileName = `${baseName}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
+
+    // Target upload directory: public/uploads/<safeBucket>
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', safeBucket);
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
@@ -42,7 +61,7 @@ export async function POST(req: Request) {
 
     fs.writeFileSync(filePath, buffer);
 
-    const publicUrl = `/uploads/${bucket}/${sanitizedFileName}`;
+    const publicUrl = `/uploads/${safeBucket}/${sanitizedFileName}`;
 
     return NextResponse.json({
       success: true,

@@ -134,14 +134,17 @@ const DEFAULT_USERS: UserAccount[] = [
 
 function getFilePath(): string {
   const possiblePaths = [
-    path.join(process.cwd(), '..', 'data', 'users.json'),
-    path.join(process.cwd(), 'data', 'users.json'),
-    path.join(process.cwd(), '..', '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), '..', '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), 'data', 'users.json'),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) return p;
   }
-  return possiblePaths[0];
+  const primary = possiblePaths[0];
+  const dir = path.dirname(primary);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return primary;
 }
 
 function readUsers(): UserAccount[] {

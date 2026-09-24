@@ -23,14 +23,17 @@ const DEFAULT_CONFIG: SystemConfig = {
 
 function getConfigPath(): string {
   const possiblePaths = [
-    path.join(process.cwd(), '..', 'data', 'system_config.json'),
-    path.join(process.cwd(), 'data', 'system_config.json'),
-    path.join(process.cwd(), '..', '..', 'data', 'system_config.json'),
+    path.resolve(process.cwd(), '..', '..', 'data', 'system_config.json'),
+    path.resolve(process.cwd(), '..', 'data', 'system_config.json'),
+    path.resolve(process.cwd(), 'data', 'system_config.json'),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) return p;
   }
-  return possiblePaths[0];
+  const primary = possiblePaths[0];
+  const dir = path.dirname(primary);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return primary;
 }
 
 function readSystemConfig(): SystemConfig {

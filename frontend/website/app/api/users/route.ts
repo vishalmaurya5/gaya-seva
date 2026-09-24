@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendEmail } from '@/lib/email/email';
 
 export interface UserAccount {
   id: string;
@@ -135,14 +136,17 @@ import path from 'path';
 
 function getFilePath(): string {
   const possiblePaths = [
-    path.join(process.cwd(), '..', 'data', 'users.json'),
-    path.join(process.cwd(), 'data', 'users.json'),
-    path.join(process.cwd(), '..', '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), '..', '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), '..', 'data', 'users.json'),
+    path.resolve(process.cwd(), 'data', 'users.json'),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) return p;
   }
-  return possiblePaths[0];
+  const primary = possiblePaths[0];
+  const dir = path.dirname(primary);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return primary;
 }
 
 function readUsers(): UserAccount[] {
@@ -249,6 +253,36 @@ export async function POST(req: Request) {
     users.push(newUser);
     writeUsers(users);
 
+    // Trigger transactional emails
+    if (newUser.email) {
+      if (newUser.role === 'PILGRIM') {
+        sendEmail({
+          event: 'USER_REGISTERED',
+          recipient: newUser.email,
+          variables: {
+            user_name: newUser.name,
+            account_email: newUser.email,
+          },
+          relatedType: 'USER',
+          relatedId: newUser.id,
+        }).catch((e) => console.warn('User welcome email trigger notice:', e));
+      } else {
+        sendEmail({
+          event: 'PROVIDER_REGISTERED',
+          recipient: newUser.email,
+          variables: {
+            provider_name: newUser.name,
+            provider_type: newUser.role,
+            service_name: newUser.customRole || newUser.role,
+            status: newUser.status,
+            date: new Date().toLocaleDateString('en-IN'),
+          },
+          relatedType: 'PROVIDER',
+          relatedId: newUser.id,
+        }).catch((e) => console.warn('Provider application email trigger notice:', e));
+      }
+    }
+
     return NextResponse.json(newUser, { status: 201, headers: corsHeaders() });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to create user' }, { status: 400, headers: corsHeaders() });
@@ -265,22 +299,47 @@ export async function PUT(req: Request) {
     }
 
     const users = readUsers();
-    let updatedUser: UserAccount | null = null;
+    const userIndex = users.findIndex((u) => u.id === id);
 
-    const updatedUsers: UserAccount[] = users.map((u) => {
-      if (u.id === id) {
-        const merged: UserAccount = { ...u, ...updates };
-        updatedUser = merged;
-        return merged;
-      }
-      return u;
-    });
-
-    if (!updatedUser) {
+    if (userIndex === -1) {
       return NextResponse.json({ error: 'User not found' }, { status: 404, headers: corsHeaders() });
     }
 
-    writeUsers(updatedUsers);
+    const oldStatus = users[userIndex].status;
+    const updatedUser: UserAccount = { ...users[userIndex], ...updates };
+    users[userIndex] = updatedUser;
+
+    writeUsers(users);
+
+    // Trigger email on status transition
+    if (updatedUser.email && oldStatus !== updates.status) {
+      if (updates.status === 'VERIFIED') {
+        sendEmail({
+          event: 'PROVIDER_VERIFIED',
+          recipient: updatedUser.email,
+          variables: {
+            provider_name: updatedUser.name,
+            provider_type: updatedUser.role,
+            service_name: updatedUser.customRole || updatedUser.role,
+            status: 'VERIFIED',
+          },
+          relatedType: 'PROVIDER',
+          relatedId: updatedUser.id,
+        }).catch((e) => console.warn('Provider verified email trigger notice:', e));
+      } else if (updates.status === 'SUSPENDED') {
+        sendEmail({
+          event: 'PROVIDER_REJECTED',
+          recipient: updatedUser.email,
+          variables: {
+            provider_name: updatedUser.name,
+            reason: updates.rejectionReason || 'Application requires document/information update.',
+          },
+          relatedType: 'PROVIDER',
+          relatedId: updatedUser.id,
+        }).catch((e) => console.warn('Provider rejected email trigger notice:', e));
+      }
+    }
+
     return NextResponse.json(updatedUser, { headers: corsHeaders() });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Failed to update user' }, { status: 400, headers: corsHeaders() });

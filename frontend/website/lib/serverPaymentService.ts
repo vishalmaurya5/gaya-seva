@@ -1,20 +1,25 @@
+import 'server-only';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { DEFAULT_CONFIG, SystemConfig } from './configStore';
 import { PaymentRecord, CustomerAccessRecord, PaymentPurpose } from './paymentStore';
 import { UserAccount } from './userStore';
+import { sendEmail } from './email/email';
 
 function getFilePath(filename: string): string {
   const possiblePaths = [
-    path.join(process.cwd(), '..', 'data', filename),
-    path.join(process.cwd(), 'data', filename),
-    path.join(process.cwd(), '..', '..', 'data', filename),
+    path.resolve(process.cwd(), '..', '..', 'data', filename),
+    path.resolve(process.cwd(), '..', 'data', filename),
+    path.resolve(process.cwd(), 'data', filename),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) return p;
   }
-  return possiblePaths[0];
+  const primary = possiblePaths[0];
+  const dir = path.dirname(primary);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return primary;
 }
 
 export function readSystemConfig(): SystemConfig {
@@ -246,6 +251,15 @@ export async function verifyPaymentServer(params: {
   const payments = readPayments();
   const paymentIndex = payments.findIndex((p) => p.razorpayOrderId === razorpay_order_id);
 
+  // Idempotency Check: If payment was already verified, return existing record without double-processing
+  if (paymentIndex !== -1 && payments[paymentIndex].status === 'SUCCESS') {
+    return {
+      success: true,
+      message: 'Payment already verified successfully (Idempotent response)',
+      payment: payments[paymentIndex],
+    };
+  }
+
   const nowIso = new Date().toISOString();
 
   let targetRecord: PaymentRecord;
@@ -335,6 +349,48 @@ export async function verifyPaymentServer(params: {
     } catch (err) {
       console.error('Failed to update provider status to VERIFIED in users store:', err);
     }
+  }
+
+  // Server-side transactional email trigger (only AFTER signature verification)
+  try {
+    const users = readUsersFromFile();
+    const user = users.find((u) => u.id === userId);
+    const recipientEmail = user?.email || 'customer@gayaseva.com';
+    const recipientName = user?.name || 'GayaSeva User';
+
+    if (purpose === 'PROVIDER_REGISTRATION') {
+      sendEmail({
+        event: 'PROVIDER_PAYMENT_SUCCESS',
+        recipient: recipientEmail,
+        variables: {
+          provider_name: recipientName,
+          amount: String(targetRecord.amount),
+          payment_id: targetRecord.razorpayPaymentId || targetRecord.id,
+          order_id: targetRecord.razorpayOrderId,
+          payment_date: new Date().toLocaleDateString('en-IN'),
+          status: 'VERIFIED SUCCESSFUL',
+        },
+        relatedType: 'PAYMENT',
+        relatedId: targetRecord.id,
+      }).catch((e) => console.warn('Provider payment email trigger background notice:', e));
+    } else {
+      sendEmail({
+        event: 'PAYMENT_SUCCESS',
+        recipient: recipientEmail,
+        variables: {
+          user_name: recipientName,
+          amount: String(targetRecord.amount),
+          currency: targetRecord.currency,
+          payment_id: targetRecord.razorpayPaymentId || targetRecord.id,
+          order_id: targetRecord.razorpayOrderId,
+          payment_date: new Date().toLocaleDateString('en-IN'),
+        },
+        relatedType: 'PAYMENT',
+        relatedId: targetRecord.id,
+      }).catch((e) => console.warn('Payment success email trigger background notice:', e));
+    }
+  } catch (emailErr) {
+    console.warn('Non-blocking payment email trigger notice:', emailErr);
   }
 
   return {
