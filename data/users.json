@@ -53,5 +53,41 @@
     "documentUrl": "/uploads/gayaseva-partner-documents/documnts_1790245494290_ghy8gqs_1790245495721_tumw7.jpeg",
     "rating": 5,
     "availabilityStatus": "AVAILABLE"
+  },
+  {
+    "id": "usr_1790265960411",
+    "name": "Vishal Kumar",
+    "email": "7301232069@provider.gayaseva.org",
+    "phone": "7301232069",
+    "password": "Babu@730123",
+    "role": "DRIVER",
+    "customRole": "Airport, Station & Outstation cabs",
+    "status": "VERIFIED",
+    "city": "Near Gaya Station",
+    "languages": [
+      "Hindi",
+      "English"
+    ],
+    "createdAt": "2026-09-24T16:06:05.453Z",
+    "documentUrl": "/uploads/gayaseva-partner-documents/documnts_1790265950920_0qqoh1b_1790265953697_gq3fj.jpeg",
+    "rating": 5,
+    "description": "SUZUKI ACCESS 125",
+    "availabilityStatus": "AVAILABLE",
+    "capacity": "Up to 1 Passengers"
+  },
+  {
+    "id": "usr_1790269441088",
+    "name": "wakeupraj29",
+    "email": "wakeupraj29@gmail.com",
+    "phone": "+91 9876543210",
+    "role": "PILGRIM",
+    "customRole": "",
+    "status": "VERIFIED",
+    "city": "Gaya Ji",
+    "languages": [
+      "Hindi"
+    ],
+    "createdAt": "2026-09-24T17:04:01.350Z",
+    "rating": 5
   }
 ]

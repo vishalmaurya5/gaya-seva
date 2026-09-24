@@ -242,7 +242,11 @@ function ServicesContent() {
       setServicesConfig(ContentStore.getServices());
     };
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('gayaseva_user_change', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('gayaseva_user_change', handleStorage);
+    };
   }, [searchParams, router, categoryRouteMap]);
 
   // GRAPH ENGINE: Dynamically extract & loop through all registered categories (including custom vendor roles!)
@@ -282,7 +286,7 @@ function ServicesContent() {
       lat?: number;
       lng?: number;
       priceText?: string;
-      availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+      availabilityStatus?: 'AVAILABLE' | 'BUSY' | 'BOOKED' | 'LIMITED' | 'FULL' | 'OPEN' | 'CLOSED' | 'OFFLINE';
       isRegistered?: boolean;
     }> = [];
 

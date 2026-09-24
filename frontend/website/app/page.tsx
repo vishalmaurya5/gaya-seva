@@ -263,6 +263,32 @@ export default function HomePage() {
             {t('heroSubtitle')}
           </motion.p>
 
+          {/* PREMIUM PARTNER / SERVICE PROVIDER CALLOUT BUTTON */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3"
+          >
+            <Link
+              href="/provider/register"
+              className="group relative inline-flex items-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#F6C343] via-[#F58220] to-[#E07210] hover:from-[#FDE047] hover:to-[#F58220] text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-2xl hover:shadow-[0_0_35px_rgba(246,195,67,0.7)] transition-all duration-300 border-2 border-white/50 transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-xl bg-slate-950 text-[#F6C343] flex items-center justify-center shrink-0 shadow-md">
+                <UserCheck className="w-4 h-4 text-[#F6C343]" />
+              </div>
+              <div className="text-left space-y-0.5">
+                <span className="block font-black text-slate-950 text-xs sm:text-sm uppercase tracking-wider">
+                  {isHindi ? '💼 सर्विस प्रदाता बनें (Become a Partner)' : '💼 Become a Service Provider / Partner'}
+                </span>
+                <span className="block text-[10px] sm:text-[11px] text-slate-900 font-extrabold opacity-90">
+                  {isHindi ? '0% कमिशन • 500+ सत्यापित गया जी पार्टनर्स से जुड़ें' : '0% Commission • Join 500+ Verified Gaya Ji Partners'}
+                </span>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform ml-1 shrink-0" />
+            </Link>
+          </motion.div>
+
           {/* SECTION 3: 🔍 ULTRA-PROFESSIONAL MULTI-SEARCH BAR */}
           <motion.div 
             initial={{ opacity: 0, y: 25 }}
@@ -444,7 +470,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Gaya Junction &rarr; Vishnupad</h3>
             <p className="text-xs text-slate-700 font-medium">AC Sedan / Hatchback / Auto-Rickshaw available 24/7.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹300 - ₹600</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/pick-drop" className="text-xs font-black text-[#F58220]">Book Cab &rarr;</Link>
             </div>
           </div>
@@ -457,7 +483,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Gaya Airport (GAY) &rarr; Bodh Gaya</h3>
             <p className="text-xs text-slate-700 font-medium">Spacious SUV & AC Sedans for international & domestic Yatri arrival.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹500 - ₹900</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/pick-drop" className="text-xs font-black text-blue-600">Book Cab &rarr;</Link>
             </div>
           </div>
@@ -470,7 +496,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Gaya Teerth Circuit Full Day</h3>
             <p className="text-xs text-slate-700 font-medium">Covers Vishnupad, Falgu, Akshayavat, Pretshila & Bodh Gaya.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹1,800 / day</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/pick-drop" className="text-xs font-black text-purple-600">Reserve Day &rarr;</Link>
             </div>
           </div>
@@ -498,7 +524,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Sri Vishnupad Yatri Dharamshala</h3>
             <p className="text-xs text-slate-700 font-medium">Clean AC / Non-AC rooms with hot water, lift & pure satvik kitchen.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-xs font-black text-slate-900">From ₹450 / night</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/stay" className="text-xs font-black text-blue-600">Book Room &rarr;</Link>
             </div>
           </div>
@@ -508,7 +534,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Hotel Teerth Residency</h3>
             <p className="text-xs text-slate-700 font-medium">3-Star comfortable rooms with free station pickup & 24hr room service.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-xs font-black text-slate-900">From ₹1,200 / night</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/stay" className="text-xs font-black text-blue-600">Book Room &rarr;</Link>
             </div>
           </div>
@@ -518,7 +544,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Mahabodhi Heritage Guest House</h3>
             <p className="text-xs text-slate-700 font-medium">Peaceful garden guest house with meditation space & airport transport.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-xs font-black text-slate-900">From ₹950 / night</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">0% Commission Direct Rate</span>
               <Link href="/stay" className="text-xs font-black text-blue-600">Book Room &rarr;</Link>
             </div>
           </div>
@@ -570,7 +596,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Complete Pind Daan Kit</h3>
             <p className="text-xs text-slate-700 font-medium">Includes pure sesame, barley flour, kusha grass, brass diya, honey, and sacred thread.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹350</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">Direct Provider Rate</span>
               <Link href="/puja-material" className="text-xs font-black text-pink-600">Order Kit &rarr;</Link>
             </div>
           </div>
@@ -580,7 +606,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Tripindi Shradh Special Kit</h3>
             <p className="text-xs text-slate-700 font-medium">Complete items for Tripindi Shradh rites with pure cow ghee and samidha wood.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹550</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">Direct Provider Rate</span>
               <Link href="/puja-material" className="text-xs font-black text-pink-600">Order Kit &rarr;</Link>
             </div>
           </div>
@@ -590,7 +616,7 @@ export default function HomePage() {
             <h3 className="font-sans font-black text-lg text-slate-900">Original Gaya Tilkut Pack</h3>
             <p className="text-xs text-slate-700 font-medium">Fresh Ramna Road traditional white sesame & jaggery Tilkut gift boxes.</p>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-              <span className="text-sm font-black text-slate-900">₹280 / kg</span>
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">Direct Provider Rate</span>
               <Link href="/puja-material" className="text-xs font-black text-emerald-600">Order Pack &rarr;</Link>
             </div>
           </div>

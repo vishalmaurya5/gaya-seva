@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Key, ShieldCheck, Search, Filter, RefreshCw, UserCheck, 
-  Clock, AlertTriangle, CheckCircle2, XCircle, Mail, Phone
+  Clock, AlertTriangle, CheckCircle2, XCircle, Mail, Phone, Lock, Unlock
 } from 'lucide-react';
 import { CustomerAccessRecord } from '@/lib/paymentStore';
 import { UserAccount, UserStore } from '@/lib/userStore';
@@ -14,6 +14,7 @@ export default function AdminAccessPassReportPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const fetchAccessData = async () => {
     setLoading(true);
@@ -23,7 +24,7 @@ export default function AdminAccessPassReportPage() {
         UserStore.fetchUsersFromApi(),
       ]);
       const recordsData = await accRes.json();
-      setAccessRecords(Array.isArray(recordsData) ? recordsData : []);
+      setAccessRecords(Array.isArray(recordsData) ? recordsData : (recordsData.records || []));
       setUsers(usersData);
     } catch (e) {
       console.error('Failed to load customer access pass data:', e);
@@ -35,6 +36,37 @@ export default function AdminAccessPassReportPage() {
   useEffect(() => {
     fetchAccessData();
   }, []);
+
+  const handleToggleRevokeAccess = async (rec: CustomerAccessRecord) => {
+    const nextStatus = rec.status === 'ACTIVE' ? 'REVOKED' : 'ACTIVE';
+    const confirmAction = confirm(
+      `Are you sure you want to change Access Pass status to ${nextStatus} for user ID ${rec.userId}?`
+    );
+
+    if (!confirmAction) return;
+
+    try {
+      const res = await fetch('/api/access/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessId: rec.id,
+          userId: rec.userId,
+          newStatus: nextStatus,
+        }),
+      });
+
+      if (res.ok) {
+        setActionMessage(`Access pass status successfully changed to ${nextStatus}.`);
+        await fetchAccessData();
+      } else {
+        const err = await res.json();
+        alert(`Failed to update access status: ${err.error || 'Unknown error'}`);
+      }
+    } catch (e: any) {
+      alert(`Error updating access status: ${e.message}`);
+    }
+  };
 
   const userMap = new Map<string, UserAccount>();
   users.forEach((u) => userMap.set(u.id, u));
@@ -82,6 +114,13 @@ export default function AdminAccessPassReportPage() {
           Sync Access Ledger
         </button>
       </div>
+
+      {actionMessage && (
+        <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold rounded-2xl flex justify-between items-center">
+          <span>{actionMessage}</span>
+          <button onClick={() => setActionMessage(null)} className="text-emerald-700 hover:underline">Dismiss</button>
+        </div>
+      )}
 
       {/* KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium">
@@ -145,7 +184,7 @@ export default function AdminAccessPassReportPage() {
                 <th className="px-6 py-4">Amount Paid</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Activated At</th>
-                <th className="px-6 py-4 text-right">Expires At</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 font-medium">
@@ -209,8 +248,21 @@ export default function AdminAccessPassReportPage() {
                         {rec.activatedAt ? new Date(rec.activatedAt).toLocaleDateString('en-IN') : '—'}
                       </td>
 
-                      <td className="px-6 py-4 text-right text-[11px] font-mono">
-                        {rec.expiresAt ? new Date(rec.expiresAt).toLocaleDateString('en-IN') : 'Lifetime Access'}
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleToggleRevokeAccess(rec)}
+                          className={`px-3 py-1.5 rounded-xl font-bold text-[11px] border transition cursor-pointer ${
+                            rec.status === 'ACTIVE'
+                              ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
+                              : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                          }`}
+                        >
+                          {rec.status === 'ACTIVE' ? (
+                            <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> Revoke Access</span>
+                          ) : (
+                            <span className="flex items-center gap-1"><Unlock className="w-3 h-3" /> Restore Access</span>
+                          )}
+                        </button>
                       </td>
                     </tr>
                   );

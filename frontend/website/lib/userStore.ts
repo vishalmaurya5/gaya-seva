@@ -5,6 +5,7 @@ export interface UserAccount {
   phone: string;
   role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'AUTO' | 'TRAVEL' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'HEALTHCARE' | 'PHOTOGRAPHY' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
   customRole?: string;
+  specialization?: string;
   status: 'VERIFIED' | 'PENDING' | 'SUSPENDED';
   city?: string;
   languages?: string[];
@@ -17,9 +18,10 @@ export interface UserAccount {
   lng?: number;
   rating?: number;
   password?: string;
-  availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+  availabilityStatus?: 'AVAILABLE' | 'BUSY' | 'BOOKED' | 'LIMITED' | 'FULL' | 'OPEN' | 'CLOSED' | 'OFFLINE';
   description?: string;
   features?: string[];
+  capacity?: string;
 }
 
 const STORAGE_KEY = 'GAYASEVA_USERS_STORE';
@@ -183,6 +185,7 @@ export const UserStore = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
       window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('gayaseva_user_change'));
     } catch (e) {
       console.error('Failed to save users to localStorage', e);
     }

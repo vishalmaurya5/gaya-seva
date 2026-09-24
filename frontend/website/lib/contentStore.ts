@@ -47,7 +47,7 @@ export interface ServiceConfigItem {
   imageUrl?: string;
   phone?: string;
   whatsapp?: string;
-  availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+  availabilityStatus?: 'AVAILABLE' | 'BUSY' | 'BOOKED' | 'LIMITED' | 'FULL' | 'OPEN' | 'CLOSED' | 'OFFLINE';
 }
 
 export interface LostFoundItem {

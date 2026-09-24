@@ -5,6 +5,7 @@ export interface UserAccount {
   phone: string;
   role: 'PILGRIM' | 'PANDIT' | 'BARBER' | 'DRIVER' | 'AUTO' | 'TRAVEL' | 'HOTEL' | 'SHOP' | 'GUIDE' | 'FOOD' | 'HEALTHCARE' | 'PHOTOGRAPHY' | 'ADMIN' | 'SUPER_ADMIN' | 'OTHER';
   customRole?: string;
+  specialization?: string;
   status: 'VERIFIED' | 'PENDING' | 'SUSPENDED';
   city?: string;
   languages?: string[];

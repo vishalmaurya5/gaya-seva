@@ -12,12 +12,94 @@ export interface AIResponseCard {
 // Extensive Gaya Ji, Bodh Gaya & Nearby Teerth Knowledge Base
 const KNOWLEDGE_TOPICS = [
   {
-    keywords: ['pass', 'access pass', 'unlock', 'lock', 'price', 'plan', 'subscription', 'contact pass', '49', '99', '199', 'day pass', 'trip pass', 'family pass', 'directory pass'],
-    title: 'GayaSeva Teerth Access Pass & Directory Unlocking',
-    answer: 'To directly view verified provider phone numbers, WhatsApp contact links, and unlock custom trip itineraries on GayaSeva, Yatris can choose an Access Pass:\n\n• ₹49 Day Pass: 24 Hours Unlimited Access\n• ₹99 Trip Pass: 7 Days Full Teerth Access\n• ₹199 Family Pass: 30 Days Family Access\n\nOnce activated, contacts and trip plans unlock automatically across all pages!',
+    keywords: ['language', 'english', 'hindi', 'bengali', 'telugu', 'tamil', 'भाषा', 'भाषा चुनें', 'bhasha'],
+    title: '🌐 Select Your Language / अपनी भाषा चुनें',
+    answer: `Welcome to GayaSeva AI Assistant! Please select your language / अपनी भाषा चुनें / আপনার ভাষা বেছে নিন / మీ భాషను ఎంచుకోండి / உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்:
+
+• 🇬🇧 English: Full guidance on functions, service provider registration, access passes & services.
+• 🇮🇳 हिंदी: गया सेवा की सम्पूर्ण कार्यप्रणाली, सेवा प्रदाता (पार्टनर) पंजीकरण, एक्सेस पास एवं सभी सेवाओं की जानकारी।
+• 🇮🇳 বাংলা: সেবা প্রদানকারী নিবন্ধন, অ্যাক্সেস পাস এবং গয়া সেবার সমস্ত পরিষেবার বিস্তারিত তথ্য।
+• 🇮🇳 తెలుగు: సేవా ప్రదాత రిజిస్ట్రేషన్, యాక్సెస్ పాస్ మరియు గయా సేవ యొక్క అన్ని సేవల వివరాలు.
+• 🇮🇳 தமிழ்: சேவை வழங்குநர் பதிவு, அணுகல் பாస్ এবং கயா சேவையின் அனைத்து சேவைகள்.`,
+    links: [
+      { label: '🚀 Complete GayaSeva Guide & Overview', url: '/services' },
+      { label: '📝 Register as Service Provider (₹49)', url: '/auth/register' },
+      { label: '🎫 Pilgrim Access Pass (₹49)', url: '/pass' },
+    ],
+  },
+  {
+    keywords: ['register provider', 'become partner', 'join provider', 'pandit registration', 'driver registration', 'hotel registration', 'partner fee', 'profile pic optional', 'optional photo', 'registration fee', 'how to register', 'how to become member', 'provider member', 'member as server provider'],
+    title: '📝 Step-by-Step: How to Register & Become a Member as a Service Provider',
+    answer: `Joining GayaSeva as a Service Provider (सेवा प्रदाता/पार्टनर) is fast, simple, and transparent:
+
+1. **Choose Your Service Role**:
+   • Pandit Ji (तीर्थ पुरोहित / पिंडदान विशेषज्ञ)
+   • Cab / Taxi / E-Rickshaw Driver (पिक एंड ड्रॉप वाहन मालिक)
+   • Hotel / Dharamshala / Guest House (आवास प्रदाता)
+   • Mundan Barber / Thakur / Nai (नाई / क्षौर कर्म)
+   • Satvik Food Restaurant / Cook (सात्विक भोजनालय)
+   • Puja Material & Tilkut Shop (पूजा सामग्री विक्रेता)
+
+2. **Fill Basic Details & Profile Info**:
+   • Provide your Business Name, Phone Number, WhatsApp Number, and Service Location.
+   • **PROFILE PICTURE IS 100% OPTIONAL (ऐच्छिक)**: Photo upload is NOT mandatory during registration! You can upload it anytime later from your Dashboard.
+
+3. **Govt Photo ID Verification**:
+   • Upload one valid Govt Photo ID (Aadhaar Card, Voter ID, PAN Card, or Driving License).
+
+4. **One-Time Registration Fee**:
+   • Pay a nominal ₹49 one-time registration fee via Razorpay secure gateway.
+
+5. **0% Commission & Lifetime Direct Bookings**:
+   • Once verified, pilgrims visiting Gaya Ji directly call or WhatsApp you.
+   • **0% Commission Fee**: You keep 100% of your earned money! No middlemen agencies.`,
+    links: [
+      { label: 'Register as Partner Now (₹49)', url: '/auth/register' },
+      { label: 'Partner Login', url: '/auth/login' },
+      { label: 'Provider Dashboard Guide', url: '/provider/dashboard' },
+    ],
+  },
+  {
+    keywords: ['pass', 'access pass', 'unlock', 'lock', 'price', 'plan', 'subscription', 'contact pass', '49', '99', '199', 'day pass', 'trip pass', 'family pass', 'directory pass', 'how pilgrims use', 'yatri pass'],
+    title: '🎫 Pilgrim Access Passes & 0% Direct Contact Model',
+    answer: `GayaSeva provides Pilgrims (Yatris) direct access to thousands of verified local service providers:
+
+1. **0% Commission Direct Booking**:
+   • Pilgrims directly contact verified Pandits, Taxi Drivers, Hotels, and Barbers via phone or WhatsApp.
+
+2. **Access Pass Options**:
+   • ₹49 Day Pass: 24 Hours Unlimited Directory Access
+   • ₹99 Trip Pass: 7 Days Full Teerth Access + Saved Itineraries
+   • ₹199 Family Pass: 30 Days Family Access + Priority Support
+
+3. **Instant Phone & WhatsApp Unlock**:
+   • Once activated, phone numbers and 1-tap WhatsApp buttons unlock automatically across all pages.`,
     links: [
       { label: 'Unlock Access Pass', url: '/pass' },
       { label: 'View Trip Planner', url: '/my-trip' },
+    ],
+  },
+  {
+    keywords: ['all services', 'all functions', 'website flow', 'website services', 'what is available', 'available services', 'available on website', 'function and serrvics', 'all available'],
+    title: '🧰 Complete Catalog of Services & Functions Available on GayaSeva',
+    answer: `Here is everything available on GayaSeva for Pilgrims and Service Providers:
+
+1. **Pind Daan & Tirth Purohit (पंडित जी)**: Verified Gaya Ji Pandits for Falgu Devghat, Vishnupad, Akshayavat & Pretshila Shradh rites.
+2. **Pick & Drop Cabs & E-Rickshaws (पिक एंड ड्रॉप)**: Station & Airport pickup to Vishnupad (₹250-₹350) & Bodh Gaya (₹500-₹750).
+3. **Hotels & Dharamshalas (आवास)**: Budget rooms, AC rooms, and Dharamshalas near Vishnupad temple.
+4. **Mundan Barbers / Kshaur Karma (नाई/ठाकुर)**: Verified local barbers for Devghat pre-pinddaan hair rituals.
+5. **100% Satvik Pure Veg Food (सात्विक भोजनालय)**: Pure vegetarian no-onion-garlic Bihari & Rajasthani thali.
+6. **Gaya Tilkut & Puja Samagri Kits (पूजा सामग्री)**: Pure Jaggery/Sugar Tilkut & 48-Vedi Puja kits.
+7. **48-Vedi Shradh & Gaya Guide (गया गाइड)**: Complete guide with timings, maps, and historical significance.
+8. **1-Day to 3-Day Custom Trip Planner (यात्रा प्लान)**: Custom itinerary with PDF download/print feature.
+9. **🔎 Lost & Found Portal (खोया-पाया)**: Report lost luggage, items, or missing persons.
+10. **24/7 Emergency & Hospitals (आपातकालीन सेवा)**: Ambulance 108, Police 112, Railway 139 & ANMMCH Hospital.`,
+    links: [
+      { label: 'Explore All Services', url: '/services' },
+      { label: 'Find Verified Pandits', url: '/pandit' },
+      { label: 'Book Pick & Drop Cab', url: '/pick-drop' },
+      { label: 'Hotels & Dharamshalas', url: '/stay' },
+      { label: 'Lost & Found Portal', url: '/help/lost-and-found' },
     ],
   },
   {
@@ -28,15 +110,6 @@ const KNOWLEDGE_TOPICS = [
       { label: 'Find Verified Pandits', url: '/pandit' },
       { label: 'Book Taxi Cab', url: '/pick-drop' },
       { label: 'Stays & Dharamshalas', url: '/stay' },
-    ],
-  },
-  {
-    keywords: ['register provider', 'become partner', 'join provider', 'pandit registration', 'driver registration', 'hotel registration', 'partner fee', 'profile pic optional', 'optional photo', 'registration fee', 'get started'],
-    title: 'Service Provider Partner Registration (₹49 Fee)',
-    answer: 'Local service providers in Gaya Ji (Pandits, Cab Drivers, E-Rickshaw drivers, Hotels/Dharamshalas, Tour Guides, Satvik Restaurants, Barbers for Mundan, Puja Shops, Photographers, etc.) can register as a Service Partner:\n\n• Registration Fee: ₹49 One-Time Fee (via Razorpay)\n• Profile Picture: 100% OPTIONAL (ऐच्छिक) - photo upload is not mandatory!\n• Verification Requirement: Govt Photo ID Upload (Aadhaar/Voter ID/PAN/License) & Shop/Office Location or GPS Auto-Detect\n• Benefits: 0% Commission, 100% Direct Bookings from thousands of visiting pilgrims!',
-    links: [
-      { label: 'Register as Partner', url: '/auth/register' },
-      { label: 'Partner Login', url: '/auth/login' },
     ],
   },
   {
@@ -172,7 +245,7 @@ export class AIKnowledgeEngine {
     for (const topic of KNOWLEDGE_TOPICS) {
       if (topic.keywords.some((kw) => q.includes(kw))) {
         return {
-          text: `🙏 **${topic.title}**\n\n${topic.answer}`,
+          text: topic.title ? `${topic.title}\n\n${topic.answer}` : topic.answer,
           links: topic.links,
           gpsQuery: topic.gpsQuery,
           phone: topic.phone,
@@ -183,13 +256,12 @@ export class AIKnowledgeEngine {
 
     // 4. Fallback Comprehensive Dynamic Knowledge Synthesis
     return {
-      text: `GayaJi Assistant Knowledge Base Synthesis:\n\nMain services, access options and sacred places active on GayaSeva:\n\n1. **0% Commission Direct Contact**: Directly call or WhatsApp verified Pandits, Drivers, Hotels, Guides, Barbers, Satvik Restaurants & Shops.\n2. **Teerth Access Passes**: ₹49 Day Pass, ₹99 Trip Pass, ₹199 Family Pass to unlock provider directory contacts & custom trip plans.\n3. **Partner Registration**: ₹49 One-time fee, Profile photo is OPTIONAL (ऐच्छic), Govt ID upload required.\n4. **Pick & Drop Taxis**: Gaya Junction to Vishnupad (₹250-₹350), Bodh Gaya (₹500-₹750).\n5. **Sacred Places**: Vishnupad Temple (5 AM - 9 PM), Falgu River Aarti (6:30 PM), Bodh Gaya Mahabodhi (5 AM - 9 PM).\n\nAapko inme se kiske baare me vistar se jankari chahiye?`,
+      text: `🙏 **Welcome to GayaSeva AI Assistant**\n\nHere is a complete summary of GayaSeva functions & services:\n\n1. **🌐 Choose Language**: English (default), Hindi, Bengali, Telugu, Tamil.\n2. **📝 Service Provider Registration**: Fast registration for Pandits, Drivers, Hotels, Barbers, Restaurants & Shops with ₹49 fee and 100% OPTIONAL photo upload.\n3. **🎫 Pilgrim Access Pass**: Unlock verified contact directory for 0% commission direct calls & WhatsApp.\n4. **🚕 Pick & Drop Cabs**: Station to Vishnupad & Bodh Gaya rides.\n5. **🧰 All Available Services**: Pandits, Stays, Mundan Barbers, Satvik Food, Tilkut, 48 Vedis & Lost-Found Portal.\n\nPlease click any prompt button below for detailed step-by-step guidance!`,
       links: [
-        { label: 'Explore Pick & Drop', url: '/pick-drop' },
-        { label: 'Find Verified Pandits', url: '/pandit' },
-        { label: 'View Gaya Guide', url: '/gaya-guide' },
-        { label: 'Unlock Access Pass', url: '/pass' },
-        { label: 'Emergency Support', url: '/help' },
+        { label: '📝 How to Register as Provider', url: '/auth/register' },
+        { label: '🧰 All Available Services', url: '/services' },
+        { label: '🎫 Pilgrim Access Pass', url: '/pass' },
+        { label: '🗺️ Gaya 1-3 Day Trip Plan', url: '/my-trip' },
       ],
       phone: '+919876543200',
       whatsapp: '919876543200',

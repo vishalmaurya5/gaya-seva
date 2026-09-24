@@ -7,7 +7,7 @@ import { PaymentRecord, CustomerAccessRecord, PaymentPurpose } from './paymentSt
 import { UserAccount } from './userStore';
 import { sendEmail } from './email/email';
 
-function getFilePath(filename: string): string {
+export function getFilePath(filename: string): string {
   const possiblePaths = [
     path.resolve(process.cwd(), '..', '..', 'data', filename),
     path.resolve(process.cwd(), '..', 'data', filename),
@@ -128,9 +128,96 @@ export function writeCustomerAccess(records: CustomerAccessRecord[]) {
   }
 }
 
+/**
+ * Reconciles existing verified payments into customer_access records for existing users.
+ * Ensures users who already paid through any flow are not charged again.
+ */
+export function reconcileExistingCustomerAccess(): { reconciledCount: number } {
+  const payments = readPayments();
+  const accessRecords = readCustomerAccess();
+  const systemConfig = readSystemConfig();
+
+  let reconciledCount = 0;
+  const nowIso = new Date().toISOString();
+
+  // Find all successful CUSTOMER_ACCESS payments
+  const successfulAccessPayments = payments.filter(
+    (p) => p.purpose === 'CUSTOMER_ACCESS' && p.status === 'SUCCESS' && p.userId
+  );
+
+  for (const pay of successfulAccessPayments) {
+    const existing = accessRecords.find((a) => a.userId === pay.userId && a.status === 'ACTIVE');
+    if (!existing) {
+      let expiresAt: string | null = null;
+      if (systemConfig.customer_access_duration_days > 0) {
+        const expDate = new Date(pay.paidAt || pay.createdAt);
+        expDate.setDate(expDate.getDate() + systemConfig.customer_access_duration_days);
+        expiresAt = expDate.toISOString();
+      }
+
+      const record: CustomerAccessRecord = {
+        id: `acc_rec_${pay.id}`,
+        userId: pay.userId,
+        accessType: systemConfig.customer_access_duration_days > 0 ? 'SUBSCRIPTION' : 'LIFETIME',
+        status: 'ACTIVE',
+        amount: pay.amount,
+        currency: pay.currency || 'INR',
+        paymentId: pay.id,
+        orderId: pay.razorpayOrderId,
+        activatedAt: pay.paidAt || pay.createdAt || nowIso,
+        expiresAt,
+        createdAt: pay.createdAt || nowIso,
+        updatedAt: nowIso,
+      };
+
+      accessRecords.unshift(record);
+      reconciledCount++;
+    }
+  }
+
+  if (reconciledCount > 0) {
+    writeCustomerAccess(accessRecords);
+  }
+
+  return { reconciledCount };
+}
+
+/**
+ * Single Server-Side Authorization Check for Global Customer Access Pass
+ */
+export function hasActiveCustomerAccess(userId: string | null | undefined): boolean {
+  if (!userId) return false;
+  
+  // Perform automatic data reconciliation for existing users if needed
+  reconcileExistingCustomerAccess();
+
+  const accessRecords = readCustomerAccess();
+  const userAccess = accessRecords.find((a) => a.userId === userId && a.status === 'ACTIVE');
+  if (!userAccess) return false;
+  if (userAccess.expiresAt && new Date(userAccess.expiresAt) < new Date()) {
+    return false;
+  }
+  return true;
+}
+
+export function canViewProviderDetails(userId: string | null | undefined): boolean {
+  return hasActiveCustomerAccess(userId);
+}
+
+/**
+ * Creates Customer Access Pass Razorpay Order (with active access check)
+ */
 export async function createPaymentOrderServer(userId: string, purpose: PaymentPurpose, providerId?: string) {
   if (!userId) {
     throw new Error('Authenticated User ID is required to create a payment order');
+  }
+
+  // Pre-Check: If user already has active access pass, do not charge again
+  if (purpose === 'CUSTOMER_ACCESS' && hasActiveCustomerAccess(userId)) {
+    return {
+      alreadyActive: true,
+      message: 'User already has an active GayaSeva Access Pass unlocked across all services.',
+    };
   }
 
   const systemConfig = readSystemConfig();
@@ -214,6 +301,9 @@ export async function createPaymentOrderServer(userId: string, purpose: PaymentP
   };
 }
 
+/**
+ * Server-Side Verification for Razorpay Payment & Access Activation
+ */
 export async function verifyPaymentServer(params: {
   razorpay_order_id: string;
   razorpay_payment_id: string;
@@ -229,7 +319,7 @@ export async function verifyPaymentServer(params: {
 
   const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || 'L4NDU9XuVKmk2V4e36SZ566N';
 
-  // HMAC Signature Verification (with support for test/demo mode)
+  // HMAC Signature Verification
   const body = `${razorpay_order_id}|${razorpay_payment_id}`;
   const expectedSignature = crypto
     .createHmac('sha256', razorpayKeySecret)
@@ -251,7 +341,7 @@ export async function verifyPaymentServer(params: {
   const payments = readPayments();
   const paymentIndex = payments.findIndex((p) => p.razorpayOrderId === razorpay_order_id);
 
-  // Idempotency Check: If payment was already verified, return existing record without double-processing
+  // Idempotency Check
   if (paymentIndex !== -1 && payments[paymentIndex].status === 'SUCCESS') {
     return {
       success: true,
@@ -295,7 +385,7 @@ export async function verifyPaymentServer(params: {
     writePayments([targetRecord, ...payments]);
   }
 
-  // Process access activation ONLY upon verified signature
+  // Activate Customer Access Pass upon verified payment
   if (purpose === 'CUSTOMER_ACCESS') {
     const accessRecords = readCustomerAccess();
     const systemConfig = readSystemConfig();
@@ -341,17 +431,13 @@ export async function verifyPaymentServer(params: {
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         const dataStr = JSON.stringify(users, null, 2);
         fs.writeFileSync(filePath, dataStr, 'utf-8');
-        const localWebPath = path.join(process.cwd(), 'data', 'users.json');
-        if (localWebPath !== filePath && fs.existsSync(path.dirname(localWebPath))) {
-          fs.writeFileSync(localWebPath, dataStr, 'utf-8');
-        }
       }
     } catch (err) {
       console.error('Failed to update provider status to VERIFIED in users store:', err);
     }
   }
 
-  // Server-side transactional email trigger (only AFTER signature verification)
+  // Transactional Email Trigger
   try {
     const users = readUsersFromFile();
     const user = users.find((u) => u.id === userId);
@@ -372,7 +458,7 @@ export async function verifyPaymentServer(params: {
         },
         relatedType: 'PAYMENT',
         relatedId: targetRecord.id,
-      }).catch((e) => console.warn('Provider payment email trigger background notice:', e));
+      }).catch((e) => console.warn('Provider payment email trigger notice:', e));
     } else {
       sendEmail({
         event: 'PAYMENT_SUCCESS',
@@ -387,7 +473,7 @@ export async function verifyPaymentServer(params: {
         },
         relatedType: 'PAYMENT',
         relatedId: targetRecord.id,
-      }).catch((e) => console.warn('Payment success email trigger background notice:', e));
+      }).catch((e) => console.warn('Payment success email trigger notice:', e));
     }
   } catch (emailErr) {
     console.warn('Non-blocking payment email trigger notice:', emailErr);
@@ -395,18 +481,7 @@ export async function verifyPaymentServer(params: {
 
   return {
     success: true,
-    message: 'Payment verified and access activated successfully',
+    message: 'Payment verified and access pass activated successfully',
     payment: targetRecord,
   };
-}
-
-export function canViewProviderDetails(userId: string | null | undefined): boolean {
-  if (!userId) return false;
-  const accessRecords = readCustomerAccess();
-  const userAccess = accessRecords.find((a) => a.userId === userId && a.status === 'ACTIVE');
-  if (!userAccess) return false;
-  if (userAccess.expiresAt && new Date(userAccess.expiresAt) < new Date()) {
-    return false;
-  }
-  return true;
 }

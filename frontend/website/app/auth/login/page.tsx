@@ -103,6 +103,16 @@ export default function LoginPage() {
       roleLabel = `${targetUser.customRole} Service Dashboard`;
     }
 
+    // Check if a specific redirect parameter was passed in URL (e.g. from Access Pass)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect');
+      if (redirectUrl) {
+        destination = decodeURIComponent(redirectUrl);
+        roleLabel = 'Redirecting to your requested page...';
+      }
+    }
+
     setResolvedUserRole(roleLabel);
     setRedirectingTarget(destination);
     setSuccess(true);

@@ -6,7 +6,13 @@ import { ShieldCheck, MapPin, Languages, CheckCircle, ArrowLeft, Clock } from 'l
 import { UserStore, UserAccount } from '@/lib/userStore';
 import { LockedContactBox } from '@/components/ui/LockedContactBox';
 
+import DynamicRoleProviderDashboardPage from '@/app/(provider)/[role]/dashboard/page';
+
 export default function PanditDetailPage({ params }: { params: { id: string } }) {
+  if (params.id === 'dashboard') {
+    return <DynamicRoleProviderDashboardPage params={{ role: 'pandit' }} />;
+  }
+
   const [pandit, setPandit] = useState<UserAccount | null>(null);
   const [loading, setLoading] = useState(true);
 

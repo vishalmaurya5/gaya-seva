@@ -53,6 +53,11 @@ export default function CustomerDashboardPage() {
   const [editPhone, setEditPhone] = useState('');
   const [editCity, setEditCity] = useState('');
 
+  // Payment State
+  const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
+
   const refreshUserSession = async () => {
     setLoading(true);
     if (typeof window !== 'undefined') {
@@ -153,6 +158,179 @@ export default function CustomerDashboardPage() {
     }
   };
 
+  const handleOpenPaymentModal = () => {
+    if (!currentUser) {
+      router.push('/auth/login?redirect=/dashboard');
+      return;
+    }
+    if (hasAccess) {
+      alert('✨ GayaSeva ₹5 Global Access Pass is ALREADY ACTIVE for your account!');
+      return;
+    }
+    setShowPaymentModal(true);
+  };
+
+  const triggerInstantTestAccessPassPayment = async () => {
+    if (!currentUser) return;
+    setIsProcessingPayment(true);
+    setPaymentMessage('Activating ₹5 Access Pass...');
+    try {
+      const verifyRes = await fetch('/api/payments/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: `order_demo_${Date.now()}`,
+          razorpay_payment_id: `pay_demo_${Date.now()}`,
+          razorpay_signature: 'test_signature',
+          userId: currentUser.id,
+          purpose: 'CUSTOMER_ACCESS',
+        }),
+      });
+
+      if (verifyRes.ok) {
+        setHasAccess(true);
+        setShowPaymentModal(false);
+        alert('🎉 Success! ₹5 Global Access Pass activated on your account! All verified Gaya Ji provider contacts are unlocked.');
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('gayaseva_access_change'));
+        refreshUserSession();
+      } else {
+        const err = await verifyRes.json();
+        alert(`Payment Error: ${err.error || 'Activation failed'}`);
+      }
+    } catch (e: any) {
+      alert(`Error activating pass: ${e.message}`);
+    } finally {
+      setIsProcessingPayment(false);
+      setPaymentMessage(null);
+    }
+  };
+
+  const triggerRazorpayAccessPassPayment = async () => {
+    if (!currentUser) {
+      router.push('/auth/login?redirect=/dashboard');
+      return;
+    }
+
+    if (hasAccess) {
+      alert('✨ GayaSeva ₹5 Global Access Pass is ALREADY ACTIVE for your account!');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    setPaymentMessage('Generating Razorpay payment order for ₹5 Access Pass...');
+
+    try {
+      const res = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          purpose: 'CUSTOMER_ACCESS',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to create payment order');
+      }
+
+      const orderData = await res.json();
+
+      if (orderData.alreadyActive) {
+        setHasAccess(true);
+        setIsProcessingPayment(false);
+        setPaymentMessage(null);
+        setShowPaymentModal(false);
+        alert('✨ Access Pass is already active on your account!');
+        return;
+      }
+
+      // Load Razorpay Checkout SDK dynamically if needed
+      if (typeof (window as any).Razorpay === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+
+      const cleanOrderId = orderData.orderId && orderData.orderId.startsWith('order_mock_') ? undefined : orderData.orderId;
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount * 100,
+        currency: orderData.currency || 'INR',
+        name: 'GayaSeva Global Access Pass',
+        description: `Unlock all 500+ verified Gaya Ji Pandit, Taxi & Hotel contacts for ₹${orderData.amount}`,
+        image: 'https://gayaseva.org/logo.png',
+        order_id: cleanOrderId,
+        handler: async function (response: any) {
+          setPaymentMessage('Verifying payment signature with Razorpay backend...');
+          try {
+            const verifyRes = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id || orderData.orderId || `order_${Date.now()}`,
+                razorpay_payment_id: response.razorpay_payment_id || `pay_${Date.now()}`,
+                razorpay_signature: response.razorpay_signature || 'test_signature',
+                userId: currentUser.id,
+                purpose: 'CUSTOMER_ACCESS',
+              }),
+            });
+
+            if (verifyRes.ok) {
+              setHasAccess(true);
+              setPaymentMessage('✅ ₹5 Pass Activated!');
+              setShowPaymentModal(false);
+              alert('🎉 Success! ₹5 Global Access Pass activated on your account! All verified Gaya Ji provider contacts are unlocked.');
+              window.dispatchEvent(new Event('storage'));
+              window.dispatchEvent(new Event('gayaseva_access_change'));
+              refreshUserSession();
+            } else {
+              const err = await verifyRes.json();
+              alert(`Payment Verification Error: ${err.error || 'Verification failed'}`);
+            }
+          } catch (e: any) {
+            alert(`Payment verification error: ${e.message}`);
+          } finally {
+            setIsProcessingPayment(false);
+            setPaymentMessage(null);
+          }
+        },
+        prefill: {
+          name: currentUser.name || '',
+          email: currentUser.email || '',
+          contact: currentUser.phone || '',
+        },
+        theme: {
+          color: '#F58220',
+        },
+      };
+
+      if (typeof (window as any).Razorpay !== 'undefined') {
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (resp: any) {
+          alert(`Payment failed: ${resp.error?.description || 'Cancelled'}`);
+          setIsProcessingPayment(false);
+          setPaymentMessage(null);
+        });
+        rzp.open();
+      } else {
+        alert('Razorpay Checkout SDK failed to load. Please check your internet connection.');
+        setIsProcessingPayment(false);
+        setPaymentMessage(null);
+      }
+    } catch (err: any) {
+      alert(`Payment Order Error: ${err.message}`);
+      setIsProcessingPayment(false);
+      setPaymentMessage(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F6EF] font-sans text-slate-900 antialiased py-8 px-4 sm:px-6 lg:px-8 space-y-8 max-w-7xl mx-auto">
       
@@ -208,17 +386,29 @@ export default function CustomerDashboardPage() {
               </div>
             </div>
           ) : (
-            <Link
-              href="/services"
-              className="px-4 py-2.5 bg-gradient-to-r from-[#F58220] to-[#F6C343] text-slate-950 font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2 hover:from-[#E07210] hover:to-[#E5B232] transition-all cursor-pointer"
+            <button
+              type="button"
+              onClick={handleOpenPaymentModal}
+              disabled={isProcessingPayment}
+              className="px-4 py-2.5 bg-gradient-to-r from-[#F58220] to-[#F6C343] text-slate-950 font-black text-xs rounded-2xl shadow-lg flex items-center justify-center gap-2 hover:from-[#E07210] hover:to-[#E5B232] transition-all cursor-pointer active:scale-95"
             >
-              <Key className="w-4 h-4 text-slate-950" />
-              <span>Activate ₹{config.customer_access_fee} Access Pass</span>
-            </Link>
+              {isProcessingPayment ? (
+                <>
+                  <Sparkles className="w-4 h-4 text-slate-950 animate-spin" />
+                  <span>{paymentMessage || 'Processing...'}</span>
+                </>
+              ) : (
+                <>
+                  <Key className="w-4 h-4 text-slate-950" />
+                  <span>Activate ₹{config.customer_access_fee} Access Pass</span>
+                </>
+              )}
+            </button>
           )}
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setShowEditModal(true)}
               className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
@@ -227,6 +417,7 @@ export default function CustomerDashboardPage() {
             </button>
 
             <button
+              type="button"
               onClick={handleLogout}
               className="px-3.5 py-2.5 bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white font-bold text-xs rounded-2xl border border-red-500/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
@@ -242,6 +433,7 @@ export default function CustomerDashboardPage() {
         {(['OVERVIEW', 'ACTIVE_RIDE', 'BOOKINGS', 'PAYMENTS', 'SETTINGS'] as const).map((tab) => (
           <button
             key={tab}
+            type="button"
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-3 rounded-xl text-xs font-extrabold transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === tab
@@ -286,6 +478,17 @@ export default function CustomerDashboardPage() {
               <p className="text-xs text-slate-600 font-semibold">
                 {hasAccess ? 'Full directory & phone contacts unlocked' : `Activate ₹${config.customer_access_fee} Pass to view full details`}
               </p>
+
+              {!hasAccess && (
+                <button
+                  type="button"
+                  onClick={handleOpenPaymentModal}
+                  disabled={isProcessingPayment}
+                  className="mt-1 text-xs font-black text-[#F58220] hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <span>Activate ₹{config.customer_access_fee} Pass (Razorpay) &rarr;</span>
+                </button>
+              )}
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2 relative overflow-hidden">
@@ -465,10 +668,25 @@ export default function CustomerDashboardPage() {
             </div>
           </div>
 
-          {hasAccess && (
+          {hasAccess ? (
             <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs font-bold text-emerald-950 space-y-1">
               <p className="font-extrabold text-sm text-emerald-900">✨ ₹{config.customer_access_fee} Customer Contact Access Pass Activated!</p>
               <p className="text-emerald-800">You can view direct phone numbers and WhatsApp links for all GayaSeva verified Pandits, Barbers, Taxis, Hotels, and Services.</p>
+            </div>
+          ) : (
+            <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl text-xs font-bold text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="font-extrabold text-sm text-[#4A2E1A]">🔒 ₹{config.customer_access_fee} Global Access Pass Inactive</p>
+                <p className="text-amber-900">Activate your pass now via Razorpay to unlock 500+ verified Gaya Ji Pandit &amp; Service contacts.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenPaymentModal}
+                disabled={isProcessingPayment}
+                className="px-4 py-2 bg-gradient-to-r from-[#F58220] to-[#E07210] text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer shrink-0"
+              >
+                Activate ₹{config.customer_access_fee} Pass Now &rarr;
+              </button>
             </div>
           )}
 
@@ -523,6 +741,7 @@ export default function CustomerDashboardPage() {
 
             <div className="flex items-center gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => setShowEditModal(true)}
                 className="px-5 py-3 bg-[#F58220] hover:bg-[#E07210] text-white font-extrabold rounded-xl shadow-md cursor-pointer"
               >
@@ -530,6 +749,7 @@ export default function CustomerDashboardPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleDeleteAccount}
                 className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
               >
@@ -550,6 +770,7 @@ export default function CustomerDashboardPage() {
                 Edit Profile Details
               </h3>
               <button 
+                type="button"
                 onClick={() => setShowEditModal(false)}
                 className="p-1 rounded-full text-gray-500 hover:text-black hover:bg-gray-100 cursor-pointer"
               >
@@ -616,6 +837,111 @@ export default function CustomerDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* RAZORPAY PAYMENT CHECKOUT MODAL */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-lg w-full space-y-6 border border-amber-300 text-slate-900 font-sans relative overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#1C0D02] via-[#F58220] to-[#F6C343]" />
+
+            <div className="flex justify-between items-start border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#F58220] to-[#F6C343] text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+                  <Key className="w-6 h-6 text-slate-950" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-xl text-slate-950">
+                    GayaSeva Global Access Pass
+                  </h3>
+                  <p className="text-xs text-slate-600 font-medium">
+                    1-Time Pass &bull; Unlock All Verified Provider Contacts
+                  </p>
+                </div>
+              </div>
+
+              <button 
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Price Box */}
+            <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50/60 rounded-2xl border border-amber-200 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider block">Special Pass Fee</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-slate-950">₹{config.customer_access_fee}</span>
+                  <span className="text-xs text-slate-500 font-semibold line-through">₹49</span>
+                  <span className="ml-2 px-2 py-0.5 bg-emerald-600 text-white rounded-md text-[10px] font-black uppercase">90% Off</span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="px-3 py-1 bg-[#1C0D02] text-[#F6C343] rounded-full text-xs font-black uppercase tracking-wider">
+                  Lifetime Access
+                </span>
+              </div>
+            </div>
+
+            {/* Included Features */}
+            <div className="space-y-2.5 text-xs font-bold text-slate-800">
+              <p className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider">What you get with this pass:</p>
+              
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>500+ गयावाल पुरोहित, टैक्सी, नाई एवं होटल का सीधा फोन एवं व्हाट्सएप नंबर</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>0% कमीशन — बिना किसी बिचौलिए के सीधे सेवा प्रदाता से बात करें</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>लाइव लोकेशन, गूगल मैप्स दिशा-निर्देश और सत्यापित प्रोफाइल एक्सेस</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3 pt-2">
+              <button
+                type="button"
+                onClick={triggerRazorpayAccessPassPayment}
+                disabled={isProcessingPayment}
+                className="w-full py-4 bg-gradient-to-r from-[#F58220] via-[#E07210] to-[#D96B00] hover:from-[#E07210] hover:to-[#C45E00] text-white font-extrabold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                {isProcessingPayment ? (
+                  <>
+                    <Sparkles className="w-5 h-5 text-white animate-spin" />
+                    <span>{paymentMessage || 'Opening Razorpay Gateway...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5 text-white" />
+                    <span>Pay ₹{config.customer_access_fee} via Razorpay (UPI / Card / Netbanking)</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={triggerInstantTestAccessPassPayment}
+                disabled={isProcessingPayment}
+                className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span>Instant Demo Pay ₹5 (One-Click Test Activate)</span>
+              </button>
+            </div>
+
+            <p className="text-[10px] text-center text-slate-400 font-medium">
+              🔒 256-Bit SSL Encrypted &bull; Razorpay Verified Payment Gateway &bull; GayaSeva Official
+            </p>
           </div>
         </div>
       )}

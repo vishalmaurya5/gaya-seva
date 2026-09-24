@@ -108,7 +108,7 @@ export function QRConciergeContent() {
       <button
         onClick={() => setIsOpen(true)}
         title="Open GayaSeva Smart QR Concierge"
-        className="fixed bottom-32 sm:bottom-20 right-4 z-40 bg-[#1C0D02] hover:bg-[#3D2310] text-[#F6C343] p-3 rounded-full shadow-2xl border-2 border-[#F6C343]/60 flex items-center justify-center group transition-all duration-300 hover:scale-110 active:scale-95"
+        className="fixed bottom-44 sm:bottom-36 right-4 sm:right-6 z-40 bg-[#1C0D02] hover:bg-[#3D2310] text-[#F6C343] p-3 rounded-full shadow-2xl border-2 border-[#F6C343]/60 flex items-center justify-center group transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
       >
         <QrCode className="w-6 h-6 animate-pulse" />
         <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap text-xs font-bold text-white px-0 group-hover:px-2">

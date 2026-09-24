@@ -8,9 +8,14 @@ import { useLanguage } from '@/context/LanguageContext';
 export const LocationBanner: React.FC = () => {
   const { locationStatus, locationName, requestLocation, hasUserSetLocation, errorMessage } = useLocation();
   const { language } = useLanguage();
+  const [mounted, setMounted] = React.useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  if (dismissed && locationStatus !== 'locating') return null;
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || (dismissed && locationStatus !== 'locating')) return null;
 
   const isHindi = language === 'hi';
 

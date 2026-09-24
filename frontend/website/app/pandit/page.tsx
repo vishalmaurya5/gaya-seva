@@ -31,6 +31,7 @@ export default function PanditDirectoryPage() {
     id: u.id,
     name: u.name,
     languages: u.languages && u.languages.length > 0 ? u.languages : ['Hindi', 'Sanskrit'],
+    specialization: u.specialization || u.customRole || 'Pind Daan & Shradh Rites',
     services: u.customRole ? [u.customRole] : ['Pind Daan', 'Vedic Shradh Rites'],
     area: u.city || 'Gaya Ji / Vishnupad Area',
     rating: u.rating || 5.0,
@@ -120,7 +121,7 @@ export default function PanditDirectoryPage() {
 
                       <div className="text-xs text-slate-700 font-medium space-y-1.5 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         <p className="font-bold text-slate-900">Languages: {pnd.languages.join(' • ')}</p>
-                        <p>Services: {pnd.services.join(' • ')}</p>
+                        <p><strong className="text-[#4A2E1A]">Specialization / सेवाएं:</strong> {pnd.specialization}</p>
                         <p>📍 {pnd.area}</p>
                         <p className="text-slate-600 font-semibold">{pnd.experience}</p>
                       </div>

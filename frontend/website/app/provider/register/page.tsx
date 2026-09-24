@@ -49,6 +49,7 @@ export default function ProviderRegisterPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<ProviderRoleCategory>('PANDIT');
   const [customRoleText, setCustomRoleText] = useState('');
+  const [specialization, setSpecialization] = useState('Pind Daan, Tripindi Shradh & Vedic Karmakand');
   
   // Form State
   const [fullName, setFullName] = useState('');
@@ -387,7 +388,8 @@ export default function ProviderRegisterPage() {
       phone: phone || '+91 9876543210',
       password: password || undefined,
       role: storeRole,
-      customRole: customRoleVal,
+      customRole: selectedRole === 'PANDIT' && specialization ? specialization : customRoleVal,
+      specialization: selectedRole === 'PANDIT' ? specialization : undefined,
       status: 'PENDING',
       city: operatingCity || 'Gaya Ji',
       languages: selectedLangs,
@@ -533,6 +535,73 @@ export default function ProviderRegisterPage() {
                   className="w-full p-2.5 bg-amber-50/70 border border-amber-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#F58220]"
                 />
               </div>
+
+              {/* Pandit Specific Specialization Field */}
+              {selectedRole === 'PANDIT' && (
+                <div className="pt-2 animate-fadeIn space-y-2 p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-[#4A2E1A] flex items-center gap-1.5 text-xs">
+                      <Flame className="w-4 h-4 text-[#F58220]" />
+                      <span>Pandit Specialization / पूजा एवं कर्मकांड विशेषज्ञता *</span>
+                    </label>
+                    <span className="text-[10px] font-bold bg-[#F58220] text-white px-2 py-0.5 rounded-full">REQUIRED</span>
+                  </div>
+                  
+                  <p className="text-[11px] text-gray-600 font-medium">
+                    Select or type your core Vedic specialties (अपनी मुख्य पूजा विशेषज्ञता चुनें या लिखें):
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {[
+                      'Pind Daan (पिंडदान)',
+                      'Tripindi Shradh (त्रिपिंडी श्राद्ध)',
+                      'Narayan Bali (नारायण बलि)',
+                      'Kaal Sarp Dosh (कालसर्प दोष)',
+                      'Vedic Karmakand (वैदिक कर्मकांड)',
+                      'Mundan Sanskar (मुंडन संस्कार)',
+                      'Ekoddishta Shradh (एकोद्दिष्ट श्राद्ध)',
+                      'Mahalaya Tarpan (महालय तर्पण)'
+                    ].map((spec) => {
+                      const cleanTag = spec.split(' ')[0];
+                      const isActive = specialization.toLowerCase().includes(cleanTag.toLowerCase());
+                      return (
+                        <button
+                          key={spec}
+                          type="button"
+                          onClick={() => {
+                            if (isActive) {
+                              const updated = specialization
+                                .split(', ')
+                                .filter(s => !s.toLowerCase().includes(cleanTag.toLowerCase()))
+                                .join(', ');
+                              setSpecialization(updated);
+                            } else {
+                              setSpecialization(specialization ? `${specialization}, ${spec}` : spec);
+                            }
+                          }}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border ${
+                            isActive
+                              ? 'bg-[#2A180B] text-[#F6C343] border-[#2A180B] shadow-xs'
+                              : 'bg-white text-gray-700 border-amber-200 hover:border-[#F58220]'
+                          }`}
+                        >
+                          {isActive ? '✓ ' : '+ '}
+                          {spec}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    value={specialization}
+                    onChange={(e) => setSpecialization(e.target.value)}
+                    placeholder="e.g. Pind Daan, Tripindi Shradh, Kaal Sarp Dosh Nivaran"
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#F58220]"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Profile Picture Section (Max 50KB or Image URL) */}

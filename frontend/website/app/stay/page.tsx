@@ -24,7 +24,7 @@ interface HotelItem {
   cleanPhone: string;
   isBiharTourismRecognized: boolean;
   googleMapsQuery: string;
-  availabilityStatus?: 'AVAILABLE' | 'BOOKED';
+  availabilityStatus?: 'AVAILABLE' | 'BUSY' | 'BOOKED' | 'LIMITED' | 'FULL' | 'OPEN' | 'CLOSED' | 'OFFLINE';
   isRegistered?: boolean;
 }
 

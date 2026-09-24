@@ -33,14 +33,17 @@ import { StickyActionButtons } from '@/components/layout/StickyActionButtons';
 import { QRConciergeModal } from '@/components/ui/QRConciergeModal';
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 
+import { StickyAccessPassBar } from '@/components/ui/StickyAccessPassBar';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen flex flex-col bg-[#F8F6EF] text-[#4A2E1A] antialiased pb-16 md:pb-0 max-w-full overflow-x-hidden">
+      <body className="min-h-screen flex flex-col bg-[#F8F6EF] text-[#4A2E1A] antialiased pb-24 md:pb-16 max-w-full overflow-x-hidden">
         <LanguageProvider>
           <LocationProvider>
             <LocationBanner />
             <Navbar />
+            <StickyAccessPassBar />
             <main className="flex-grow">{children}</main>
             <Footer />
             <MobileBottomNav />
