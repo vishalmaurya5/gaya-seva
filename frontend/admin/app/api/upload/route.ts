@@ -25,10 +25,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400, headers: corsHeaders() });
     }
 
-    // 1. File Size Enforcement (Max 10MB for documents)
-    const MAX_SIZE = 10 * 1024 * 1024;
+    // 1. File Size Enforcement (Max 200KB for popup-ads, 10MB for documents)
+    const isPopupAd = bucket === 'popup-ads' || bucket === 'popup_ads';
+    const MAX_SIZE = isPopupAd ? 200 * 1024 : 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: 'File size exceeds 10MB limit' }, { status: 400, headers: corsHeaders() });
+      const limitKb = isPopupAd ? 200 : 10240;
+      const actualKb = (file.size / 1024).toFixed(1);
+      return NextResponse.json({ 
+        error: `File size exceeds ${limitKb}KB limit (Actual: ${actualKb}KB). Please upload a smaller image.` 
+      }, { status: 400, headers: corsHeaders() });
     }
 
     // 2. Allowed Extensions & Mime types

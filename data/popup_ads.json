@@ -1,13 +1,14 @@
 [
   {
-    "id": "pop-promo-1",
-    "title": "🙏 Gaya Ji Pinda Daan & Yatra Special Offer",
-    "subtitle": "Book Verified Teerth Pandits, Safe Hotel Stays, and Express Pickup Taxi Direct at 0% Commission.",
-    "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136",
+    "title": "\t📢 GayaSeva पर अपना Business Promote करें!",
+    "subtitle": "Hotel, Taxi, Pandit, Restaurant, Clinic, Coaching — Gaya के लाखों यात्रियों तक पहुँचें। Premium Placement + Mobile Visibility",
+    "imageUrl": "/uploads/popup-ads/gaya_1790320290088_201jx.jpeg",
+    "imageSizeKb": 98,
     "actionUrl": "/services",
-    "buttonText": "Explore All Gaya Services",
     "phone": "+919117588242",
     "whatsapp": "919117588242",
-    "isActive": false
+    "isActive": true,
+    "delaySeconds": 1,
+    "id": "pop_1790320060862"
   }
 ]

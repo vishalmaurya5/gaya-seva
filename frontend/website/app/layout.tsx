@@ -34,6 +34,7 @@ import { QRConciergeModal } from '@/components/ui/QRConciergeModal';
 import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 
 import { StickyAccessPassBar } from '@/components/ui/StickyAccessPassBar';
+import { PopupAd } from '@/components/PopupAd';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <StickyActionButtons />
             <QRConciergeModal />
             <PWAInstallPrompt />
+            <PopupAd />
           </LocationProvider>
         </LanguageProvider>
       </body>

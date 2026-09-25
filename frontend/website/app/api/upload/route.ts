@@ -25,10 +25,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400, headers: corsHeaders() });
     }
 
-    // 1. Strict File Size Enforcement (Max 5MB)
-    const MAX_SIZE = 5 * 1024 * 1024;
+    // 1. Strict File Size Enforcement (Max 200KB for popup-ads, 5MB default)
+    const isPopupAd = bucket === 'popup-ads' || bucket === 'popup_ads';
+    const MAX_SIZE = isPopupAd ? 200 * 1024 : 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: 'Security Error: File size exceeds 5MB limit' }, { status: 400, headers: corsHeaders() });
+      const limitKb = isPopupAd ? 200 : 5120;
+      const actualKb = (file.size / 1024).toFixed(1);
+      return NextResponse.json({ 
+        error: `File size exceeds ${limitKb}KB limit (Actual: ${actualKb}KB). Please upload a smaller photo.` 
+      }, { status: 400, headers: corsHeaders() });
     }
 
     // 2. Extension & MIME Type Whitelisting

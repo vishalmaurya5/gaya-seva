@@ -3,6 +3,7 @@ export interface PopupAd {
   title: string;
   subtitle: string;
   imageUrl: string;
+  imageSizeKb?: number;
   actionUrl: string;
   phone: string;
   whatsapp: string;
@@ -485,12 +486,12 @@ export class ContentStore {
     if (typeof window === 'undefined') return INITIAL_POPUP_ADS;
     try {
       const stored = localStorage.getItem(KEYS.POPUP_ADS);
-      if (!stored) {
+      if (stored === null) {
         localStorage.setItem(KEYS.POPUP_ADS, JSON.stringify(INITIAL_POPUP_ADS));
         return INITIAL_POPUP_ADS;
       }
       const parsed: PopupAd[] = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
       return INITIAL_POPUP_ADS;
@@ -848,7 +849,7 @@ export class PopupAdStore {
       const res = await fetch('/api/popup-ads', { cache: 'no-store' });
       if (res.ok) {
         const ads: PopupAd[] = await res.json();
-        if (Array.isArray(ads) && ads.length > 0) {
+        if (Array.isArray(ads)) {
           ContentStore.savePopupAds(ads);
           return ads;
         }
